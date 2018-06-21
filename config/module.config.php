@@ -43,13 +43,6 @@ return array (
 							'defaults' => array('action' => 'template2'),
 						),
 					),
-					'serialize' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/serialize[/:place_identifier]',
-							'defaults' => array('action' => 'serialize'),
-						),
-					),
 				),
 			),
 			'profile' => array(
@@ -77,11 +70,14 @@ return array (
 							'defaults' => array('action' => 'template2'),
 						),
 					),
-					'serialize' => array(
+					'photoUpload' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/serialize[/:place_identifier]',
-							'defaults' => array('action' => 'serialize'),
+							'route' => '/photo-upload[/:id]',
+							'constraints' => ['id' => '[0-9]*'],
+							'defaults' => array(
+								'action' => 'photoUpload',
+							),
 						),
 					),
 				),
@@ -111,11 +107,22 @@ return array (
 							'defaults' => array('action' => 'template1'),
 						),
 					),
-					'serialize' => array(
+					'selectTest' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/serialize[/:place_identifier][/:survey]',
-							'defaults' => array('action' => 'serialize'),
+							'route' => '/select-test[/:place_identifier]',
+							'defaults' => array(
+								'action' => 'selectTest',
+							),
+						),
+					),
+					'inviteToTest' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/invite-to-test[/:place_identifier]',
+							'defaults' => array(
+								'action' => 'inviteToTest',
+							),
 						),
 					),
 				),
@@ -129,15 +136,15 @@ return array (
 			'BjyAuthorize\Guard\Route' => array(
 				array('route' => 'landing/template1', 'roles' => array('guest')),
 				array('route' => 'landing/template2', 'roles' => array('guest')),
-				array('route' => 'landing/serialize', 'roles' => array('admin')),
 				
 				array('route' => 'profile/template1', 'roles' => array('guest')),
 				array('route' => 'profile/template2', 'roles' => array('guest')),
-				array('route' => 'profile/serialize', 'roles' => array('admin')),
+				array('route' => 'profile/photoUpload', 'roles' => array('user')),
 				
 				array('route' => 'survey/fill', 'roles' => array('guest')),
 				array('route' => 'survey/template1', 'roles' => array('guest')),
-				array('route' => 'survey/serialize', 'roles' => array('admin')),
+				array('route' => 'survey/selectTest', 'roles' => array('operational_management', 'sales_manager', 'manager')),
+				array('route' => 'survey/inviteToTest', 'roles' => array('operational_management', 'sales_manager', 'manager')),
 			),
 		),
 	),
@@ -158,7 +165,24 @@ return array (
 			'ppit-flow' => __DIR__ . '/../view',
 		),
 	),
-
+	
+	'translator' => array(
+		'locale' => 'fr_FR',
+		'translation_file_patterns' => array(
+			array(
+				'type'     => 'phparray',
+				'base_dir' => __DIR__ . '/../language',
+				'pattern'  => '%s.php',
+				'text_domain' => 'ppit-flow'
+			),
+			array(
+				'type' => 'phpArray',
+				'base_dir' => './vendor/zendframework/zendframework/resources/languages/',
+				'pattern'  => 'fr/Zend_Validate.php',
+			),
+		),
+	),
+	
 	'matching/skills' => array(
 
 		// Daniel

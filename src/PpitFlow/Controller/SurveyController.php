@@ -1,6 +1,7 @@
 <?php
 namespace PpitFlow\Controller;
 
+use PpitContact\Model\ContactMessage;
 use PpitCore\Form\CsrfForm;
 use PpitCore\Model\Account;
 use PpitCore\Model\Config;
@@ -44,6 +45,8 @@ class SurveyController extends AbstractActionController
 		$content['form'] = $content['forms'][$step];
 		
 		$viewData = array();
+		$viewData['account_id'] = $event->account_id;
+		$viewData['photo_link_id'] = ($event->photo_link_id) ? $event->photo_link_id : 'no-photo.png';
 		foreach ($content['form']['inputs'] as $inputId => $options) {
 			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
 			else {
@@ -140,4 +143,203 @@ class SurveyController extends AbstractActionController
 	{
 		return $this->fillAction();
 	}
+
+	public function selectTestAction()
+	{
+		// Retrieve the context
+		$context = Context::getCurrent();
+		$place_identifier = $this->params()->fromQuery('place_identifier');
+		$place = Place::get($place_identifier, 'identifier');
+		if (!$place) $place = Place::get($context->getPlaceId());
+		$place_identifier = $place->identifier;
+		
+		// Retrieve the available surveys and the signature to use in the emails
+		$tests = array();
+		foreach ($context->getConfig('flow/tests') as $testId => $testDefinition) {
+			if ($context->getConfig('specificationMode') == 'config') $tests[$testId] = $context->getConfig($testDefinition)['header']['title'];
+			else {
+				$config = Config::get($place_identifier.'_'.$testId, 'identifier');
+				if ($config) $tests[$testId] = $config->content['header']['title'];
+			}
+		}
+    	$view = new ViewModel(array(
+			'context' => $context,
+			'tests' => $tests,
+    	));
+    	$view->setTerminal(true);
+    	return $view;
+	}
+	
+	public function inviteToTestAction()
+	{
+		// Retrieve the context
+		$context = Context::getCurrent();
+		$eventConfigProperties = Event::getConfigProperties('email');
+		$place_identifier = $this->params()->fromQuery('place_identifier');
+		$place = Place::get($place_identifier, 'identifier');
+		if (!$place) $place = Place::get($context->getPlaceId());
+		$place_identifier = $place->identifier;
+	
+    	// Retrieve the available surveys and the signature to use in the emails
+		$tests = array();
+		foreach ($context->getConfig('flow/tests') as $testId => $testDefinition) {
+			if ($context->getConfig('specificationMode') == 'config') $tests[$testId] = $context->getConfig($testDefinition);
+			else {
+				$config = Config::get($place_identifier.'_'.$testId, 'identifier');
+				if ($config) $tests[$testId] = $config->content;
+			}
+		}
+
+		// Retrieve the selected email template and with the "from" value
+		$selectedTestId = $this->params()->fromQuery('test_id');
+		$selectedTest = $tests[$selectedTestId];
+    	$signature = $context->getConfig('core_account/sendMessage')['signature'];
+    	if ($signature['definition'] != 'inline') $signature = $context->getConfig($signature['definition']);
+
+    	$accountIds = explode(',', $this->params()->fromQuery('accounts'));
+    	$emails = array();
+    	$error = null;
+    	$eventConnection = Event::getTable()->getAdapter()->getDriver()->getConnection();
+		$eventConnection->beginTransaction();
+		try {
+	    	foreach ($accountIds as $account_id) {
+	    		$account = Account::get($account_id);
+	    		$data = array();
+    			$data['account_name'] = $account->name;
+	    		$data['type'] = 'email';
+	    		$data['to'] = array();
+	    		$data['cci'] = array();
+	    		if ($context->getConfig('core_account/mailTo')) {
+	    			foreach ($context->getConfig('core_account/mailTo') as $toMail => $toName) $data['cci'][$toMail] = $toName;
+	    		}
+	    		else {
+	    			if ($account->email) $data['to'][$account->email] = $account->n_first;
+	    			if ($account->email_2) $data['to'][$account->email_2] = $account->n_first_2;
+	    			if ($account->email_3) $data['to'][$account->email_3] = $account->n_first_3;
+	    			if ($account->email_4) $data['to'][$account->email_4] = $account->n_first_4;
+	    			if ($account->email_5) $data['to'][$account->email_5] = $account->n_first_5;
+	    		}
+	    		
+	    		$invitation = $selectedTest['invitation'];
+	    		 
+	    		if (array_key_exists('cci', $invitation)) $data['cci'][$invitation['cci']] = $invitation['cci'];
+	    		$data['from_mail'] = $invitation['from_mail'];
+	    		$data['from_name'] = $invitation['from_name'];
+	    		$data['subject'] = $context->localize($invitation['subject'], $account->locale);
+	    		 
+	    		// Retrieve the text from the form if the email text is customizable in the view and add the signature at the location of the tag '%s'
+	    		$text = $context->localize($invitation['text'], $account->locale);
+	    		$signatureBody = $context->localize($signature['body'], $account->locale);
+	    		
+	    		$body = '';
+	    		if ($context->getConfig('core_account/mailTo')) {
+	    			if ($account->email) $body .= $account->email;
+	    			if ($account->email_2) $body .= $account->email_2;
+	    			if ($account->email_3) $body .= $account->email_3;
+	    			if ($account->email_4) $body .= $account->email_4;
+	    			if ($account->email_5) $body .= $account->email_5;
+	    			$body .= '<br>';
+	    		}
+	    		
+	    		$theme = $context->getConfig('core_account/sendMessage')['themes']['theme_2'];
+	    		if ($theme['definition'] != 'inline') $theme = $context->getConfig($theme['definition']);
+	    		$body .= sprintf($theme, $text, $signatureBody);
+	    		
+	    		$event = Event::get('survey', 'type', $account->id, 'account_id', $selectedTestId, 'category', 'steps', 'subcategory');
+	    		if (!$event) {
+		    		$eventData = array();
+		    		$eventData['place_id'] = $account->place_id;
+		    		$eventData['account_id'] = $account->id;
+		    		$eventData['category'] = $selectedTestId;
+		    		$eventData['subcategory'] = 'steps';
+		    		$eventData['description'] = '';
+		    		foreach ($selectedTest['forms'] as $formId => $unused) {
+		    			if ($eventData['description']) $eventData['description'] .= ',';
+		    			$eventData['description'] .= $formId;
+		    		}
+		    		 
+		    		// Generate an authentication token that can be passed as a value for the variable 'authentication_token' in the text.
+		    		// This token allows the email's addressee to access the target page as being authenticated
+		
+		    		// Generate the root event (subcategory 'steps') that gives access to the test
+		    		$event = Event::instanciate('survey');
+		    		$event->authentication_token = md5(uniqid(rand(), true));
+		    		$event->properties['authentication_token'] = $event->authentication_token;
+		    		$rc = $event->loadAndAdd($eventData, Event::getConfigProperties('survey'));
+		    		if ($rc['0'] != '200') {
+		    			$eventConnection->rollback();
+		    			$error = $rc;
+		    		}
+	    		}
+	    		 
+	    		// Replace all the variables in the text by their value in the account data structure
+	    		// And replace the 'link' variable to the URL to Dropbox
+	    		if (array_key_exists('params', $invitation)) {
+	    			$arguments = array();
+	    			foreach ($invitation['params'] as $param) {
+	    				$arguments[] = htmlentities($event->properties[$param]);
+	    			}
+	    			$body = vsprintf($body, $arguments);
+	    		}
+	    		else $body = sprintf($body, $link);
+	    		$data['body'] = $body;
+	    		
+	    		$emails[$account_id] = $data;
+	    	}
+	    	if (!$error) $eventConnection->commit();
+		}
+		catch (\Exception $e) {
+			$eventConnection->rollback();
+			throw $e;
+		}
+
+    	// Instanciate the csrf form
+    	$csrfForm = new CsrfForm();
+    	$csrfForm->addCsrfElement('csrf');
+    	$message = null;
+    	
+    	// Process the posted form
+    	$request = $this->getRequest();
+    	if (!$error && $request->isPost()) {
+    		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
+    		$csrfForm->setData($request->getPost());
+    		if ($csrfForm->isValid()) { // CSRF check
+ 				$mail = ContactMessage::instanciate();
+				$mail->type = 'email';
+				if ($mail->loadData($data) != 'OK') throw new \Exception('View error');
+	    			
+    			// Atomicity
+	   			$connection = ContactMessage::getTable()->getAdapter()->getDriver()->getConnection();
+    			$connection->beginTransaction();
+    			try {
+    				$rc = $mail->add();
+    				if ($rc != 'OK') {
+    					$connection->rollback();
+    					$error = $rc;
+    				}
+    				else {
+    					$connection->commit();
+    					$message = 'OK';
+    				}
+    			}
+    			catch (\Exception $e) {
+    				$connection->rollback();
+    				throw $e;
+    			}
+    		}
+    	}
+
+    	// Return the view
+    	$view = new ViewModel(array(
+    			'context' => $context,
+    			'tests' => $tests,
+    			'selectedTestId' => $selectedTestId,
+    			'emails' => $emails,
+    			'csrfForm' => $csrfForm,
+    			'message' => $message,
+    			'error' => $error,
+    	));
+    	$view->setTerminal(true);
+    	return $view;
+    }
 }

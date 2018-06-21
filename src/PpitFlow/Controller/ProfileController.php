@@ -139,4 +139,19 @@ class ProfileController extends AbstractActionController
 	{
 		return $this->template1Action();
 	}
+
+	public function photoUploadAction()
+	{
+		$context = Context::getCurrent();
+		$id = $this->params()->fromRoute('id');
+		$account = Account::get($id);
+		if ($account) {
+			$photoPath = $this->request->getFiles()->toArray()['photo_path'];
+			$account->contact_1->savePhoto($photoPath);
+			$account->contact_1->photo_link_id = $account->contact_1_id.'.jpg';
+			$account->contact_1->update(null);
+			echo $account->contact_1->photo_link_id;
+		}
+		return $this->response;
+	}
 }
