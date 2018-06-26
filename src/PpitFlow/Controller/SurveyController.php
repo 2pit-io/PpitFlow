@@ -376,14 +376,30 @@ class SurveyController extends AbstractActionController
     
 	public function patchAction()
 	{
-		$events = Event::getList('survey', []);
+		$events = Event::getList('course_test', ['subcategory' => 'contributor']);
 		foreach ($events as $event) {
-		if (!$event->vcard_id) {
-				$account = Account::get($event->account_id);
-				if ($account) {
-					$event->vcard_id = $account->contact_1_id;
-			    	echo 'Event: '.$event->id.', Account: '.$event->account_id.', Vcard: '.$event->vcard_id."\n";
-		    		$event->update(null);
+			$account = Account::get($event->account_id);
+			if ($account) {
+				$updated = false;
+				if (!$account->json_property_1 && $event->property_1) {
+					$account->json_property_1 = $event->property_1;
+					$updated = true;
+				}
+				if (!$account->property_2 && $event->property_2) {
+					$account->property_2 = $event->property_2;
+					$updated = true;
+				}
+				if (!$account->property_15 && $event->property_16) {
+					$account->property_15 = $event->property_16;
+					$updated = true;
+				}
+				if (!$account->property_16 && $event->property_17) {
+					$account->property_16 = $event->property_17;
+					$updated = true;
+				}
+				if ($updated) {
+					echo 'Account: '.$account->properties['n_fn']."\n";
+					$account->update(null);
 				}
 			}
 		}
