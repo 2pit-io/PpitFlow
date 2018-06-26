@@ -32,6 +32,7 @@ class SurveyController extends AbstractActionController
 		// Retrieve the account and the survey in progress and anthenticate
 		$event = Event::get($id);
 		$place = Place::get($event->place_id);
+		$account = Account::get($event->account_id);
 		if (!$locale) $locale = $event->locale;
 		if (!$locale) $locale = $context->getLocale();
 		if ($token != $event->authentication_token) return $this->redirect()->toRoute('landing/template2', ['place_identifier' => $place->identifier]);
@@ -40,6 +41,7 @@ class SurveyController extends AbstractActionController
 		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($survey.'/'.$place->identifier);
 		else $content = Config::get($place->identifier.'_'.$survey, 'identifier')->content;
 		$steps = explode(',', $event->description);
+
 		$step = reset($steps); // Get the first step in the list
 		if (!$step) $step = 'steps'; // As a default, show the form 'steps' that allows the user to choose the steps he wants to follow
 		$content['form'] = $content['forms'][$step];
@@ -82,6 +84,9 @@ class SurveyController extends AbstractActionController
 			$data['subcategory'] = $step;
 			array_shift($steps); // Get the first step in the list
 			$data['description'] = implode(',', $steps);
+			
+			$accountData = array();
+			
 			foreach ($content['form']['inputs'] as $inputId => $property) {
 				if (array_key_exists('property_id', $property)) $propertyId = $property['property_id'];
 				else $propertyId = $inputId;
@@ -99,23 +104,33 @@ class SurveyController extends AbstractActionController
 						$data[$propertyId] = '';
 						foreach ($property['repository'] as $entryId => $unused) {
 							$viewData[$inputId.'-'.$entryId] = $this->request->getPost($inputId.'-'.$entryId);
-							if (array_key_exists($propertyId, $data) && $data[$propertyId]) {
-								if ($viewData[$inputId.'-'.$entryId]) $data[$propertyId] .= ','.$entryId;
+							if ($viewData[$inputId.'-'.$entryId]) {
+								if (array_key_exists($propertyId, $data) && $data[$propertyId]) $data[$propertyId] .= ','.$entryId;
+								else $data[$propertyId] = $entryId;
 							}
-							else $data[$propertyId] = $entryId;
 						}
 					}
 					else $data[$propertyId] = $viewData[$propertyId];
+
+					if (array_key_exists('account_property', $property)) $accountData[$property['account_property']] = $data[$propertyId];
 				}
 			}
-
+			
 			$event = Event::instanciate('survey');
 			if (!$token) $token = md5(uniqid(rand(), true));
 			$event->authentication_token = $token;
 			$rc = $event->loadAndAdd($data, $description['properties']); // Duplicate the event for storing the current step's data 
 			$id = $event->id;
-			if ($event->description) return $this->redirect()->toRoute($this->getEvent()->getRouteMatch()->getMatchedRouteName(), ['id' => $id], array('query' => array('hash' => $token, 'survey' => $survey)));
-			if (in_array($rc[0], ['200'])) $message = 'OK';
+			if (in_array($rc[0], ['200'])) {
+				if ($accountData) {
+					$rc = $account->loadAndUpdate($accountData);
+					if (in_array($rc[0], ['200'])) {
+						$message = 'OK';
+						if ($event->description) return $this->redirect()->toRoute($this->getEvent()->getRouteMatch()->getMatchedRouteName(), ['id' => $id], array('query' => array('hash' => $token, 'survey' => $survey)));
+					}
+					else $error = $rc[1];
+				}
+			}
 			else $error = $rc[1];
 		}
 
@@ -228,7 +243,10 @@ class SurveyController extends AbstractActionController
 	    		$data['subject'] = $context->localize($invitation['subject'], $account->locale);
 	    		 
 	    		// Retrieve the text from the form if the email text is customizable in the view and add the signature at the location of the tag '%s'
+	    		$characters = ['à', 'â', 'ä', 'é', 'è', 'ê', 'ë', 'î', 'ï', 'ô', 'ö', 'ù', 'û', 'ü'];
+	    		$encoded = ['&agrave;', '&acirc;', '&auml;', '&eacute;', '&egrave;', '&ecirc;', '&euml;', '&icirc;', '&iuml;', '&ocirc;', '&ouml;', '&ugrave;', '&ucirc;', '&uuml'];
 	    		$text = $context->localize($invitation['text'], $account->locale);
+	    		$text = str_replace($characters, $encoded, $text);
 	    		$signatureBody = $context->localize($signature['body'], $account->locale);
 	    		
 	    		$body = '';
@@ -244,12 +262,13 @@ class SurveyController extends AbstractActionController
 	    		$theme = $context->getConfig('core_account/sendMessage')['themes']['theme_2'];
 	    		if ($theme['definition'] != 'inline') $theme = $context->getConfig($theme['definition']);
 	    		$body .= sprintf($theme, $text, $signatureBody);
-	    		
+
 	    		$event = Event::get('survey', 'type', $account->id, 'account_id', $selectedTestId, 'category', 'steps', 'subcategory');
 	    		if (!$event) {
 		    		$eventData = array();
-		    		$eventData['place_id'] = $account->place_id;
+		    		$eventData['place_id'] = $place->id;
 		    		$eventData['account_id'] = $account->id;
+		    		$eventData['vcard_id'] = $account->contact_1_id; // Deprecated, the join is on the account id, not on the vcard id
 		    		$eventData['category'] = $selectedTestId;
 		    		$eventData['subcategory'] = 'steps';
 		    		$eventData['description'] = '';
@@ -263,6 +282,16 @@ class SurveyController extends AbstractActionController
 		
 		    		// Generate the root event (subcategory 'steps') that gives access to the test
 		    		$event = Event::instanciate('survey');
+	    			$event->properties = $event->getProperties();
+		    		$event->place_caption = $place->caption;
+			    	$event->place_identifier = $place->identifier;
+			    	$vcard = Vcard::get($account->contact_1_id);
+			    	$event->n_fn = $vcard->n_fn;
+			    	$event->n_first = $vcard->n_first;
+			    	$event->n_last = $vcard->n_last;
+			    	$event->email = $vcard->email;
+			    	$event->photo_link_id = $vcard->photo_link_id;
+			    	$event->locale = $vcard->locale;
 		    		$event->authentication_token = md5(uniqid(rand(), true));
 		    		$event->properties['authentication_token'] = $event->authentication_token;
 		    		$rc = $event->loadAndAdd($eventData, Event::getConfigProperties('survey'));
@@ -304,28 +333,30 @@ class SurveyController extends AbstractActionController
     		$csrfForm->setInputFilter((new Csrf('csrf'))->getInputFilter());
     		$csrfForm->setData($request->getPost());
     		if ($csrfForm->isValid()) { // CSRF check
- 				$mail = ContactMessage::instanciate();
-				$mail->type = 'email';
-				if ($mail->loadData($data) != 'OK') throw new \Exception('View error');
-	    			
-    			// Atomicity
-	   			$connection = ContactMessage::getTable()->getAdapter()->getDriver()->getConnection();
-    			$connection->beginTransaction();
-    			try {
-    				$rc = $mail->add();
-    				if ($rc != 'OK') {
-    					$connection->rollback();
-    					$error = $rc;
-    				}
-    				else {
-    					$connection->commit();
-    					$message = 'OK';
-    				}
-    			}
-    			catch (\Exception $e) {
-    				$connection->rollback();
-    				throw $e;
-    			}
+				foreach ($emails as $data) {
+	    			$mail = ContactMessage::instanciate();
+					$mail->type = 'email';
+					if ($mail->loadData($data) != 'OK') throw new \Exception('View error');
+		    			
+	    			// Atomicity
+		   			$connection = ContactMessage::getTable()->getAdapter()->getDriver()->getConnection();
+	    			$connection->beginTransaction();
+	    			try {
+	    				$rc = $mail->add();
+	    				if ($rc != 'OK') {
+	    					$connection->rollback();
+	    					$error = $rc;
+	    				}
+	    				else {
+	    					$connection->commit();
+	    					$message = 'OK';
+	    				}
+	    			}
+	    			catch (\Exception $e) {
+	    				$connection->rollback();
+	    				throw $e;
+	    			}
+				}
     		}
     	}
 
@@ -341,5 +372,17 @@ class SurveyController extends AbstractActionController
     	));
     	$view->setTerminal(true);
     	return $view;
+    }
+    
+    public function patchAction()
+    {
+    	$events = Event::getList('survey', array('category' => 'survey_profile'));
+    	foreach ($events as $event) {
+    		$account = Account::get($event->account_id);
+    		if ($account) $event->vcard_id = $account->contact_1_id;
+	    	echo 'Event: '.$event->id.', Vcard: '.$event->vcard_id."\n";
+    		$event->update(null);
+    	}
+    	return $this->response;
     }
 }

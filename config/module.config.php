@@ -125,6 +125,15 @@ return array (
 							),
 						),
 					),
+					'patch' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/patch',
+							'defaults' => array(
+								'action' => 'patch',
+							),
+						),
+					),
 				),
 			),
 		),
@@ -145,6 +154,7 @@ return array (
 				array('route' => 'survey/template1', 'roles' => array('guest')),
 				array('route' => 'survey/selectTest', 'roles' => array('operational_management', 'sales_manager', 'manager')),
 				array('route' => 'survey/inviteToTest', 'roles' => array('operational_management', 'sales_manager', 'manager')),
+				array('route' => 'survey/patch', 'roles' => array('admin')),
 			),
 		),
 	),
@@ -184,8 +194,6 @@ return array (
 	),
 	
 	'matching/skills' => array(
-
-		// Daniel
 		'blockchain' => ['labels' => ['default' => 'Blockchain'], 'color' => 'aqua-gradient'],
 		'brainstorming' => ['labels' => ['default' => 'Brainstorming'], 'color' => 'purple-gradient'],
 		'bi' => ['labels' => ['default' => 'Business Intelligence'], 'color' => 'aqua-gradient'],
@@ -216,8 +224,6 @@ return array (
 		'ux_design' => ['labels' => ['default' => 'UX Design'], 'color' => 'purple-gradient'],
 		'vba' => ['labels' => ['default' => 'VBA'], 'color' => 'aqua-gradient'],
 		'legal' => ['labels' => ['default' => 'Legal', 'fr_FR' => 'Juridique'], 'color' => 'blue-gradient'],
-
-		// Nicole
 		'surveys' => ['labels' => ['default' => 'Surveys', 'fr_FR' => 'Sondages'], 'color' => 'purple-gradient'],
 		'marketing' => ['labels' => ['default' => 'Marketing'], 'color' => 'purple-gradient'],
 		'customer_relationship' => ['labels' => ['default' => 'Customer relationship', 'fr_FR' => 'Relation client'], 'color' => 'purple-gradient'],
