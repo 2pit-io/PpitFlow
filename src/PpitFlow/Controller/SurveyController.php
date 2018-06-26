@@ -281,7 +281,7 @@ class SurveyController extends AbstractActionController
 		    		// This token allows the email's addressee to access the target page as being authenticated
 		
 		    		// Generate the root event (subcategory 'steps') that gives access to the test
-		    		$event = Event::instanciate('survey');
+		    		$event = Event::instanciate('course_test');
 	    			$event->properties = $event->getProperties();
 		    		$event->place_caption = $place->caption;
 			    	$event->place_identifier = $place->identifier;
@@ -374,15 +374,19 @@ class SurveyController extends AbstractActionController
     	return $view;
     }
     
-    public function patchAction()
-    {
-    	$events = Event::getList('survey', array('category' => 'survey_profile'));
-    	foreach ($events as $event) {
-    		$account = Account::get($event->account_id);
-    		if ($account) $event->vcard_id = $account->contact_1_id;
-	    	echo 'Event: '.$event->id.', Vcard: '.$event->vcard_id."\n";
-    		$event->update(null);
-    	}
-    	return $this->response;
-    }
+	public function patchAction()
+	{
+		$events = Event::getList('survey', []);
+		foreach ($events as $event) {
+		if (!$event->vcard_id) {
+				$account = Account::get($event->account_id);
+				if ($account) {
+					$event->vcard_id = $account->contact_1_id;
+			    	echo 'Event: '.$event->id.', Account: '.$event->account_id.', Vcard: '.$event->vcard_id."\n";
+		    		$event->update(null);
+				}
+			}
+		}
+		return $this->response;
+	}
 }
