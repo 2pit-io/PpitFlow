@@ -107,6 +107,13 @@ return array (
 							'defaults' => array('action' => 'template1'),
 						),
 					),
+					'template2' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/template2[/:id]',
+							'defaults' => array('action' => 'template2'),
+						),
+					),
 					'selectTest' => array(
 						'type' => 'segment',
 						'options' => array(
@@ -152,6 +159,7 @@ return array (
 				
 				array('route' => 'survey/fill', 'roles' => array('guest')),
 				array('route' => 'survey/template1', 'roles' => array('guest')),
+				array('route' => 'survey/template2', 'roles' => array('guest')),
 				array('route' => 'survey/selectTest', 'roles' => array('operational_management', 'sales_manager', 'manager')),
 				array('route' => 'survey/inviteToTest', 'roles' => array('operational_management', 'sales_manager', 'manager')),
 				array('route' => 'survey/patch', 'roles' => array('admin')),

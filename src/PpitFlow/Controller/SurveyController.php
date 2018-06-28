@@ -49,6 +49,33 @@ class SurveyController extends AbstractActionController
 		$viewData = array();
 		$viewData['account_id'] = $event->account_id;
 		$viewData['photo_link_id'] = ($event->photo_link_id) ? $event->photo_link_id : 'no-photo.png';
+
+		// Card
+		foreach ($content['form']['card'] as $inputId => $options) {
+			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
+			else {
+				$property = $description['properties'][$inputId];
+				if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
+				if (array_key_exists('mandatory', $options)) $property['mandatory'] = $options['mandatory'];
+				if (array_key_exists('updatable', $options)) $property['updatable'] = $options['updatable'];
+			}
+			if (array_key_exists('repository', $property)) $property['repository'] = $context->getConfig($property['repository']);
+			if (!array_key_exists('mandatory', $property)) $property['mandatory'] = false;
+			if (!array_key_exists('updatable', $property)) $property['updatable'] = true;
+			if (!array_key_exists('placeholder', $property)) $property['placeholder'] = null;
+			$content['form']['card'][$inputId] = $property;
+			if (array_key_exists('property_id', $property)) $propertyId = $property['property_id'];
+			else $propertyId = $inputId;
+			if ($id) {
+				if ($inputId != $propertyId) $viewData[$inputId] = (in_array($property['value'], explode(',', $event->properties[$propertyId])) ? $property['value'] : null);
+				elseif (array_key_exists($propertyId, $event->properties)) $viewData[$inputId] = $event->properties[$propertyId];
+				$queryValue = $this->params()->fromQuery($inputId);
+				if ($queryValue !== null) $viewData[$inputId] = $queryValue;
+			}
+			else $viewData[$inputId] = (array_key_exists('default', $property)) ? $property['default'] : null;
+		}
+		
+		// Form
 		foreach ($content['form']['inputs'] as $inputId => $options) {
 			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
 			else {
@@ -155,6 +182,11 @@ class SurveyController extends AbstractActionController
 	}
 
 	public function template1Action()
+	{
+		return $this->fillAction();
+	}
+	
+	public function template2Action()
 	{
 		return $this->fillAction();
 	}
@@ -299,6 +331,8 @@ class SurveyController extends AbstractActionController
 		    			$eventConnection->rollback();
 		    			$error = $rc;
 		    		}
+					$renderer = $this->serviceLocator->get('Zend\View\Renderer\RendererInterface');
+		    		$event->properties['base_path'] = $renderer->basePath('');
 	    		}
 	    		 
 	    		// Replace all the variables in the text by their value in the account data structure
@@ -399,7 +433,7 @@ class SurveyController extends AbstractActionController
 				}
 				if ($updated) {
 					echo 'Account: '.$account->properties['n_fn']."\n";
-					$account->update(null);
+//					$account->update(null);
 				}
 			}
 		}
