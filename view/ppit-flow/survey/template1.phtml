@@ -149,7 +149,7 @@ header,
     </div>
 
     <!-- Avatar -->
-	    <a class="avatar mx-auto white btn-floating file-field" id="photo_upload">
+	    <a class="avatar mx-auto white file-field" id="photo_upload">
 	    	<img src="<?php echo $this->basePath('/photos/'.$viewData['photo_link_id'])?>" class="rounded-circle" id="photo">
 	    	<input type="file" id="photo_path">
 	    </a>
@@ -191,6 +191,35 @@ header,
 
 			<!--Grid column-->
 			<div class="col-md-8 col-xl-9">
+	
+			<div class="row">
+<?php foreach ($content['form']['introduction'] as $paragraph) : ?>
+	<?php if (array_key_exists('a', $paragraph)) : ?>
+				<a 
+					href="<?php echo $paragraph['a']['href']?>" 
+					<?php if (array_key_exists('class', $paragraph['a'])) echo 'class="'.$paragraph['a']['class'].'"' ?>
+					<?php if (array_key_exists('id', $paragraph['a'])) echo 'id="'.$paragraph['a']['id'].'"' ?>
+				>
+	<?php elseif (array_key_exists('button', $paragraph)) : ?>
+				<button type="button" 
+					<?php if (array_key_exists('class', $paragraph['button'])) echo 'class="'.$paragraph['button']['class'].'"' ?>
+					<?php if (array_key_exists('id', $paragraph['button'])) echo 'id="'.$paragraph['button']['id'].'"' ?>
+				>
+	<?php else : ?>
+				<<?php echo $paragraph['type']?> <?php if (array_key_exists('class', $paragraph)) echo 'class="'.$paragraph['class'].'"' ?>>
+	<?php endif;?>
+	<?php if (array_key_exists('text', $paragraph)) : ?>
+				<?php echo $context->localize($paragraph['text'], $locale) ?>
+	<?php endif;?>
+	<?php if (array_key_exists('a', $paragraph)) : ?>
+				</a>
+	<?php elseif (array_key_exists('button', $paragraph)) : ?>
+				</button>
+	<?php else : ?>
+				</<?php echo $paragraph['type']?>>
+	<?php endif;?>
+<?php endforeach;?>
+			</div>
 				<form action="<?php echo $this->url('survey/template1', ['id' => $id]) ?>?hash=<?php echo $token ?>&survey=<?php echo $survey ?>&locale=<?php echo $locale ?>" method="post">
 
 <?php if ($error) : ?>
@@ -289,32 +318,32 @@ header,
 <?php if (array_key_exists('contact_section', $content)) : ?>
 			<!--Grid column-->
 			<div class="col-md-4 col-xl-3">
-				<ul class="contact-icons">
+				<div class="contact-icons">
 	<?php if (array_key_exists('location', $content['contact_section'])) : ?>
-					<li><i class="fa fa-map-marker fa-2x"></i>
+					<div><i class="fa fa-map-marker fa-2x"></i>
 						<p><?php echo $context->localize($content['contact_section']['location']['label'], $locale) ?></p>
-					</li>
+					</div>
 	<?php endif;?>
 
 	<?php if (array_key_exists('phone', $content['contact_section'])) : ?>
-					<li><i class="fa fa-phone fa-2x"></i>
+					<div><i class="fa fa-phone fa-2x"></i>
 						<p><a href="tel:<?php echo $content['contact_section']['phone']['href'] ?>"><?php echo $context->localize($content['contact_section']['phone']['label'], $locale) ?></a></p>
-					</li>
+					</div>
 	<?php endif;?>
 
 	<?php if (array_key_exists('email', $content['contact_section'])) : ?>
-					<li><i class="fa fa-envelope fa-2x"></i>
+					<div><i class="fa fa-envelope fa-2x"></i>
 						<p><a href="mailto:<?php echo $content['contact_section']['email']['href'] ?>?subject=<?php echo $context->localize($content['contact_section']['email']['subject'], $locale) ?>"><?php echo $context->localize($content['contact_section']['email']['label'], $locale) ?></a></p>
-					</li>
+					</div>
 	<?php endif;?>
-				</ul>
+				</div>
 			</div>
 			<!--Grid column-->
 <?php endif;?>
 		</div>
 		<br>
 		<div class="row">
-<?php foreach ($content['form']['introduction'] as $paragraph) : ?>
+<?php foreach ($content['form']['legal'] as $paragraph) : ?>
 		<?php if (array_key_exists('a', $paragraph)) : ?>
 					<a 
 						href="<?php echo $paragraph['a']['href']?>" 
@@ -393,7 +422,7 @@ header,
     <!-- SCRIPTS -->
     <!-- Font Awesome -->
     <!-- JQuery -->
-    <script type="text/javascript" src="<?php echo $this->basePath('MDB Pro/js/jquery-3.2.1.min.js') ?>"></script>
+    <script type="text/javascript" src="<?php echo $this->basePath('MDB Pro/js/jquery-3.3.1.min.js') ?>"></script>
     <!-- Bootstrap tooltips -->
     <script type="text/javascript" src="<?php echo $this->basePath('MDB Pro/js/popper.min.js') ?>"></script>
     <!-- Bootstrap core JavaScript -->

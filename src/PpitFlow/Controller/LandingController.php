@@ -27,8 +27,8 @@ class LandingController extends AbstractActionController
 			$place = Place::get($context->getPlaceId());
 			$place_identifier = $place->identifier;
 		}
-		if ($context->getConfig('specificationMode') == 'config') $content = LandingController::$contents[$place_identifier];
-		else $content = Config::get($place_identifier.'_landing', 'identifier', $place->id)->content;
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('landing/'.$place->identifier);
+		else $content = Config::get($place->identifier.'_landing', 'identifier')->content;
 		$locale = $this->params()->fromQuery('locale');
 		
 		$token = null;

@@ -51,7 +51,7 @@ class SurveyController extends AbstractActionController
 		$viewData['photo_link_id'] = ($event->photo_link_id) ? $event->photo_link_id : 'no-photo.png';
 
 		// Card
-		foreach ($content['form']['card'] as $inputId => $options) {
+		foreach ($content['card'] as $inputId => $options) {
 			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
 			else {
 				$property = $description['properties'][$inputId];
@@ -63,7 +63,7 @@ class SurveyController extends AbstractActionController
 			if (!array_key_exists('mandatory', $property)) $property['mandatory'] = false;
 			if (!array_key_exists('updatable', $property)) $property['updatable'] = true;
 			if (!array_key_exists('placeholder', $property)) $property['placeholder'] = null;
-			$content['form']['card'][$inputId] = $property;
+			$content['card'][$inputId] = $property;
 			if (array_key_exists('property_id', $property)) $propertyId = $property['property_id'];
 			else $propertyId = $inputId;
 			if ($id) {
@@ -137,26 +137,29 @@ class SurveyController extends AbstractActionController
 							}
 						}
 					}
+					elseif ($property['type'] == 'date') { // Workaround due to a bug in MDBootstrap that ignores formatSubmit
+						$data[$propertyId] = substr($viewData[$propertyId], 6, 4).'-'.substr($viewData[$propertyId], 3, 2).'-'.substr($viewData[$propertyId], 0, 2);
+					}
 					else $data[$propertyId] = $viewData[$propertyId];
 
 					if (array_key_exists('account_property', $property)) $accountData[$property['account_property']] = $data[$propertyId];
 				}
 			}
-			
-			$event = Event::instanciate('survey');
+
+			$event = Event::instanciate($content['type']);
 			if (!$token) $token = md5(uniqid(rand(), true));
 			$event->authentication_token = $token;
 			$rc = $event->loadAndAdd($data, $description['properties']); // Duplicate the event for storing the current step's data 
+
 			$id = $event->id;
 			if (in_array($rc[0], ['200'])) {
 				if ($accountData) {
 					$rc = $account->loadAndUpdate($accountData);
-					if (in_array($rc[0], ['200'])) {
-						$message = 'OK';
-						if ($event->description) return $this->redirect()->toRoute($this->getEvent()->getRouteMatch()->getMatchedRouteName(), ['id' => $id], array('query' => array('hash' => $token, 'survey' => $survey)));
-					}
+					if (in_array($rc[0], ['200'])) $message = 'OK';
 					else $error = $rc[1];
 				}
+				else $message = 'OK';
+				if ($message == 'OK' && $event->description) return $this->redirect()->toRoute($this->getEvent()->getRouteMatch()->getMatchedRouteName(), ['id' => $event->id], array('query' => array('hash' => $token, 'survey' => $survey)));
 			}
 			else $error = $rc[1];
 		}
@@ -295,7 +298,7 @@ class SurveyController extends AbstractActionController
 	    		if ($theme['definition'] != 'inline') $theme = $context->getConfig($theme['definition']);
 	    		$body .= sprintf($theme, $text, $signatureBody);
 
-	    		$event = Event::get('survey', 'type', $account->id, 'account_id', $selectedTestId, 'category', 'steps', 'subcategory');
+	    		$event = Event::get($selectedTest['type'], 'type', $account->id, 'account_id', $selectedTestId, 'category', 'steps', 'subcategory');
 	    		if (!$event) {
 		    		$eventData = array();
 		    		$eventData['place_id'] = $place->id;
@@ -331,10 +334,10 @@ class SurveyController extends AbstractActionController
 		    			$eventConnection->rollback();
 		    			$error = $rc;
 		    		}
-					$renderer = $this->serviceLocator->get('Zend\View\Renderer\RendererInterface');
-		    		$event->properties['base_path'] = $renderer->basePath('');
 	    		}
-	    		 
+				$renderer = $this->serviceLocator->get('Zend\View\Renderer\RendererInterface');
+		    	$event->properties['base_path'] = $renderer->basePath('');
+
 	    		// Replace all the variables in the text by their value in the account data structure
 	    		// And replace the 'link' variable to the URL to Dropbox
 	    		if (array_key_exists('params', $invitation)) {

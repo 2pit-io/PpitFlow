@@ -38,7 +38,7 @@ html,
 body,
 header,
 #intro {
-    height: 65%;
+    height: 70%;
 }
 
 #intro {
@@ -104,9 +104,9 @@ header,
                         </li>
                         <li class="nav-item">
 <?php if ($locale == 'fr_FR') : ?>
-							<a class="nav-link" href="<?php echo $this->url('survey/template1', ['id' => $id]) ?>?hash=<?php echo $token ?>&survey=<?php echo $survey ?>&locale=en_US">EN</a>
+							<a class="nav-link" href="<?php echo $this->url('survey/template2', ['id' => $id]) ?>?hash=<?php echo $token ?>&survey=<?php echo $survey ?>&locale=en_US">EN</a>
 <?php else : ?>
-							<a class="nav-link" href="<?php echo $this->url('survey/template1', ['id' => $id]) ?>?hash=<?php echo $token ?>&survey=<?php echo $survey ?>&locale=fr_FR">FR</a>
+							<a class="nav-link" href="<?php echo $this->url('survey/template2', ['id' => $id]) ?>?hash=<?php echo $token ?>&survey=<?php echo $survey ?>&locale=fr_FR">FR</a>
 <?php endif;?>
                         </li>
                     </ul>
@@ -125,12 +125,12 @@ header,
             <i class="fa fa-envelope"></i>
           </a>
         </li>
-
-      <!-- Login / register -->
-              <a class="btn btn-info btn-rounded btn-sm waves-effect waves-light" data-toggle="modal" data-target="#profile">Mon profil
-          <i class="fa fa-sign-in ml-2"></i>
-        </a>
-          </ul>                                             
+		<li>
+          <a class="waves-effect waves-light" data-toggle="modal" data-target="#profile">
+            <img src="<?php echo $this->basePath('/photos/'.$viewData['photo_link_id'])?>" height="40" class="rounded-circle z-depth-0" alt="avatar image">
+          </a>
+		</li>
+	</ul>                                             
                 </div>
                 <!-- Collapsible content -->
 
@@ -154,7 +154,7 @@ header,
 
     <!--Main layout-->
     <main>
-<form action="<?php echo $this->url('survey/template1', ['id' => $id]) ?>?hash=<?php echo $token ?>&survey=<?php echo $survey ?>&locale=<?php echo $locale ?>" method="post">
+<form action="<?php echo $this->url('survey/template2', ['id' => $id]) ?>?hash=<?php echo $token ?>&survey=<?php echo $survey ?>&locale=<?php echo $locale ?>" method="post">
 <div class="container" name="descr" id="descr">
 	<br>
 	<section class="section feature-box wow fadeIn" data-wow-delay="0.3s">
@@ -190,8 +190,41 @@ header,
 
 		<!--Grid column-->
 		<div class="col-md-12">
+	
+			<div class="row">
+<?php foreach ($content['form']['introduction'] as $paragraph) : ?>
+	<?php if (array_key_exists('a', $paragraph)) : ?>
+				<a 
+					href="<?php echo $paragraph['a']['href']?>" 
+					<?php if (array_key_exists('class', $paragraph['a'])) echo 'class="'.$paragraph['a']['class'].'"' ?>
+					<?php if (array_key_exists('id', $paragraph['a'])) echo 'id="'.$paragraph['a']['id'].'"' ?>
+				>
+	<?php elseif (array_key_exists('button', $paragraph)) : ?>
+				<button type="button" 
+					<?php if (array_key_exists('class', $paragraph['button'])) echo 'class="'.$paragraph['button']['class'].'"' ?>
+					<?php if (array_key_exists('id', $paragraph['button'])) echo 'id="'.$paragraph['button']['id'].'"' ?>
+				>
+	<?php else : ?>
+				<<?php echo $paragraph['type']?> <?php if (array_key_exists('class', $paragraph)) echo 'class="'.$paragraph['class'].'"' ?>>
+	<?php endif;?>
+	<?php if (array_key_exists('text', $paragraph)) : ?>
+				<?php echo $context->localize($paragraph['text'], $locale) ?>
+	<?php endif;?>
+	<?php if (array_key_exists('a', $paragraph)) : ?>
+				</a>
+	<?php elseif (array_key_exists('button', $paragraph)) : ?>
+				</button>
+	<?php else : ?>
+				</<?php echo $paragraph['type']?>>
+	<?php endif;?>
+<?php endforeach;?>
+			</div>
 
 			<div class="row">
+
+			<div class="row">
+				<div class="col-md-6">&nbsp;</div>
+				<div class="col-md-6"><a class="btn btn-secondary btn-sm" id="other-example"><?php echo $this->translate('Other example', 'ppit-flow', $locale) ?></a></div>
 
  <?php foreach ($content['form']['inputs'] as $inputId => $property) : ?>
  	<?php $disabled = $message || $error || $id && !$property['updatable'] ?>
@@ -266,13 +299,21 @@ header,
 								</div>
 
      			<?php else : ?>
-								<span><?php echo $context->localize($property['labels'], $locale) ?></span>
+								<span id='<?php echo $inputId ?>'></span>
 
 				<?php endif;?>
 							</div>
 						</div>
 <?php endforeach;?>
-			</div>
+					</div>
+
+<?php if (!$message && !$error) : ?>
+					<div class="center-on-small-only">
+						<button class="btn btn-light-blue btn-rounded" type="submit"><?php echo $context->localize($content['form']['submit']['labels'], $locale) ?></button>
+					</div>
+<?php else : ?>
+					<a href="<?php echo $this->url('home') ?>" class="btn btn-light-blue btn-rounded">Accueil</a>
+<?php endif;?>
 	    </div>
 		<!--Grid column-->
 	</section> 
@@ -311,7 +352,7 @@ header,
 
 	</div>
 </form>
-		
+
 		<div class="modal fade" id="profile" tabindex="-1" role="dialog" aria-labelledby="profileLabel" aria-hidden="true">
 			<div class="col-md-8 col-xl-6">
     <div class="modal-dialog" role="document">
@@ -340,7 +381,7 @@ header,
 			    <div class="card-body">
 					<div class="row">
 
- <?php foreach ($content['form']['card'] as $inputId => $property) : ?>
+ <?php foreach ($content['card'] as $inputId => $property) : ?>
  	<?php $disabled = $message || $error || $id && !$property['updatable'] ?>
 						<div class="<?php echo (array_key_exists('class',$property)) ? $property['class'] : 'col-md-6' ?>">
 							<div class="md-form">
@@ -416,7 +457,6 @@ header,
            </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-rounded" data-dismiss="modal">Fermer</button>
-				<button class="btn btn-light-blue btn-rounded" type="submit"><?php echo $context->localize($content['form']['submit']['labels'], $locale) ?></button>
             </div>
         </div>
 			</div>
@@ -475,7 +515,7 @@ header,
 
 <script type="text/javascript">
 // Material Select Initialization
-//new WOW().init();
+new WOW().init();
 $(document).ready(function() {
    $('.mdb-select').material_select();
 });
@@ -490,6 +530,11 @@ $('#a_survey').click(function () {
 <?php endif;?>
 	$(location).attr('href', '#descr');
 });
+
+<?php if ($error) : ?>
+toastr.error('<?php echo $this->translate('Technical information: ', 'ppit-core', $context->getLocale()).$error ?>');
+toastr.error('<?php echo $this->translate('An error has occurred, please try again later', 'ppit-core', $context->getLocale()) ?>');
+<?php endif;?>
 
 $('.datepicker').pickadate({
 	monthsFull: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
@@ -625,6 +670,23 @@ $('#<?php echo $itemId ?>').attr('title', '<?php echo $context->localize($toolti
 $('#<?php echo $itemId ?>').attr('data-html', true);
 	<?php endif;?>
 <?php endforeach;?>
-</script>
 
+var example = 0;
+
+function loadExample(number) {
+<?php foreach ($content['examples'] as $number => $example) : ?>
+	if (number == <?php echo $number ?>) {
+	<?php foreach ($example as $propertyId => $labels) : ?>
+		$('#<?php echo $propertyId ?>').html('<?php echo $context->localize($labels) ?>');
+	<?php endforeach;?>
+	}
+<?php endforeach;?>
+}
+
+loadExample(example);
+$('#other-example').click(function () { 
+	example = (example + 1) % <?php echo count($content['examples']) ?>;
+	loadExample(example); 
+});
+</script>
 </html>
