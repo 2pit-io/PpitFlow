@@ -41,10 +41,11 @@ class SurveyController extends AbstractActionController
 		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($survey.'/'.$place->identifier);
 		else $content = Config::get($place->identifier.'_'.$survey, 'identifier')->content;
 		$steps = explode(',', $event->description);
-
 		$step = reset($steps); // Get the first step in the list
 		if (!$step) $step = 'steps'; // As a default, show the form 'steps' that allows the user to choose the steps he wants to follow
 		$content['form'] = $content['forms'][$step];
+		if (!array_key_exists('options', $content['form'])) $content['form']['options'] = array();
+		if (!array_key_exists('examples', $content['form']['options'])) $content['form']['options']['examples'] = false;
 		
 		$viewData = array();
 		$viewData['account_id'] = $event->account_id;
@@ -336,7 +337,7 @@ class SurveyController extends AbstractActionController
 		    		}
 	    		}
 				$renderer = $this->serviceLocator->get('Zend\View\Renderer\RendererInterface');
-		    	$event->properties['base_path'] = $renderer->basePath('');
+		    	$event->properties['base_path'] = 'http://'.$context->getInstance()->fqdn.$renderer->basePath('');
 
 	    		// Replace all the variables in the text by their value in the account data structure
 	    		// And replace the 'link' variable to the URL to Dropbox
@@ -349,7 +350,6 @@ class SurveyController extends AbstractActionController
 	    		}
 	    		else $body = sprintf($body, $link);
 	    		$data['body'] = $body;
-	    		
 	    		$emails[$account_id] = $data;
 	    	}
 	    	if (!$error) $eventConnection->commit();
@@ -374,7 +374,7 @@ class SurveyController extends AbstractActionController
 	    			$mail = ContactMessage::instanciate();
 					$mail->type = 'email';
 					if ($mail->loadData($data) != 'OK') throw new \Exception('View error');
-		    			
+
 	    			// Atomicity
 		   			$connection = ContactMessage::getTable()->getAdapter()->getDriver()->getConnection();
 	    			$connection->beginTransaction();
