@@ -22,7 +22,6 @@ class SurveyController extends AbstractActionController
 	{
 		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
-		$description = Event::getDescription('survey');
 		$id = $this->params()->fromRoute('id');
 		$token = $this->params()->fromQuery('hash', null);
 		$survey = $this->params()->fromQuery('survey');
@@ -31,6 +30,7 @@ class SurveyController extends AbstractActionController
 
 		// Retrieve the account and the survey in progress and anthenticate
 		$event = Event::get($id);
+		$description = Event::getDescription($event->type);
 		$place = Place::get($event->place_id);
 		$account = Account::get($event->account_id);
 		if (!$locale) $locale = $event->locale;
@@ -84,6 +84,9 @@ class SurveyController extends AbstractActionController
 				if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
 				if (array_key_exists('mandatory', $options)) $property['mandatory'] = $options['mandatory'];
 				if (array_key_exists('updatable', $options)) $property['updatable'] = $options['updatable'];
+				if (array_key_exists('rows', $options)) $property['rows'] = $options['rows'];
+				if (array_key_exists('class', $options)) $property['class'] = $options['class'];
+				if (array_key_exists('labels', $options)) $property['labels'] = $options['labels'];
 			}
 			if (array_key_exists('repository', $property)) $property['repository'] = $context->getConfig($property['repository']);
 			if (!array_key_exists('mandatory', $property)) $property['mandatory'] = false;
@@ -100,7 +103,6 @@ class SurveyController extends AbstractActionController
 			}
 			else $viewData[$inputId] = (array_key_exists('default', $property)) ? $property['default'] : null;
 		}
-
 		// Process the post data after input
 		$message = $error = null;
 		if ($this->request->isPost()) {
