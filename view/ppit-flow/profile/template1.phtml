@@ -149,8 +149,10 @@ header,
     </div>
 
     <!-- Avatar -->
-    <div class="avatar mx-auto white"><img src="<?php echo $this->basePath('/photos/no-photo.png')?>" class="rounded-circle">
-    </div>
+	    <a class="avatar mx-auto white file-field" id="photo_upload">
+	    	<img src="<?php echo $this->basePath('/photos/'.$viewData['photo_link_id'])?>" class="rounded-circle" id="photo">
+	    	<input type="file" id="photo_path">
+	    </a>
 
     <div class="card-body">
 
@@ -191,14 +193,7 @@ header,
 			<div class="col-md-8 col-xl-9">
 				<form action="<?php echo $this->url('profile/template1', ['id' => $id]) ?>?hash=<?php echo $token ?>" method="post">
 
-<?php if ($message) : ?>
-				<p class="alert alert-success section-description">
-					<?php echo $this->translate('Your request has been registered', 'ppit-core', $context->getLocale()) ?>. Nous vous remercions de votre confiance.
-				</p>
-				<p class="section-description">
-					<a href="<?php echo $this->url('home') ?>" class="btn btn-light-blue btn-rounded">Accueil</a>
-				</p>
-<?php elseif ($error) : ?>
+<?php if ($error) : ?>
 				<p class="alert alert-danger section-description">
 					<?php echo $this->translate('An error has occurred, please try again later', 'ppit-core', $context->getLocale()) ?><br>
 					<?php echo $this->translate('Technical information: ', 'ppit-core', $context->getLocale()).$error[0].' '.$error[1] ?>
@@ -251,12 +246,27 @@ header,
 								<input type="email" id="<?php echo $inputId ?>" name="<?php echo $inputId ?>" class="form-control validate" <?php if ($property['placeholder']) echo 'placeholder="'.$context->localize($property['placeholder'], $locale).'"' ?> <?php if ($property['mandatory']) echo 'required="required"' ?> <?php if ($disabled) echo 'disabled="disabled"' ?> value="<?php echo $viewData[$inputId] ?>" />
 								<label for="<?php echo $inputId ?>" class=""><?php if ($property['mandatory']) echo '* ' ?><?php echo $context->localize($property['labels'], $locale) ?></label>
 
+     			<?php elseif ($property['type'] == 'keywords') : ?>
+								<input type="text" id="<?php echo $inputId ?>" name="<?php echo $inputId ?>" class="form-control mdb-autocomplete" <?php if ($property['placeholder']) echo 'placeholder="'.$context->localize($property['placeholder'], $locale).'"' ?> <?php if ($property['mandatory']) echo 'required="required"' ?> <?php if ($disabled) echo 'disabled="disabled"' ?> value="<?php echo $viewData[$inputId] ?>">
+
      			<?php elseif ($property['type'] == 'input') : ?>
 								<input type="text" id="<?php echo $inputId ?>" name="<?php echo $inputId ?>" class="form-control validate" <?php if ($property['placeholder']) echo 'placeholder="'.$context->localize($property['placeholder'], $locale).'"' ?> <?php if ($property['mandatory']) echo 'required="required"' ?> <?php if ($disabled) echo 'disabled="disabled"' ?> value="<?php echo $viewData[$inputId] ?>" />
 								<label for="<?php echo $inputId ?>" class=""><?php if ($property['mandatory']) echo '* ' ?><?php echo $context->localize($property['labels'], $locale) ?></label>
 
      			<?php elseif ($property['type'] == 'separation') : ?>
      							<hr>
+
+     			<?php elseif ($property['type'] == 'chips') : ?>
+					<?php $currentSkills = explode(',', $viewData[$inputId]) ?>
+					        	<div class="text-center">
+					<?php foreach ($property['repository'] as $entryId => $entry) : ?>
+									<input type="hidden" id="<?php echo $inputId.'-'.$entryId ?>" name="<?php echo $inputId.'-'.$entryId ?>" value="<?php echo in_array($entryId, $currentSkills) ? 1 : 0 ?>" />
+									<span id="search-<?php echo $inputId ?>-<?php echo $entryId ?>" class="chip <?php echo $entry['color'] ?> white-text search-<?php echo $inputId ?> <?php if (!in_array($entryId, $currentSkills)) echo 'search-'.$inputId.'-hidden' ?>">
+										<?php echo $context->localize($entry['labels'], $locale) ?>
+									    &nbsp;<a><i id="chip-<?php echo $inputId ?>-<?php echo $entryId ?>" class="search-<?php echo $inputId ?>-close fa fa-times" style="color: red"></i></a>
+									</span>
+					<?php endforeach;?>
+								</div>
 
      			<?php else : ?>
 								<span class="font-weight-bold"><?php echo $context->localize($property['labels'], $locale) ?></span>
@@ -279,32 +289,32 @@ header,
 <?php if (array_key_exists('contact_section', $content)) : ?>
 			<!--Grid column-->
 			<div class="col-md-4 col-xl-3">
-				<ul class="contact-icons">
+				<div class="contact-icons">
 	<?php if (array_key_exists('location', $content['contact_section'])) : ?>
-					<li><i class="fa fa-map-marker fa-2x"></i>
+					<div><i class="fa fa-map-marker fa-2x"></i>
 						<p><?php echo $context->localize($content['contact_section']['location']['label'], $locale) ?></p>
-					</li>
+					</div>
 	<?php endif;?>
 
 	<?php if (array_key_exists('phone', $content['contact_section'])) : ?>
-					<li><i class="fa fa-phone fa-2x"></i>
+					<div><i class="fa fa-phone fa-2x"></i>
 						<p><?php echo $context->localize($content['contact_section']['phone']['label'], $locale) ?></p>
-					</li>
+					</div>
 	<?php endif;?>
 
 	<?php if (array_key_exists('email', $content['contact_section'])) : ?>
-					<li><i class="fa fa-envelope fa-2x"></i>
+					<div><i class="fa fa-envelope fa-2x"></i>
 						<p><?php echo $context->localize($content['contact_section']['email']['label'], $locale) ?></p>
-					</li>
+					</div>
 	<?php endif;?>
-				</ul>
+				</div>
 			</div>
 			<!--Grid column-->
 <?php endif;?>
 		</div>
 		<br>
 		<div class="row">
-<?php foreach ($content['form']['introduction'] as $paragraph) : ?>
+<?php foreach ($content['form']['legal'] as $paragraph) : ?>
 		<?php if (array_key_exists('a', $paragraph)) : ?>
 					<a 
 						href="<?php echo $paragraph['a']['href']?>" 
@@ -336,8 +346,12 @@ header,
     </div>
 
 </div>
+
+	<div>&nbsp;</div>
+
 <!-- Card -->	
 
+	<div id="requests"></div>
         </div>
 
    <!--Footer-->
@@ -383,7 +397,7 @@ header,
     <!-- SCRIPTS -->
     <!-- Font Awesome -->
     <!-- JQuery -->
-    <script type="text/javascript" src="<?php echo $this->basePath('MDB Pro/js/jquery-3.2.1.min.js') ?>"></script>
+    <script type="text/javascript" src="<?php echo $this->basePath('MDB Pro/js/jquery-3.3.1.min.js') ?>"></script>
     <!-- Bootstrap tooltips -->
     <script type="text/javascript" src="<?php echo $this->basePath('MDB Pro/js/popper.min.js') ?>"></script>
     <!-- Bootstrap core JavaScript -->
@@ -446,6 +460,102 @@ $('#a_survey').click(function () {
     }
     var throttledAutoSave = debounce(triggerAutoSave, 1000);
     editor.subscribe('editableInput', throttledAutoSave);
+
+ // Upload the photo
+ $('#photo_upload').change(function () {
+ 	var formData = new FormData();
+ 	var fileSelect = document.getElementById('photo_path');
+ 	if (fileSelect) {
+ 		var files = fileSelect.files;
+ 		for (var i = 0; i < files.length; i++) {
+ 			var file = files[i];
+ 			formData.append('photo_path', file, file.name);
+ 		}
+ 	}
+
+ 	var xhttp = new XMLHttpRequest();
+ 	xhttp = new XMLHttpRequest();
+ 	xhttp.open("POST", '<?php echo $this->url('profile/photoUpload', ['id' => $viewData['account_id']]) ?>', true);
+ 	xhttp.onreadystatechange = function() {
+ 		if (xhttp.status == 401) location.href = '<?php echo $this->url('user/expired')?>';
+ 		if (xhttp.readyState == 4 && xhttp.status == 200) {
+ 			$('#photo').attr('src', '<?php echo $this->basePath('/photos/') ?>' + xhttp.responseText + '?random=' + (new Date()).getTime());
+ 		}
+ 	}
+ 	xhttp.send(formData);
+ });
+
+//Submit the form
+
+<?php foreach ($content['form']['inputs'] as $inputId => $property) : ?>
+	<?php if ($property['type'] == 'chips') : ?>
+	var <?php echo $inputId ?> = {
+	<?php $first = true; foreach ($property['repository'] as $entryId => $entry) : ?>
+	<?php 
+	if (!$first) echo ',';
+	$first = false;
+	 ?>
+	 	"<?php echo $entryId ?>": "<?php echo $context->localize($entry['labels'], $locale) ?>"
+	<?php endforeach;?>
+	};
+
+  $('.search-<?php echo $inputId ?>-hidden').hide();
+
+  $('#<?php echo $property['trigger'] ?>').mdb_autocomplete({
+      data: <?php echo $inputId ?>
+  });
+
+  $('#<?php echo $property['trigger'] ?>').change(function () {
+      var matched;
+      setTimeout(function () {
+	        for (id in <?php echo $inputId ?>) {
+	        	if (<?php echo $inputId ?>[id] == $('#<?php echo $property['trigger'] ?>').val()) {
+		        	$('#<?php echo $inputId ?>-' + id).val(1);
+		        	$('#search-<?php echo $inputId ?>-' + id).show();
+		        	$('#<?php echo $property['trigger'] ?>').val('');
+		        	break;
+	        	}
+	        }
+      }, 600);
+  });
+
+  $('.search-<?php echo $inputId ?>-close').click(function () {
+	<?php foreach ($property['repository'] as $entryId => $entry) : ?>
+  	if ($(this).attr('id').split('-')[2] == '<?php echo $entryId ?>') $('#<?php echo $inputId ?>-' + id).val(0);
+	<?php endforeach;?>
+  	$(this).parent().parent().hide();
+  });
+  <?php endif;?>
+<?php endforeach;?>
+
+<?php if ($message) : ?>
+toastr.success('<?php echo $this->translate('Your request has been registered', 'ppit-core', $context->getLocale()) ?>');
+<?php endif;?>
+
+//Tooltips Initialization
+$(function () {
+$('[data-toggle="tooltip"]').tooltip()
+})
+
+<?php foreach ($content['tooltips'] as $itemId => $tooltip) : ?>
+$('#<?php echo $itemId ?>').attr('data-toggle', 'tooltip');
+$('#<?php echo $itemId ?>').addClass('red-tooltip');
+$('#<?php echo $itemId ?>').attr('data-placement', '<?php echo (array_key_exists('data-placement', $tooltip)) ? $tooltip['data-placement'] : 'right' ?>');
+$('#<?php echo $itemId ?>').attr('title', '<?php echo $context->localize($tooltip['title'], $locale) ?>');
+<?php endforeach;?>
+
+
+<!-- Dashboard to move as a future home page -->
+
+var xhttp = new XMLHttpRequest();
+xhttp.open('GET', '<?php echo $this->url('profile/dashboard') ?>', true);
+xhttp.onload = function () {
+	if (xhttp.readyState == 4 && xhttp.status == 200) {
+		document.getElementById('requests').innerHTML = xhttp.responseText;
+	}
+};
+xhttp.send();
+
 </script>
 <?php //endif;?>
 </html>

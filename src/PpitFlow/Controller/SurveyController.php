@@ -8,6 +8,7 @@ use PpitCore\Model\Config;
 use PpitCore\Model\Context;
 use PpitCore\Model\Csrf;
 use PpitCore\Model\Event;
+use PpitCore\Model\GroupAccount;
 use PpitCore\Model\Place;
 use PpitCore\Model\Vcard;
 use Zend\Http\Headers;
@@ -223,6 +224,57 @@ class SurveyController extends AbstractActionController
     	return $view;
 	}
 	
+	public function newRequestAction()
+	{
+		$context = Context::getCurrent();
+		$account = Account::get($context->getContactId(), 'contact_1_id');
+		$place = Place::get($account->place_id);
+		$vcard = Vcard::get($account->contact_1_id);
+
+		// Retrieve the available surveys and the signature to use in the emails
+		$tests = array();
+		foreach ($context->getConfig('flow/tests') as $testId => $testDefinition) {
+			if ($context->getConfig('specificationMode') == 'config') $tests[$testId] = $context->getConfig($testDefinition);
+			else {
+				$config = Config::get($place_identifier.'_'.$testId, 'identifier');
+				if ($config) $tests[$testId] = $config->content;
+			}
+		}
+		
+		$eventData = array();
+		$eventData['place_id'] = $place->id;
+		$eventData['account_id'] = $account->id;
+		$eventData['vcard_id'] = $account->contact_1_id; // Deprecated, the join is on the account id, not on the vcard id
+		$eventData['category'] = 'test_request';
+		$eventData['subcategory'] = 'steps';
+		$eventData['description'] = '';
+		foreach ($tests['test_request']['forms'] as $formId => $unused) {
+			if ($eventData['description']) $eventData['description'] .= ',';
+			$eventData['description'] .= $formId;
+		}
+		
+		// Generate the root event (subcategory 'steps') that gives access to the test
+		$event = Event::instanciate('course_test');
+		$event->properties = $event->getProperties();
+		$event->place_caption = $place->caption;
+		$event->place_identifier = $place->identifier;
+		$vcard = Vcard::get($account->contact_1_id);
+		$event->n_fn = $vcard->n_fn;
+		$event->n_first = $vcard->n_first;
+		$event->n_last = $vcard->n_last;
+		$event->email = $vcard->email;
+		$event->photo_link_id = $vcard->photo_link_id;
+		$event->locale = $vcard->locale;
+		$event->authentication_token = md5(uniqid(rand(), true));
+		$event->properties['authentication_token'] = $event->authentication_token;
+		$rc = $event->loadAndAdd($eventData, Event::getConfigProperties('survey'));
+		if ($rc['0'] != '200') {
+			$eventConnection->rollback();
+			$error = $rc;
+		}
+		return $this->redirect()->toRoute('survey/template2', ['id' => $event->id], ['query' => ['hash' => $event->authentication_token, 'survey' => 'test_request']]);
+	}
+	
 	public function inviteToTestAction()
 	{
 		// Retrieve the context
@@ -254,46 +306,45 @@ class SurveyController extends AbstractActionController
     	$error = null;
     	$eventConnection = Event::getTable()->getAdapter()->getDriver()->getConnection();
 		$eventConnection->beginTransaction();
+		$accounts = array();
+		foreach ($accountIds as $account_id) {
+			$account = Account::get($account_id);
+			if ($account->type == 'group') {
+				foreach (GroupAccount::getList(GroupAccount::getDescription('generic'), ['group_id' => $account->id]) as $groupAccount) {
+					$accounts[$groupAccount->account_id] = ['n_first' => $groupAccount->n_first, 'n_last' => $groupAccount->n_last, 'email' => $groupAccount->email, 'n_fn' => $groupAccount->n_fn, 'locale' => $groupAccount->locale];
+				}
+			}
+			else $accounts[$account->id] = ['n_first' => $account->n_first, 'n_last' => $account->n_last, 'email' => $account->email, 'n_fn' => $account->n_fn, 'locale' => $account->locale];
+		}
 		try {
-	    	foreach ($accountIds as $account_id) {
-	    		$account = Account::get($account_id);
+	    	foreach ($accounts as $account_id => $account) {
 	    		$data = array();
-    			$data['account_name'] = $account->name;
+    			$data['n_fn'] = $account['n_fn'];
 	    		$data['type'] = 'email';
 	    		$data['to'] = array();
 	    		$data['cci'] = array();
 	    		if ($context->getConfig('core_account/mailTo')) {
 	    			foreach ($context->getConfig('core_account/mailTo') as $toMail => $toName) $data['cci'][$toMail] = $toName;
 	    		}
-	    		else {
-	    			if ($account->email) $data['to'][$account->email] = $account->n_first;
-	    			if ($account->email_2) $data['to'][$account->email_2] = $account->n_first_2;
-	    			if ($account->email_3) $data['to'][$account->email_3] = $account->n_first_3;
-	    			if ($account->email_4) $data['to'][$account->email_4] = $account->n_first_4;
-	    			if ($account->email_5) $data['to'][$account->email_5] = $account->n_first_5;
-	    		}
+	    		else $data['to'][$account['email']] = $account['n_first'];
 	    		
 	    		$invitation = $selectedTest['invitation'];
 	    		 
 	    		if (array_key_exists('cci', $invitation)) $data['cci'][$invitation['cci']] = $invitation['cci'];
 	    		$data['from_mail'] = $invitation['from_mail'];
 	    		$data['from_name'] = $invitation['from_name'];
-	    		$data['subject'] = $context->localize($invitation['subject'], $account->locale);
-	    		 
+	    		$data['subject'] = $context->localize($invitation['subject'], $account['locale']);
+
 	    		// Retrieve the text from the form if the email text is customizable in the view and add the signature at the location of the tag '%s'
 	    		$characters = ['à', 'â', 'ä', 'é', 'è', 'ê', 'ë', 'î', 'ï', 'ô', 'ö', 'ù', 'û', 'ü'];
 	    		$encoded = ['&agrave;', '&acirc;', '&auml;', '&eacute;', '&egrave;', '&ecirc;', '&euml;', '&icirc;', '&iuml;', '&ocirc;', '&ouml;', '&ugrave;', '&ucirc;', '&uuml'];
-	    		$text = $context->localize($invitation['text'], $account->locale);
+	    		$text = $context->localize($invitation['text'], $account['locale']);
 	    		$text = str_replace($characters, $encoded, $text);
-	    		$signatureBody = $context->localize($signature['body'], $account->locale);
+	    		$signatureBody = $context->localize($signature['body'], $account['locale']);
 	    		
 	    		$body = '';
 	    		if ($context->getConfig('core_account/mailTo')) {
-	    			if ($account->email) $body .= $account->email;
-	    			if ($account->email_2) $body .= $account->email_2;
-	    			if ($account->email_3) $body .= $account->email_3;
-	    			if ($account->email_4) $body .= $account->email_4;
-	    			if ($account->email_5) $body .= $account->email_5;
+	    			$body .= $account['email'];
 	    			$body .= '<br>';
 	    		}
 	    		
@@ -301,12 +352,12 @@ class SurveyController extends AbstractActionController
 	    		if ($theme['definition'] != 'inline') $theme = $context->getConfig($theme['definition']);
 	    		$body .= sprintf($theme, $text, $signatureBody);
 
-	    		$event = Event::get($selectedTest['type'], 'type', $account->id, 'account_id', $selectedTestId, 'category', 'steps', 'subcategory');
+	    		$event = Event::get($selectedTest['type'], 'type', $account_id, 'account_id', $selectedTestId, 'category', 'steps', 'subcategory');
 	    		if (!$event) {
 		    		$eventData = array();
 		    		$eventData['place_id'] = $place->id;
-		    		$eventData['account_id'] = $account->id;
-		    		$eventData['vcard_id'] = $account->contact_1_id; // Deprecated, the join is on the account id, not on the vcard id
+		    		$eventData['account_id'] = $account_id;
+		    		$eventData['vcard_id'] = $account['contact_1_id']; // Deprecated, the join is on the account id, not on the vcard id
 		    		$eventData['category'] = $selectedTestId;
 		    		$eventData['subcategory'] = 'steps';
 		    		$eventData['description'] = '';
@@ -323,7 +374,7 @@ class SurveyController extends AbstractActionController
 	    			$event->properties = $event->getProperties();
 		    		$event->place_caption = $place->caption;
 			    	$event->place_identifier = $place->identifier;
-			    	$vcard = Vcard::get($account->contact_1_id);
+			    	$vcard = Vcard::get($account['contact_1_id']);
 			    	$event->n_fn = $vcard->n_fn;
 			    	$event->n_first = $vcard->n_first;
 			    	$event->n_last = $vcard->n_last;

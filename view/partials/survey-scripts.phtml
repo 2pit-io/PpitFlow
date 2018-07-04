@@ -3,15 +3,13 @@ function connectInviteToTestForm()
 {
 	var xhttp = new XMLHttpRequest();
 
-	var accountNumber = $('#account-number').val(), accounts = '';
+	var accountNumber = $('#group-nb-account').val(), accounts = '';
 	first = true;
 	for (i = 0, j = 0; i < accountNumber; i++) {
-		if (document.getElementById('account-checkbox_' + i).checked) {
-			if (!first) accounts += ',';
-			first = false;
-			accounts += $('#account_' + i).val();
-			j++;
-		}
+		if (!first) accounts += ',';
+		first = false;
+		accounts += $('#group-account_' + i).val();
+		j++;
 	}
 
 	var route = '<?php echo $this->url('survey/inviteToTest') ?>' + '?test_id=' + $('#test_id').val() + '&accounts=' + accounts;
@@ -32,15 +30,13 @@ function inviteToTest() {
 
 	var xhttp = new XMLHttpRequest();
 
-	var accountNumber = $('#account-number').val(), accounts = '';
+	var accountNumber = $('#group-nb-account').val(), accounts = '';
 	first = true;
 	for (i = 0, j = 0; i < accountNumber; i++) {
-		if (document.getElementById('account-checkbox_' + i).checked) {
-			if (!first) accounts += ',';
-			first = false;
-			accounts += $('#account_' + i).val();
-			j++;
-		}
+		if (!first) accounts += ',';
+		first = false;
+		accounts += $('#group-account_' + i).val();
+		j++;
 	}
 
 	var route = '<?php echo $this->url('survey/inviteToTest') ?>' + '?test_id=' + $('#test_id').val() + '&accounts=' + accounts;

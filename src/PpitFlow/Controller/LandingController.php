@@ -39,6 +39,9 @@ class LandingController extends AbstractActionController
 			$token = $this->params()->fromQuery('hash', null);
 	    	if ($token != $account->authentication_token) return $this->redirect()->toRoute('landing/template2', ['place_identifier' => $place_identifier]);
 		}
+		elseif ($context->isAuthenticated()) {
+			$account = Account::get($context->getContactId(), 'contact_1_id');
+		}
 		else $account = Account::instanciate('generic');
 
 		if (!$locale) if ($account) $locale = $account->locale; else $locale = $context->getLocale();
@@ -53,6 +56,7 @@ class LandingController extends AbstractActionController
 		}
 
 		$viewData = array();
+		$viewData['photo_link_id'] = ($account->photo_link_id) ? $account->photo_link_id : 'no-photo.png';
 		foreach ($content['form']['inputs'] as $inputId => $options) {
 			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
 			else {
@@ -120,6 +124,7 @@ class LandingController extends AbstractActionController
 		$view = new ViewModel(array(
 			'context' => $context,
 			'locale' => $locale,
+			'type' => $context->getConfig('landing_account_type'),
 			'place_identifier' => $place_identifier,
 			'id' => $id,
 			'token' => $token,

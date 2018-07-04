@@ -70,6 +70,15 @@ return array (
 							'defaults' => array('action' => 'template2'),
 						),
 					),
+					'dashboard' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/dashboard',
+							'defaults' => array(
+								'action' => 'dashboard',
+							),
+						),
+					),
 					'photoUpload' => array(
 						'type' => 'segment',
 						'options' => array(
@@ -132,6 +141,15 @@ return array (
 							),
 						),
 					),
+					'newRequest' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/new-request[/:id]',
+							'defaults' => array(
+								'action' => 'newRequest',
+							),
+						),
+					),
 					'patch' => array(
 						'type' => 'segment',
 						'options' => array(
@@ -155,6 +173,7 @@ return array (
 				
 				array('route' => 'profile/template1', 'roles' => array('guest')),
 				array('route' => 'profile/template2', 'roles' => array('guest')),
+				array('route' => 'profile/dashboard', 'roles' => array('user')),
 				array('route' => 'profile/photoUpload', 'roles' => array('user')),
 				
 				array('route' => 'survey/fill', 'roles' => array('guest')),
@@ -162,6 +181,7 @@ return array (
 				array('route' => 'survey/template2', 'roles' => array('guest')),
 				array('route' => 'survey/selectTest', 'roles' => array('operational_management', 'sales_manager', 'manager')),
 				array('route' => 'survey/inviteToTest', 'roles' => array('operational_management', 'sales_manager', 'manager')),
+				array('route' => 'survey/newRequest', 'roles' => array('user')),
 				array('route' => 'survey/patch', 'roles' => array('admin')),
 			),
 		),
@@ -200,6 +220,8 @@ return array (
 			),
 		),
 	),
+
+	'landing_account_type' => 'generic',
 	
 	'matching/skills' => array(
 		'blockchain' => ['labels' => ['default' => 'Blockchain'], 'color' => 'aqua-gradient'],
