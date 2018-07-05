@@ -75,7 +75,7 @@ header,
     <header>
 
         <!--Navbar-->
-        <nav class="navbar navbar-expand-lg navbar-dark fixed-top scrolling-navbar navbar-transparent">
+        <nav class="navbar navbar-expand-lg fixed-top scrolling-navbar navbar-transparent">
             <div class="container">
 
                 <!-- Navbar brand -->
@@ -603,7 +603,7 @@ function register() {
 	xhttp.setRequestHeader("Authorization", "Basic " + btoa($('#identity').val() + ':' + $('#credential').val()));
 	xhttp.onload = function () {
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
-//			document.location.href = '<?php echo $this->url('home') ?>';
+			document.location.href = '<?php echo $this->url('home') ?>';
 		}
 		else toastr.error('<?php echo $this->translate('An account already exists for this email address', 'ppit-core', $context->getLocale()) ?>');
 	};

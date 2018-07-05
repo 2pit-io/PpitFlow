@@ -247,11 +247,11 @@ class SurveyController extends AbstractActionController
 		$eventData['vcard_id'] = $account->contact_1_id; // Deprecated, the join is on the account id, not on the vcard id
 		$eventData['category'] = 'test_request';
 		$eventData['subcategory'] = 'steps';
-		$eventData['description'] = '';
-		foreach ($tests['test_request']['forms'] as $formId => $unused) {
+		$eventData['description'] = 'requestor,opinion';
+/*		foreach ($tests['test_request']['forms'] as $formId => $unused) {
 			if ($eventData['description']) $eventData['description'] .= ',';
 			$eventData['description'] .= $formId;
-		}
+		}*/
 		
 		// Generate the root event (subcategory 'steps') that gives access to the test
 		$event = Event::instanciate('course_test');
