@@ -44,6 +44,7 @@ class SurveyController extends AbstractActionController
 		$steps = explode(',', $event->description);
 		$step = reset($steps); // Get the first step in the list
 		if (!$step) $step = 'steps'; // As a default, show the form 'steps' that allows the user to choose the steps he wants to follow
+
 		$content['form'] = $content['forms'][$step];
 		if (!array_key_exists('options', $content['form'])) $content['form']['options'] = array();
 		if (!array_key_exists('examples', $content['form']['options'])) $content['form']['options']['examples'] = false;

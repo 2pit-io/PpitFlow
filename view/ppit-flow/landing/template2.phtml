@@ -100,7 +100,7 @@ header,
                     <!-- Links -->
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="<?php echo $this->url($content['header']['logo']['href'], $content['header']['logo']['params']) ?>"><?php echo $this->translate('Home', 'ppit-core', $context->getLocale()) ?></a>
+                            <a class="nav-link" href="<?php echo $this->url('home') ?>"><?php echo $this->translate('Home', 'ppit-core', $context->getLocale()) ?></a>
                         </li>
                         <li class="nav-item">
 <?php if (array_key_exists('locales', $content['header'])) foreach ($content['header']['locales'] as $localeId => $label) : ?>

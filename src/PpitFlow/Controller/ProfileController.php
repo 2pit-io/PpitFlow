@@ -97,9 +97,10 @@ class ProfileController extends AbstractActionController
 				if (array_key_exists('property_id', $property)) $propertyId = $property['property_id'];
 				else $propertyId = $inputId;
 				if (!$id || $property['updatable']) {
-					$viewData[$propertyId] = $this->request->getPost($propertyId);
-					$viewData[$inputId] = $this->request->getPost($inputId);
-
+					if ($property['type'] != 'chips') {
+						$viewData[$propertyId] = $this->request->getPost($propertyId);
+						$viewData[$inputId] = $this->request->getPost($inputId);
+					}
 					if ($property['type'] == 'checkbox') {
 						if (array_key_exists($propertyId, $data) && $data[$propertyId]) {
 							if ($viewData[$inputId]) $data[$propertyId] .= ','.$viewData[$inputId];
@@ -115,6 +116,7 @@ class ProfileController extends AbstractActionController
 								else $data[$propertyId] = $entryId;
 							}
 						}
+						$viewData[$propertyId] = $data[$propertyId]; // Updating the data to display in the confirmation form
 					}
 					elseif ($property['type'] == 'date') { // Workaround due to a bug in MDBootstrap that ignores formatSubmit
 						$data[$propertyId] = substr($viewData[$propertyId], 6, 4).'-'.substr($viewData[$propertyId], 3, 2).'-'.substr($viewData[$propertyId], 0, 2);
@@ -124,6 +126,7 @@ class ProfileController extends AbstractActionController
 					if (array_key_exists('account_property', $property)) $accountData[$property['account_property']] = $data[$propertyId];
 				}
 			}
+
 			$rc = $account->loadAndUpdate($data);
 
 			if (in_array($rc[0], ['200'])) $message = 'OK';
@@ -134,6 +137,7 @@ class ProfileController extends AbstractActionController
 		$view = new ViewModel(array(
 			'context' => $context,
 			'locale' => $locale,
+			'type' => $context->getConfig('landing_account_type'),
 			'id' => $id,
 			'token' => $token,
 			'template' => [],
