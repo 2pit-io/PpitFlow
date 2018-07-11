@@ -74,167 +74,7 @@ header,
     <!--Main Navigation-->
     <header>
 
-        <!--Navbar-->
-        <nav class="navbar navbar-expand-lg navbar-dark fixed-top scrolling-navbar navbar-transparent">
-            <div class="container">
-
-                <!-- Navbar brand -->
-				<a href="<?php echo $this->url($content['header']['logo']['href'], $content['header']['logo']['params']) ?>" class="navbar-brand">
-					<img 
-						src="<?php echo $this->basePath($content['header']['logo']['src']) ?>"
-						<?php if (array_key_exists('height', $content['header']['logo'])) echo 'height="'.$content['header']['logo']['height'].'"' ?>
-						<?php if (array_key_exists('width', $content['header']['logo'])) echo 'width="'.$content['header']['logo']['width'].'"' ?>
-						alt="<?php echo $content['header']['logo']['alt'] ?>"
-					/>
-				</a>
-
-                <!-- Collapse button -->
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav" aria-controls="basicExampleNav"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <!-- Collapsible content -->
-                <div class="collapse navbar-collapse" id="basicExampleNav">
-                    
-                    <!-- Links -->
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?php echo $this->url($content['header']['logo']['href'], $content['header']['logo']['params']) ?>"><?php echo $this->translate('Home', 'ppit-core', $context->getLocale()) ?></a>
-                        </li>
-                        <li class="nav-item">
-<?php if (array_key_exists('locales', $content['header'])) foreach ($content['header']['locales'] as $localeId => $label) : ?>
-	<?php if ($localeId != $locale) : ?>
-							<a class="nav-link" href="<?php echo $this->url('landing/template2', array('place_identifier' => $place_identifier, 'id' => $id)) ?>?hash=<?php echo $token ?>&locale=<?php echo $localeId ?>"><?php echo $label ?></a>
-	<?php endif;?>
-<?php endforeach;?>
-                        </li>
-                    </ul>
-                    <!-- Links -->
-                                            
-                </div>
-                <!-- Collapsible content -->
-                    <!-- Links -->
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item">
-					        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-<?php if (!$context->isAuthenticated()) : ?>
-					            <i class="fa fa-user"></i>
-					            <span class="clearfix d-none d-sm-inline-block"><?php echo $this->translate('Account', 'ppit-core', $context->getLocale())?></span>
-<?php else : ?>
-					            <img src="<?php echo $this->basePath('/photos/'.$viewData['photo_link_id'])?>" height="40" class="rounded-circle z-depth-0" alt="avatar image">
-<?php endif;?>
-					        </a>
-					        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-<?php if (!$context->isAuthenticated()) : ?>
-					            <a class="dropdown-item" data-toggle="modal" id="login-anchor" data-target="#modalLoginForm"><?php echo $this->translate('Login', 'ppit-core', $context->getLocale())?></a>
-					            <a class="dropdown-item" data-toggle="modal" data-target="#modalRegisterForm"><?php echo $this->translate('Register', 'ppit-core', $context->getLocale())?></a>
-<?php else : ?>
-					            <a class="dropdown-item" data-toggle="modal" data-target="#modalLogoutForm"><?php echo $this->translate('Logout', 'ppit-core', $context->getLocale())?></a>
-<?php endif;?>
-					        </div>
-                        </li>
-                    </ul>
-                    <!-- Links -->
-            </div>
-        </nav>
-        <!--/.Navbar-->    
- 
-<div class="modal fade" id="modalLoginForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header text-center">
-                <h4 class="modal-title w-100 font-weight-bold"><?php echo $this->translate('Login', 'ppit-core', $context->getLocale()) ?></h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form id="login-form">
-            	<span id="login-csrf"></span>
-	            <div class="modal-body mx-3">
-	                <div class="md-form mb-5">
-	                    <i class="fa fa-envelope prefix grey-text"></i>
-	                    <input type="email" id="identity" class="form-control validate" required="required">
-	                    <label data-error="<?php echo $this->translate('Invalid', 'ppit-core', $context->getLocale()) ?>" for="identity">Your email</label>
-	                </div>
-	
-	                <div class="md-form mb-4">
-	                    <i class="fa fa-lock prefix grey-text"></i>
-	                    <input type="password" id="credential" class="form-control validate" required="required">
-	                    <label data-error="<?php echo $this->translate('Invalid', 'ppit-core', $context->getLocale()) ?>" for="credential">Your password</label>
-	                </div>
-	
-	            </div>
-	            <div class="modal-footer d-flex justify-content-center">
-	                <button type="submit" class="btn btn-primary" id="login-button"><?php echo $this->translate('Login', 'ppit-core', $context->getLocale()) ?></button>
-	            </div>
-	        </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modalRegisterForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header text-center">
-                <h4 class="modal-title w-100 font-weight-bold"><?php echo $this->translate('Register', 'ppit-core', $context->getLocale()) ?></h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form id="register-form">
-	            <div class="modal-body mx-3">
-	                <div class="md-form mb-5">
-	                    <input type="email" id="register-email" class="form-control validate" required="required">
-	                    <label data-error="<?php echo $this->translate('Invalid', 'ppit-core', $context->getLocale()) ?>" for="register-email">* <?php echo $this->translate('Your email', 'ppit-core', $context->getLocale()) ?></label>
-	                </div>
-	
-	                <div class="md-form mb-5">
-	                    <input type="text" id="register-n_first" class="form-control validate" required="required">
-	                    <label data-error="<?php echo $this->translate('Invalid', 'ppit-core', $context->getLocale()) ?>" for="register-n_first">* <?php echo $this->translate('Your first name', 'ppit-core', $context->getLocale()) ?></label>
-	                </div>
-	
-	                <div class="md-form mb-5">
-	                    <input type="text" id="register-n_last" class="form-control validate" required="required">
-	                    <label data-error="<?php echo $this->translate('Invalid', 'ppit-core', $context->getLocale()) ?>" for="register-n_last">* <?php echo $this->translate('Your last name', 'ppit-core', $context->getLocale()) ?></label>
-	                </div>
-	
-	                <div class="md-form mb-4">
-	                    <input type="password" id="register-password" class="form-control validate" required="required">
-	                    <label data-error="<?php echo $this->translate('Invalid', 'ppit-core', $context->getLocale()) ?>" for="register-password">* <?php echo $this->translate('Choose a password', 'ppit-core', $context->getLocale()) ?></label>
-	                </div>
-	
-	                <div class="md-form mb-4">
-	                    <input type="password" id="register-password2" class="form-control validate" required="required">
-	                    <label data-error="<?php echo $this->translate('Invalid', 'ppit-core', $context->getLocale()) ?>" for="register-password2">* <?php echo $this->translate('Confirm the password', 'ppit-core', $context->getLocale()) ?></label>
-	                </div>
-	
-	            </div>
-	            <div class="modal-footer d-flex justify-content-center">
-	                <button type="submit" class="btn btn-primary" id="register-button"><?php echo $this->translate('Register', 'ppit-core', $context->getLocale()) ?></button>
-	            </div>
-            </form>
-        </div>
-    </div>
-</div>
-  
-<div class="modal fade" id="modalLogoutForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-        	<form id="logout-form">
-	            <div class="modal-header text-center">
-	                <h4 class="modal-title w-100 font-weight-bold"><?php echo $this->translate('Logout', 'ppit-core', $context->getLocale()) ?></h4>
-	                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-	                    <span aria-hidden="true">&times;</span>
-	                </button>
-	            </div>
-	            <div class="modal-footer d-flex justify-content-center">
-	                <button class="btn btn-primary" id="logout-button"><?php echo $this->translate('Confirm logout', 'ppit-core', $context->getLocale()) ?></button>
-	            </div>
-			</form>
-        </div>
-    </div>
-</div>
+<?php echo $this->partial('/partials/navbar.phtml'); ?>
  
 <!--Mask-->
 <div id="intro" class="view h-100"> 
@@ -291,95 +131,84 @@ header,
                         <!--Featured image-->
                         <div class="card card-cascade wider reverse">
                             <div class="view view-cascade overlay">
-                                <img src="<?php echo $this->basePath('/img/flux/plp/30-ans.jpg') ?>" alt="Présentation 30 ans de dessin">
-                                <a>
-                                    <div class=""></div>
-                                </a>
+                                <img src="<?php echo $this->basePath('/img/flux/plp/book_p1.jpg') ?>" alt="Book P1">
                             </div>
-
-                            <!--Post data-->
-                            <div class="card-body card-body-cascade text-center">
-                                <h3>30 ANS DE DESSIN ET DE CRÉATION VISUELLE</h3>
-                               	<h3 >AU SERVICE DE <strong>LA COMMUNICATION ET DU DESIGN</strong></h3>
-
-                                <!--Social shares-->
-                                <div class="social-counters ">
-
-                                    <!--Facebook-->
-                                    <a class="btn btn-fb ">
-                                        <i class="fa fa-facebook left "></i>
-                                        <span class="hidden-md-down ">Facebook</span>
-                                    </a>
-                                    <span class="counter ">46</span>
-
-                                    <!--Twitter-->
-                                    <a class="btn btn-tw ">
-                                        <i class="fa fa-twitter left "></i>
-                                        <span class="hidden-md-down ">Twitter</span>
-                                    </a>
-                                    <span class="counter ">22</span>
-
-                                    <!--Dribbble-->
-                                    <a class="btn btn-dribbble ">
-                                        <i class="fa fa-dribbble left "></i>
-                                        <span class="hidden-md-down ">Dribbble</span>
-                                    </a>
-                                    <span class="counter ">31</span>
-
-                                    <!--Comments-->
-                                    <a class="btn btn-blue-grey ">
-                                        <i class="fa fa-comments-o left "></i>
-                                        <span class="hidden-md-down ">Comments</span>
-                                    </a>
-                                    <span class="counter ">18</span>
-
-                                </div>
-                                <!--Social shares-->
-
-                            </div>
-                            <!--Post data-->
                         </div>
+                    </div>
+                </div>
+                <!--Grid row-->
 
-                        <!--Excerpt-->
-                        <div class="excerpt mt-5 wow fadeIn" data-wow-delay="0.3s">
-                            <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum
-                                deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate
-                                non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum
-                                et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.
-                            </p>
-
-                            <p>Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod
-                                maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus
-                                autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates
-                                repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus,
-                                ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus.</p>
-
-                            <blockquote class="blockquote mt-4 mb-4">
-                                <p class="mb-0"><em>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus.</em></p>
-                                <footer class="blockquote-footer">Someone famous in <cite title="Source Title">Source Title</cite></footer>
-                            </blockquote>
-
-
-                            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium,
-                                totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae
-                                vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit
-                                aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem.
-                            </p>
-
-                            <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit,
-                                sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat
-                                voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit
-                                laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit
-                                qui in ea voluptate velit esse quam nihil molestiae consequatur.</p>
-
-
-                            <div class="mt-4 d-flex justify-content-end">
-                                <span class="badge pink">Travel</span>
-                                <span class="badge badge-primary mx-1">Adventure</span>
-                                <span class="badge grey mr-1">Photography</span>
-                                <span class="badge badge-info">Education</span>
+            </section>
+            <!--Section: Blog v.4-->
+				<br>
+ 
+            <!--Section: Blog v.4-->
+            <section class="section section-blog-fw mt-5 pb-3 wow fadeIn">
+                <!--Grid row-->
+                <div class="row">
+                    <div class="col-md-12">
+                        <!--Featured image-->
+                        <div class="card card-cascade wider reverse">
+                            <div class="view view-cascade overlay">
+                                <img src="<?php echo $this->basePath('/img/flux/plp/book_p2.jpg') ?>" alt="Book P2">
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Grid row-->
 
+            </section>
+            <!--Section: Blog v.4-->
+				<br>
+ 
+            <!--Section: Blog v.4-->
+            <section class="section section-blog-fw mt-5 pb-3 wow fadeIn">
+                <!--Grid row-->
+                <div class="row">
+                    <div class="col-md-12">
+                        <!--Featured image-->
+                        <div class="card card-cascade wider reverse">
+                            <div class="view view-cascade overlay">
+                                <img src="<?php echo $this->basePath('/img/flux/plp/book_p3.jpg') ?>" alt="Book P3">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Grid row-->
+
+            </section>
+            <!--Section: Blog v.4-->
+				<br>
+ 
+            <!--Section: Blog v.4-->
+            <section class="section section-blog-fw mt-5 pb-3 wow fadeIn">
+                <!--Grid row-->
+                <div class="row">
+                    <div class="col-md-12">
+                        <!--Featured image-->
+                        <div class="card card-cascade wider reverse">
+                            <div class="view view-cascade overlay">
+                                <img src="<?php echo $this->basePath('/img/flux/plp/book_p4.jpg') ?>" alt="Book P4">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Grid row-->
+
+            </section>
+            <!--Section: Blog v.4-->
+				<br>
+ 
+            <!--Section: Blog v.4-->
+            <section class="section section-blog-fw mt-5 pb-3 wow fadeIn">
+                <!--Grid row-->
+                <div class="row">
+                    <div class="col-md-12">
+                        <!--Featured image-->
+                        <div class="card card-cascade wider reverse">
+                            <div class="view view-cascade overlay">
+                                <img src="<?php echo $this->basePath('/img/flux/plp/book_p5.jpg') ?>" alt="Book P5">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -672,71 +501,6 @@ toastr.error('<?php echo $this->translate('An error has occurred, please try aga
 </script>
 <?php endif;?>
 
-<script>
+<?php echo $this->partial('/partials/navbar-script.phtml'); ?>
 
-$('#login-anchor').click(function () {
-	$('#identity').val('');
-	$('#credential').val('');
-});
-
-function login() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open('GET', '<?php echo $this->url('user/v1') ?>?request=login', true);
-	xhttp.setRequestHeader("Authorization", "Basic " + btoa($('#identity').val() + ':' + $('#credential').val()));
-	xhttp.onload = function () {
-		if (xhttp.readyState == 4 && xhttp.status == 200) {
-			document.location.href = '<?php echo $this->url('home') ?>';
-		}
-		else toastr.error('<?php echo $this->translate('Invalid authentication', 'ppit-core', $context->getLocale()) ?>');
-	};
-	xhttp.send();
-}
-
-var form = document.getElementById('login-form');
-form.onsubmit = function(event) {
-	event.preventDefault();
-	login();
-}
-
-function register() {
-	var xhttp = new XMLHttpRequest(), formData = new FormData();
-	formData.append('email', $('#register-email').val());
-	formData.append('n_first', $('#register-n_first').val());
-	formData.append('n_last', $('#register-n_last').val());
-	formData.append('password', $('#register-password').val());
-	formData.append('locale', '<?php echo $locale ?>');
-	xhttp.open('POST', '<?php echo $this->url('user/v1', ['type' => $type]) ?>', true);
-	xhttp.setRequestHeader("Authorization", "Basic " + btoa($('#identity').val() + ':' + $('#credential').val()));
-	xhttp.onload = function () {
-		if (xhttp.readyState == 4 && xhttp.status == 200) {
-//			document.location.href = '<?php echo $this->url('home') ?>';
-		}
-		else toastr.error('<?php echo $this->translate('An account already exists for this email address', 'ppit-core', $context->getLocale()) ?>');
-	};
-	xhttp.send(formData);
-}
-
-var form = document.getElementById('register-form');
-form.onsubmit = function(event) {
-	event.preventDefault();
-	register();
-}
-
-function logout() {
-	var xhttp = new XMLHttpRequest();
-	xhttp.open('GET', '<?php echo $this->url('user/v1') ?>?request=logout', true);
-	xhttp.onload = function () {
-		if (xhttp.readyState == 4 && xhttp.status == 200) {
-			document.location.href = '<?php echo $this->url('home') ?>';
-		}
-	};
-	xhttp.send();
-}
-
-var form = document.getElementById('logout-form');
-form.onsubmit = function(event) {
-	event.preventDefault();
-	logout();
-}
-</script>
 </html>

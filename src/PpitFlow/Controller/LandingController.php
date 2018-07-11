@@ -143,4 +143,9 @@ class LandingController extends AbstractActionController
 	{
 		return $this->template1Action();
 	}
+	
+	public function templatePlpAction()
+	{
+		return $this->template1Action();
+	}
 }

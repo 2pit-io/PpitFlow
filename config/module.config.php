@@ -43,6 +43,13 @@ return array (
 							'defaults' => array('action' => 'template2'),
 						),
 					),
+					'templatePlp' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/template-plp[/:place_identifier][/:id]',
+							'defaults' => array('action' => 'templatePlp'),
+						),
+					),
 				),
 			),
 			'profile' => array(
@@ -170,6 +177,7 @@ return array (
 			'BjyAuthorize\Guard\Route' => array(
 				array('route' => 'landing/template1', 'roles' => array('guest')),
 				array('route' => 'landing/template2', 'roles' => array('guest')),
+				array('route' => 'landing/templatePlp', 'roles' => array('guest')),
 				
 				array('route' => 'profile/template1', 'roles' => array('guest')),
 				array('route' => 'profile/template2', 'roles' => array('guest')),
