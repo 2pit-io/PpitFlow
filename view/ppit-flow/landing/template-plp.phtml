@@ -24,11 +24,11 @@ ga('send', 'pageview');
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <!-- Font Awesome -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">    <!-- Bootstrap core CSS -->
-    <link href="<?php echo $this->basePath('MDB Pro/css/bootstrap.min.css" rel="stylesheet') ?>">
+    <link href="<?php echo $this->basePath('MDB-Pro/css/bootstrap.min.css" rel="stylesheet') ?>">
     <!-- Material Design Bootstrap -->
-    <link href="<?php echo $this->basePath('MDB Pro/css/mdb.min.css" rel="stylesheet') ?>">
+    <link href="<?php echo $this->basePath('MDB-Pro/css/mdb.min.css" rel="stylesheet') ?>">
     <!-- Your custom styles (optional) -->
-    <link href="<?php echo $this->basePath('MDB Pro/css/style.css" rel="stylesheet') ?>">
+    <link href="<?php echo $this->basePath('MDB-Pro/css/style.css" rel="stylesheet') ?>">
 
     <link rel="stylesheet" href="<?php echo $this->basePath('medium-editor-master/dist/css/medium-editor.css') ?>">
     <link rel="stylesheet" href="<?php echo $this->basePath('medium-editor-master/dist/css/themes/default.css" id="medium-editor-theme') ?>">
@@ -42,7 +42,7 @@ header,
 }
 
 #intro {
-    background: url("<?php echo $this->basePath($content['header']['background_image']['src']) ?>")no-repeat center center fixed;
+    background: url("<?php echo $this->basePath($context->localize($content['header']['background_image']['src'], $locale)) ?>")no-repeat center center fixed;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -124,7 +124,75 @@ header,
 
             <!--Section: Blog v.4-->
             <section class="section section-blog-fw mt-5 pb-3 wow fadeIn">
+<div class="row">
+    <div class="col-md-12">
 
+        <div id="mdb-lightbox-ui"></div>
+
+        <div class="mdb-lightbox no-margin">
+
+            <figure class="col-md-4">
+                <a href="https://mdbootstrap.com/img/Photos/Horizontal/Nature/12-col/img%20(117).jpg" data-size="1600x1067">
+                    <img alt="picture" src="https://mdbootstrap.com/img/Photos/Horizontal/Nature/4-col/img%20(117).jpg" class="img-fluid">
+                </a>
+            </figure>
+
+            <figure class="col-md-4">
+                <a href="https://mdbootstrap.com/img/Photos/Horizontal/Nature/12-col/img%20(98).jpg" data-size="1600x1067">
+                    <img alt="picture" src="https://mdbootstrap.com/img/Photos/Horizontal/Nature/4-col/img%20(98).jpg" class="img-fluid" />
+                </a>
+            </figure>
+
+            <figure class="col-md-4">
+                <a href="https://mdbootstrap.com/img/Photos/Horizontal/Nature/12-col/img%20(131).jpg" data-size="1600x1067">
+                    <img alt="picture" src="https://mdbootstrap.com/img/Photos/Horizontal/Nature/4-col/img%20(131).jpg" class="img-fluid" />
+                </a>
+            </figure>
+
+            <figure class="col-md-4">
+                <a href="https://mdbootstrap.com/img/Photos/Horizontal/Nature/12-col/img%20(123).jpg" data-size="1600x1067">
+                    <img alt="picture" src="https://mdbootstrap.com/img/Photos/Horizontal/Nature/4-col/img%20(123).jpg" class="img-fluid" />
+                </a>
+            </figure>
+
+            <figure class="col-md-4">
+                <a href="https://mdbootstrap.com/img/Photos/Horizontal/Nature/12-col/img%20(118).jpg" data-size="1600x1067">
+                    <img alt="picture" src="https://mdbootstrap.com/img/Photos/Horizontal/Nature/4-col/img%20(118).jpg" class="img-fluid" />
+                </a>
+            </figure>
+
+            <figure class="col-md-4">
+                <a href="https://mdbootstrap.com/img/Photos/Horizontal/Nature/12-col/img%20(128).jpg" data-size="1600x1067">
+                    <img alt="picture" src="https://mdbootstrap.com/img/Photos/Horizontal/Nature/4-col/img%20(128).jpg" class="img-fluid" />
+                </a>
+            </figure>
+
+            <figure class="col-md-4">
+                <a href="https://mdbootstrap.com/img/Photos/Horizontal/Nature/12-col/img%20(132).jpg" data-size="1600x1067">
+                    <img alt="picture" src="https://mdbootstrap.com/img/Photos/Horizontal/Nature/4-col/img%20(132).jpg" class="img-fluid" />
+                </a>
+            </figure>
+
+            <figure class="col-md-4">
+                <a href="https://mdbootstrap.com/img/Photos/Horizontal/Nature/12-col/img%20(115).jpg" data-size="1600x1067">
+                    <img alt="picture" src="https://mdbootstrap.com/img/Photos/Horizontal/Nature/4-col/img%20(115).jpg" class="img-fluid" />
+                </a>
+            </figure>
+
+            <figure class="col-md-4">
+                <a href="https://mdbootstrap.com/img/Photos/Horizontal/Nature/12-col/img%20(133).jpg" data-size="1600x1067">
+                    <img alt="picture" src="https://mdbootstrap.com/img/Photos/Horizontal/Nature/4-col/img%20(133).jpg" class="img-fluid" />
+                </a>
+            </figure>
+
+        </div>
+
+    </div>
+</div>
+        	<br>
+
+            <!--Section: Blog v.4-->
+            <section class="section section-blog-fw mt-5 pb-3 wow fadeIn">
                 <!--Grid row-->
                 <div class="row">
                     <div class="col-md-12">
@@ -216,35 +284,6 @@ header,
 
             </section>
             <!--Section: Blog v.4-->
-
-           <section class="section wow fadeIn" data-wow-delay="0.3s">
-<?php foreach ($content['feature-box'] as $paragraph) : ?>
-		<?php if (array_key_exists('a', $paragraph)) : ?>
-					<a 
-						href="<?php echo $paragraph['a']['href']?>" 
-						<?php if (array_key_exists('class', $paragraph['a'])) echo 'class="'.$paragraph['a']['class'].'"' ?>
-						<?php if (array_key_exists('id', $paragraph['a'])) echo 'id="'.$paragraph['a']['id'].'"' ?>
-					>
-		<?php elseif (array_key_exists('button', $paragraph)) : ?>
-					<button type="button" 
-						<?php if (array_key_exists('class', $paragraph['button'])) echo 'class="'.$paragraph['button']['class'].'"' ?>
-						<?php if (array_key_exists('id', $paragraph['button'])) echo 'id="'.$paragraph['button']['id'].'"' ?>
-					>
-		<?php else : ?>
-					<<?php echo $paragraph['type']?> <?php if (array_key_exists('class', $paragraph)) echo 'class="'.$paragraph['class'].'"' ?>>
-		<?php endif;?>
-		<?php if (array_key_exists('text', $paragraph)) : ?>
-			<?php echo $context->localize($paragraph['text'], $locale) ?>
-		<?php endif;?>
-		<?php if (array_key_exists('a', $paragraph)) : ?>
-					</a>
-		<?php elseif (array_key_exists('button', $paragraph)) : ?>
-					</button>
-		<?php else : ?>
-					</<?php echo $paragraph['type']?>>
-		<?php endif;?>
-<?php endforeach;?>
-           </section>
 	
 	<section class="section pb-5 wow fadeIn" data-wow-delay="0.3s" id="survey">
 		<div class="row">
@@ -427,19 +466,24 @@ header,
     <!-- SCRIPTS -->
     <!-- Font Awesome -->
     <!-- JQuery -->
-    <script type="text/javascript" src="<?php echo $this->basePath('MDB Pro/js/jquery-3.3.1.min.js') ?>"></script>
+    <script type="text/javascript" src="<?php echo $this->basePath('MDB-Pro/js/jquery-3.3.1.min.js') ?>"></script>
     <!-- Bootstrap tooltips -->
-    <script type="text/javascript" src="<?php echo $this->basePath('MDB Pro/js/popper.min.js') ?>"></script>
+    <script type="text/javascript" src="<?php echo $this->basePath('MDB-Pro/js/popper.min.js') ?>"></script>
     <!-- Bootstrap core JavaScript -->
-    <script type="text/javascript" src="<?php echo $this->basePath('MDB Pro/js/bootstrap.min.js') ?>"></script>
+    <script type="text/javascript" src="<?php echo $this->basePath('MDB-Pro/js/bootstrap.min.js') ?>"></script>
     <!-- MDB core JavaScript -->
-    <script type="text/javascript" src="<?php echo $this->basePath('MDB Pro/js/mdb.min.js') ?>"></script>
+    <script type="text/javascript" src="<?php echo $this->basePath('MDB-Pro/js/mdb.min.js') ?>"></script>
 
 <script type="text/javascript">
 // Material Select Initialization
 new WOW().init();
 $(document).ready(function() {
    $('.mdb-select').material_select();
+});
+
+//MDB Lightbox Init
+$(function () {
+    $("#mdb-lightbox-ui").load("<?php echo $this->basePath('MDB-Pro/mdb-addons/mdb-lightbox-ui.html') ?>");
 });
 
 <?php if ($message) : ?>

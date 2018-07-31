@@ -28,7 +28,7 @@ class LandingController extends AbstractActionController
 			$place_identifier = $place->identifier;
 		}
 		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('landing/'.$place->identifier);
-		else $content = Config::get($place->identifier.'_landing', 'identifier')->content;
+		else $content = Config::get($place->identifier.'_landing', 'identifier', $place->id)->content;
 		$locale = $this->params()->fromQuery('locale');
 		
 		$token = null;
@@ -42,7 +42,7 @@ class LandingController extends AbstractActionController
 		elseif ($context->isAuthenticated()) {
 			$account = Account::get($context->getContactId(), 'contact_1_id');
 		}
-		else $account = Account::instanciate('generic');
+		else $account = Account::instanciate($context->getConfig('landing_account_type'));
 
 		if (!$locale) if ($account) $locale = $account->locale; else $locale = $context->getLocale();
 		$links = $context->getConfig('public/'.$instance_caption.'/links');

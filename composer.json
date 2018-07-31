@@ -1,0 +1,13 @@
+{
+    "name": "PpitFlow",
+    "description": "2pit project's PpitFlow module",
+    "license": "GNU GPL",
+    "keywords": [
+        "2pit",
+        "PpitFlow module"
+    ],
+    "homepage": "https://github.com/2pit-io/2pit.io",
+    "require": {
+        "php": "^5.3.3 || ^7.0"
+    }
+}
