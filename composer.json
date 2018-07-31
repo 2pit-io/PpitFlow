@@ -1,7 +1,7 @@
 {
-    "name": "PpitFlow",
+    "name": "2pit-io/2pit-flow",
     "description": "2pit project's PpitFlow module",
-    "license": "GNU GPL",
+    "license": "GPL-3.0-or-later",
     "keywords": [
         "2pit",
         "PpitFlow module"
