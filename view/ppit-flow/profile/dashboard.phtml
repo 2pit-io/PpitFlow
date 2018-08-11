@@ -26,6 +26,8 @@ $properties = $content['description']['properties'];
 <table class="table">
     <thead>
         <tr>
+            <th>&nbsp;</th>
+            
 <?php foreach ($content['description']['list'] as $propertyId => $options) : ?>
 	<?php $property = $properties[$propertyId] ?>
             <th class="th-lg"><?php echo $context->localize($property['labels']) ?></th>
@@ -33,8 +35,13 @@ $properties = $content['description']['properties'];
         </tr>
     </thead>
     <tbody>
-<?php foreach ($content['data'] as $item) : ?>
+<?php foreach ($content['data'] as $itemId => $item) : ?>
         <tr>
+           <td>
+		      <a type="button" class="btn-rounded btn-sm btn-secondary" href="<?php echo $this->url('request/fill', ['id' => $itemId]) ?>">
+		          <i class="fa fa-edit mt-0"></i>
+		      </a>
+          </td>
 
 	<?php foreach ($content['description']['list'] as $propertyId => $options) : ?>
 		<?php $property = $properties[$propertyId] ?>
@@ -42,6 +49,19 @@ $properties = $content['description']['properties'];
 		<?php if ($property['type'] == 'select') : ?>
             <td><?php if ($item[$propertyId]) echo $context->localize($properties[$propertyId]['modalities'][$item[$propertyId]]) ?></td>
 
+        <?php elseif ($property['type'] == 'multiselect') : ?>
+          <?php $list = explode(',', $item[$propertyId]) ?>
+            <td>
+              <?php 
+              $first = true; 
+              foreach ($list as $value) {
+              	if (!$first) echo '<br>';
+                $first = false;
+              	if (array_key_exists($value, $properties[$propertyId]['modalities'])) echo $context->localize($properties[$propertyId]['modalities'][$value]);
+              }
+              ?>
+            </td>
+            
 		<?php elseif ($property['type'] == 'date') : ?>
             <td><?php echo $context->decodeDate($item[$propertyId]) ?></td>
 
@@ -59,7 +79,7 @@ $properties = $content['description']['properties'];
 </table>
       </div>
       <div class="center-on-small-only">
-		<a href="<?php echo $this->url('survey/newRequest') ?>" class="btn btn-light-blue btn-rounded"><?php echo $this->translate('Nouvelle demande', 'ppit-flow', $context->getLocale()) ?></a>
+		<a href="<?php echo $this->url('request/fill') ?>" class="btn btn-secondary btn-rounded"><?php echo $this->translate('Nouvelle demande', 'ppit-flow', $context->getLocale()) ?></a>
 	  </div>
       
 </div>

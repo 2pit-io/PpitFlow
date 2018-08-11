@@ -12,6 +12,7 @@ return array (
 		'invokables' => array(
 			'PpitFlow\Controller\Landing' => 'PpitFlow\Controller\LandingController',
 			'PpitFlow\Controller\Profile' => 'PpitFlow\Controller\ProfileController',
+			'PpitFlow\Controller\Request' => 'PpitFlow\Controller\RequestController',
 			'PpitFlow\Controller\Survey' => 'PpitFlow\Controller\SurveyController',
 		),
 	),
@@ -98,6 +99,27 @@ return array (
 					),
 				),
 			),
+			'request' => array(
+				'type'    => 'literal',
+				'options' => array(
+					'route'    => '/request',
+					'constraints' => ['id' => '[0-9]*'],
+					'defaults' => array(
+						'controller' => 'PpitFlow\Controller\Request',
+						'action'     => 'fill',
+					),
+				),
+				'may_terminate' => true,
+				'child_routes' => array(
+					'fill' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/fill[/:id]',
+							'defaults' => array('action' => 'fill'),
+						),
+					),
+				),
+			),
 			'survey' => array(
 				'type'    => 'literal',
 				'options' => array(
@@ -179,10 +201,12 @@ return array (
 				array('route' => 'landing/template2', 'roles' => array('guest')),
 				array('route' => 'landing/templatePlp', 'roles' => array('guest')),
 				
-				array('route' => 'profile/template1', 'roles' => array('guest')),
-				array('route' => 'profile/template2', 'roles' => array('guest')),
+				array('route' => 'profile/template1', 'roles' => array('user')),
+				array('route' => 'profile/template2', 'roles' => array('user')),
 				array('route' => 'profile/dashboard', 'roles' => array('user')),
 				array('route' => 'profile/photoUpload', 'roles' => array('user')),
+
+				array('route' => 'request/fill', 'roles' => array('user')),
 				
 				array('route' => 'survey/fill', 'roles' => array('guest')),
 				array('route' => 'survey/template1', 'roles' => array('guest')),

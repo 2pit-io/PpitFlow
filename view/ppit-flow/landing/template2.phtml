@@ -158,7 +158,7 @@
   <!--Main layout-->
   <main>  
     <div class="container" name="descr" id="descr">
-      <br>
+      <br><br><br>
  
  <?php foreach ($content['presentation'] as $section) : ?>
 
@@ -208,7 +208,11 @@
       <?php if (array_key_exists('a', $column)) : ?>
                       <a 
         <?php foreach ($column['a'] as $attrId => $attr) : ?>
+          <?php if ($attrId == 'href') : ?>
+                        <?php echo $attrId ?>="<?php echo $this->basePath($attr) ?>"
+          <?php else : ?>
                         <?php echo $attrId ?>="<?php echo $attr ?>"
+          <?php endif;?>
         <?php endforeach;?>
                       >
 
@@ -226,7 +230,11 @@
       <?php elseif (array_key_exists('img', $column)) : ?>
                       <img 
         <?php foreach ($column['img'] as $attrId => $attr) : ?>
+          <?php if ($attrId == 'src') : ?>
+                        <?php echo $attrId ?>="<?php echo $this->basePath($attr) ?>"
+          <?php else : ?>
                         <?php echo $attrId ?>="<?php echo $attr ?>"
+          <?php endif;?>
         <?php endforeach;?>
                       />
 
@@ -305,7 +313,7 @@
 <?php endforeach;?>
 
         </div>
-
+        <hr>
         <div class="row">
 
           <!--Grid column-->

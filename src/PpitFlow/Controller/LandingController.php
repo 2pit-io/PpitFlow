@@ -27,6 +27,7 @@ class LandingController extends AbstractActionController
 			$place = Place::get($context->getPlaceId());
 			$place_identifier = $place->identifier;
 		}
+		
 		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('landing/'.$place->identifier);
 		else $content = Config::get($place->identifier.'_landing', 'identifier', $place->id)->content;
 		$locale = $this->params()->fromQuery('locale');
@@ -123,6 +124,7 @@ class LandingController extends AbstractActionController
 		// Return the view
 		$view = new ViewModel(array(
 			'context' => $context,
+			'mode' => $this->params()->fromQuery('mode'),
 			'locale' => $locale,
 			'type' => $context->getConfig('landing_account_type'),
 			'place_identifier' => $place_identifier,

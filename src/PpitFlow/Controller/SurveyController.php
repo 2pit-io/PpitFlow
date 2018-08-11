@@ -391,7 +391,7 @@ class SurveyController extends AbstractActionController
 		    		}
 	    		}
 				$renderer = $this->serviceLocator->get('Zend\View\Renderer\RendererInterface');
-		    	$event->properties['base_path'] = 'http://'.$context->getInstance()->fqdn.$renderer->basePath('');
+		    	$event->properties['base_path'] = 'https://'.$context->getInstance()->fqdn.$renderer->basePath('');
 
 	    		// Replace all the variables in the text by their value in the account data structure
 	    		// And replace the 'link' variable to the URL to Dropbox
