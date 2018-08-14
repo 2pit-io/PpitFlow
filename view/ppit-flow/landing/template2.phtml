@@ -432,7 +432,7 @@
     </div>
 
     <!--Footer-->
-    <footer class="page-footer center-on-small-only mt-5">
+    <footer class="page-footer indigo lighten-3 pt-4 mt-4 text-center text-md-left mt-5">
 
       <!--Footer Links-->
       <div class="container">
@@ -441,6 +441,11 @@
           <!--First column-->
           <div class="col-md-3">
             <h5 class="title">Ressources </h5>
+            <ul class="list-unstyled">
+              <li>
+	           <a data-toggle="modal" data-target="#modalShowCharterForm"><?php echo $this->translate('Charter', 'ppit-core', $context->getLocale()) ?></a>
+              </li>
+            </ul>
           </div>
           <!--/First column-->
 
@@ -448,8 +453,8 @@
 
           <!--Second column-->
           <div class="col-md-2 ml-auto">
-            <ul>
-              <li><a href="#!">Blog</a></li>
+            <ul class="list-unstyled">
+              <li><a href="#!"></a></li>
             </ul>
           </div>
           <!--/Second column-->
@@ -458,7 +463,7 @@
       </div>
 
       <!--Copyright-->
-      <div class="footer-copyright">
+      <div class="footer-copyright py-3 text-center">
         <div class="container-fluid">
           © 2018 Copyright: <a href="https://github.com/2pit-io/PpitCore/blob/master/license.txt"> 2pit.io </a>
         </div>
@@ -467,6 +472,27 @@
 
     </footer>
     <!--/ Footer -->
+  
+<div class="modal fade" id="modalShowCharterForm" tabindex="-1" role="dialog" aria-labelledby="modalShowCharterLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+              <div class="modal-header text-center">
+                  <h4 class="modal-title w-100 font-weight-bold"></h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body mx-3">
+                  <div id="show_charter_content"></div>
+              </div>
+              <div class="modal-footer d-flex justify-content-center">
+		        <button type="button" class="btn btn-link" data-dismiss="modal" aria-label="Close">
+		          <?php echo $this->translate('Close', 'ppit-core', $context->getLocale()) ?>
+		        </button>
+              </div>
+        </div>
+    </div>
+</div>
 
   </main>
 </body>
@@ -631,5 +657,17 @@ $('.resizable').show();
 
 <!-- Sign in and registration -->
 <?php echo $this->partial('/partials/navbar-script.phtml'); ?>
+
+<script>
+$('#modalShowCharterForm').on('show.bs.modal', function () { 
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '<?php echo $this->url('instance/charter') ?>', true);
+    xhttp.onload = function () {
+      if (xhttp.readyState == 4 && xhttp.status == 200) $('#show_charter_content').html(xhttp.responseText);
+      else toastr.error("<?php echo $this->translate('A technical error has occured. PLease try again later', 'ppit-core', $context->getLocale()) ?>");
+    };
+    xhttp.send();
+});
+</script>
 
 </html>
