@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<?php if (array_key_exists('analytics-id', $header)) : ?>
+	<!--Google Analytics-->
+	<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	
+	ga('create', '<?php echo $header['analytics-id']?>', 'auto');
+	ga('send', 'pageview');
+	</script>
+	<!--/Google Analytics-->
+<?php endif;?>
+
+	<title><?php echo $context->localize($header['title'], $locale) ?></title>
+	<meta charset="utf-8">
+	<meta name="description" content="<?php echo $context->localize($header['description'], $locale) ?>">
+	<meta name="robots" content="index, follow">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">    <!-- Bootstrap core CSS -->
+	<link href="<?php echo $this->basePath('MDB-Pro/css/bootstrap.min.css" rel="stylesheet') ?>">
+
+	<!-- Material Design Bootstrap -->
+	<link href="<?php echo $this->basePath('MDB-Pro/css/mdb.min.css" rel="stylesheet') ?>">
+	<link href="<?php echo $this->basePath('MDB-Pro/css/style.css" rel="stylesheet') ?>">
+	
+	<!-- medium editor -->
+	<link rel="stylesheet" href="<?php echo $this->basePath('medium-editor-master/dist/css/medium-editor.css') ?>">
+	<link rel="stylesheet" href="<?php echo $this->basePath('medium-editor-master/dist/css/themes/default.css" id="medium-editor-theme') ?>">
+	
+	<!-- jquery-ui -->
+	<link href="<?php echo $this->basePath('jquery-ui-1.12.1/jquery-ui.min.css" rel="stylesheet') ?>">
+
+    <!-- Custom styles -->
+	<style>
+	html,
+	body,
+	header,
+	#intro {
+      height: <?php echo $header['intro_height'] ?>;
+      background-size: cover;
+	}
+	
+	#intro {
+	  background: url("<?php echo $this->basePath($context->localize($header['background_image']['src'], $locale)) ?>") no-repeat center center;
+	  -webkit-background-size: cover;
+	  -moz-background-size: cover;
+	  -o-background-size: cover;
+	  background-size: cover;
+	}
+	
+	@include media-breakpoint-up(sm) {
+	  html {
+	    font-size: 16px;
+	  }
+	}
+	
+	@include media-breakpoint-up(md) {
+	  html {
+	    font-size: 20px;
+	  }
+	}
+	
+	@include media-breakpoint-up(lg) {
+	  html {
+	    font-size: 28px;
+	  }
+	}
+	
+	.portlet {
+	  margin: 0 1em 1em 0;
+	  padding: 0.3em;
+	}
+	.portlet-header {
+	  padding: 0.2em 0.3em;
+	  margin-bottom: 0.5em;
+	  position: relative;
+	}
+	.portlet-toggle {
+	  position: absolute;
+	  top: 50%;
+	  right: 0;
+	  margin-top: -8px;
+	}
+	.portlet-viewContent {
+	  padding: 0.4em;
+	}
+	.portlet-placeholder {
+	  border: 1px dotted black;
+	  margin: 0 1em 1em 0;
+	  height: 50px;
+	}
+	
+	.resizable { font-size: 16px; text-align: center; margin: 0; }
+	</style>
+</head>
+
+<body>
+
+  <!--Main Navigation-->
+  <header>
+
+    <!-- Sign in and registration -->
+    <?php echo $this->partial('/partials/navbar.phtml'); ?>
+ 
+    <!-- Mask -->
+    <div id="intro" class="view h-100"> 
+      <div class="d-block h-100 w-lg-100 <?php echo $header['background_image']['mask'] ?>">
+        <div class="full-bg-img flex-center">
+          <div class="col-md-12 justify-content-center text-center">
+<?php foreach ($intro as $paragraphId => $paragraph) : ?>
+
+  <?php if (array_key_exists('a', $paragraph)) : ?>
+            <a
+              href="<?php echo $this->url('landing/template2') ?><?php echo $paragraph['a']['href']?>"
+    <?php if (array_key_exists('class', $paragraph['a'])) echo 'class="'.$paragraph['a']['class'].'"' ?>
+    <?php if (array_key_exists('id', $paragraph['a'])) echo 'id="'.$paragraph['a']['id'].'"' ?>
+            >
+
+  <?php elseif (array_key_exists('button', $paragraph)) : ?>
+            <button type="button" 
+    <?php if (array_key_exists('class', $paragraph['button'])) echo 'class="'.$paragraph['button']['class'].'"' ?>
+    <?php if (array_key_exists('id', $paragraph['button'])) echo 'id="'.$paragraph['button']['id'].'"' ?>
+            >
+
+  <?php else : ?>
+            <<?php echo $paragraph['type']?> class="editable <?php if (array_key_exists('class', $paragraph)) echo $paragraph['class'] ?>" id="<?php echo $paragraphId ?>/text<?php if (array_key_exists('text', $paragraph)) echo '/'.$context->getLocaleFor($paragraph['text']) ?>">
+  <?php endif;?>
+  
+  <?php if (array_key_exists('text', $paragraph)) : ?>
+            <?php echo $context->localize($paragraph['text'], $locale) ?>
+  <?php endif;?>
+
+  <?php if (array_key_exists('a', $paragraph)) : ?>
+            </a>
+  <?php elseif (array_key_exists('button', $paragraph)) : ?>
+            </button>
+  <?php else : ?>
+            </<?php echo $paragraph['type']?>>
+  <?php endif;?>
+<?php endforeach;?>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--/Mask-->
+
+  </header>
+  <!--/Main Navigation-->
+  <?php echo $this->content ?>
+
+    <!--Footer-->
+    <footer class="page-footer indigo lighten-3 pt-4 mt-4 text-center text-md-left mt-5">
+
+      <!--Footer Links-->
+      <div class="container">
+        <div class="row">
+
+          <!--First column-->
+          <div class="col-md-3">
+            <h5 class="title">Ressources </h5>
+            <ul class="list-unstyled">
+              <li>
+	           <a data-toggle="modal" data-target="#modalShowCharterForm"><?php echo $this->translate('Charter', 'ppit-core', $context->getLocale()) ?></a>
+              </li>
+            </ul>
+          </div>
+          <!--/First column-->
+
+          <hr class="w-100 clearfix d-md-none">
+
+          <!--Second column-->
+          <div class="col-md-2 ml-auto">
+            <ul class="list-unstyled">
+              <li><a href="#!"></a></li>
+            </ul>
+          </div>
+          <!--/Second column-->
+
+        </div>
+      </div>
+
+      <!--Copyright-->
+      <div class="footer-copyright py-3 text-center">
+        <div class="container-fluid">
+          © 2018 Copyright: <a href="https://github.com/2pit-io/PpitCore/blob/master/license.txt"> 2pit.io </a>
+        </div>
+      </div>
+      <!--/Copyright-->
+
+    </footer>
+    <!--/ Footer -->
+  
+<div class="modal fade" id="modalShowCharterForm" tabindex="-1" role="dialog" aria-labelledby="modalShowCharterLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+              <div class="modal-header text-center">
+                  <h4 class="modal-title w-100 font-weight-bold"></h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body mx-3">
+                  <div id="show_charter_content"></div>
+              </div>
+              <div class="modal-footer d-flex justify-content-center">
+		        <button type="button" class="btn btn-link" data-dismiss="modal" aria-label="Close">
+		          <?php echo $this->translate('Close', 'ppit-core', $context->getLocale()) ?>
+		        </button>
+              </div>
+        </div>
+    </div>
+</div>
+
+  </main>
+</body>
+    	
+<!-- SCRIPTS -->
+<!-- Font Awesome -->
+<!-- JQuery -->
+<script type="text/javascript" src="<?php echo $this->basePath('MDB-Pro/js/jquery-3.3.1.min.js') ?>"></script>
+<!-- Bootstrap tooltips -->
+<script type="text/javascript" src="<?php echo $this->basePath('MDB-Pro/js/popper.min.js') ?>"></script>
+<!-- Bootstrap core JavaScript -->
+<script type="text/javascript" src="<?php echo $this->basePath('MDB-Pro/js/bootstrap.min.js') ?>"></script>
+<!-- MDB core JavaScript -->
+<script type="text/javascript" src="<?php echo $this->basePath('MDB-Pro/js/mdb.min.js') ?>"></script>
+
+<script type="text/javascript">
+// Material Select Initialization
+new WOW().init();
+$(document).ready(function() {
+   $('.mdb-select').material_select();
+});
+
+// MDB Carousel
+$('.carousel').carousel({
+    interval: false
+})
+//MDB Lightbox Init
+$(function () {
+  $("#mdb-lightbox-ui").load("<?php echo $this->basePath('MDB-Pro/mdb-addons/mdb-lightbox-ui.html') ?>");
+});
+
+$('#a_survey').click(function () {
+<?php if (array_key_exists('analytics-id', $header)) : ?>
+  ga('send', 'event', '<?php echo $header['campaign'] ?>', 'click', 'landing_template2#survey', 1);
+<?php endif;?>
+  $(location).attr('href', '#descr');
+});
+</script>
+
+<!-- Sign in and registration -->
+<?php echo $this->partial('/partials/navbar-script.phtml'); ?>
+
+<script>
+$('#modalShowCharterForm').on('show.bs.modal', function () { 
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '<?php echo $this->url('instance/charter') ?>', true);
+    xhttp.onload = function () {
+      if (xhttp.readyState == 4 && xhttp.status == 200) $('#show_charter_content').html(xhttp.responseText);
+      else toastr.error("<?php echo $this->translate('A technical error has occured. PLease try again later', 'ppit-core', $context->getLocale()) ?>");
+    };
+    xhttp.send();
+});
+</script>
+
+<?php echo $this->partial($pageScripts) ?>
+
+</html>

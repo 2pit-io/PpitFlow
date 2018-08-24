@@ -17,6 +17,150 @@ use Zend\View\Model\ViewModel;
 
 class ProfileController extends AbstractActionController
 {	
+	public function homeAction()
+	{
+		$context = Context::getCurrent();
+		$instance_caption = $context->getInstance()->caption;
+		$place_identifier = $this->params()->fromRoute('place_identifier');
+		if ($place_identifier) $place = Place::get($place_identifier, 'identifier');
+		else {
+			$place = Place::get($context->getPlaceId());
+			$place_identifier = $place->identifier;
+		}
+
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('profile/'.$place_identifier);
+		else $content = Config::get($place_identifier.'_profile', 'identifier')->content;
+		$locale = $this->params()->fromQuery('locale');
+		
+		$account_id = $this->params()->fromRoute('account_id');
+		$account = null;
+		if ($account_id) {
+			$account = Account::get($account_id);
+			$charter_status = $account->getCharterStatus();
+			$gtou_status = $account->getGtouStatus();
+		}
+		elseif ($context->isAuthenticated()) {
+			$account = Account::get($context->getContactId(), 'contact_1_id');
+			$charter_status = $account->getCharterStatus();
+			$gtou_status = $account->getGtouStatus();
+		}
+		else {
+			$account = Account::instanciate($context->getConfig('landing_account_type'));
+			$charter_status = null;
+			$gtou_status = null;
+		}
+
+		if (!$locale) if ($account) $locale = $account->locale; else $locale = $context->getLocale();
+
+		$description = Event::getDescription('request');
+		$viewData = array();
+		$viewData['photo_link_id'] = ($account->photo_link_id) ? $account->photo_link_id : 'no-photo.png';
+		
+		$accounts = Account::getList('pbc', [], '+name', null);
+		$viewData['accounts'] = array();
+		foreach ($accounts as $accountId => $account) $viewData['accounts'][$accountId] = $account->getProperties();
+
+		// Feed the layout
+		$this->layout('/layout/flow-layout');
+		$this->layout()->setVariables(array(
+			'context' => $context,
+			'place_identifier' => $place_identifier,
+			'type' => $context->getConfig('landing_account_type'),
+			'header' => $content['header'],
+			'intro' => $content['intro'],
+			'locale' => $locale,
+			'photo_link_id' => ($account) ? $account->photo_link_id : null,
+			'charter_status' => $charter_status,
+			'gtou_status' => $gtou_status,
+			'pageScripts' => 'ppit-flow/profile/home-scripts',
+			'tooltips' => $content['tooltips'],
+			'message' => null,
+			'error' => null,
+		));
+
+		$view = new ViewModel(array(
+			'context' => $context,
+			'locale' => $locale,
+			'description' => $description,
+			'viewData' => $viewData,
+			'accounts' => $accounts,
+			'content' => $content,
+		));
+		return $view;
+	}
+	
+	public function listAction()
+	{
+		$context = Context::getCurrent();
+		$instance_caption = $context->getInstance()->caption;
+		$place_identifier = $this->params()->fromRoute('place_identifier');
+		if ($place_identifier) $place = Place::get($place_identifier, 'identifier');
+		else {
+			$place = Place::get($context->getPlaceId());
+			$place_identifier = $place->identifier;
+		}
+		$request_id = $this->params()->fromRoute('request_id');
+		
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('profile/'.$place_identifier);
+		else $content = Config::get($place_identifier.'_profile', 'identifier')->content;
+		$locale = $this->params()->fromQuery('locale');
+
+		$myAccountId = Account::get($context->getContactId(), 'contact_1_id')->id;
+		$account_id = $this->params()->fromRoute('account_id');
+		$account = null;
+		if ($account_id) {
+			$account = Account::get($account_id);
+			$charter_status = $account->getCharterStatus();
+			$gtou_status = $account->getGtouStatus();
+		}
+		elseif ($context->isAuthenticated()) {
+			$account = Account::get($context->getContactId(), 'contact_1_id');
+			$charter_status = $account->getCharterStatus();
+			$gtou_status = $account->getGtouStatus();
+		}
+		else {
+			$account = Account::instanciate($context->getConfig('landing_account_type'));
+			$charter_status = null;
+			$gtou_status = null;
+		}
+	
+		if (!$locale) if ($account) $locale = $account->locale; else $locale = $context->getLocale();
+	
+		$description = Event::getDescription('request');
+		$viewData = array();
+		$viewData['photo_link_id'] = ($account->photo_link_id) ? $account->photo_link_id : 'no-photo.png';
+
+		if ($request_id) {
+			$request = Event::get($request_id);
+			$skills = $request->property_2;
+			$accounts = array();
+			foreach (explode(',', $skills) as $skill) {
+				$result = Account::getList('pbc', ['profile_tiny_2' => $skill], '+name', null);
+				foreach ($result as $account_id => $account) {
+					
+					// Exclude from the potential matching list myself aand the already matched accounts
+					if ($account_id != $myAccountId && (!$request->matched_accounts || !in_array($account_id, explode(',', $request->matched_accounts)))) {
+						$accounts[$account_id] = $account;
+					}
+				}
+			}
+		}
+		else $accounts = Account::getList('pbc', [], '+name', null);
+		$viewData['accounts'] = array();
+		foreach ($accounts as $accountId => $account) $viewData['accounts'][$accountId] = $account->getProperties();
+	
+		$view = new ViewModel(array(
+			'context' => $context,
+			'locale' => $locale,
+			'description' => $description,
+			'viewData' => $viewData,
+			'accounts' => $accounts,
+			'content' => $content,
+		));
+		$view->setTerminal(true);
+		return $view;
+	}
+	
 	public function template1Action()
 	{
 		// Retrieve the context and the parameters
@@ -117,21 +261,35 @@ class ProfileController extends AbstractActionController
 			else $error = $rc;
 		}
 
+		// Feed the layout
+		$this->layout('/layout/flow-layout');
+		$this->layout()->setVariables(array(
+			'context' => $context,
+			'place_identifier' => $place_identifier,
+			'type' => $context->getConfig('landing_account_type'),
+			'header' => $content['header'],
+			'intro' => $content['intro'],
+			'locale' => $locale,
+			'photo_link_id' => ($account) ? $account->photo_link_id : null,
+			'charter_status' => $charter_status,
+			'gtou_status' => $gtou_status,
+			'pageScripts' => 'ppit-flow/profile/profile-scripts',
+			'form' => $content['form'],
+			'tooltips' => $content['tooltips'],
+			'message' => $message,
+			'error' => $error,
+		));
+		
 		// Return the view
 		$view = new ViewModel(array(
 			'context' => $context,
 			'locale' => $locale,
-			'type' => $context->getConfig('landing_account_type'),
-			'charter_status' => $charter_status,
-			'gtou_status' => $gtou_status,
-			'template' => [],
-			'links' => $links,
+			'place_identifier' => $place_identifier,
 			'content' => $content,
 			'viewData' => $viewData,
 			'message' => $message,
 			'error' => $error,
 		));
-		$view->setTerminal(true);
 		return $view;
 	}
 
@@ -139,16 +297,192 @@ class ProfileController extends AbstractActionController
 	{
 		return $this->template1Action();
 	}
+
+	public function profileAction()
+	{
+		// Retrieve the context and the parameters
+		$context = Context::getCurrent();
+		$place = Place::get($context->getPlaceId());
+		$place_identifier = $place->identifier;
+		$account_id = $this->params()->fromRoute('account_id');
+		$account = Account::get($account_id);
+		$profile = Vcard::get($account->contact_1_id);
+		$locale = $this->params()->fromQuery('locale');
+		$currentRequestId = $this->params()->fromQuery('request');
+		if ($currentRequestId) $currentRequest = Event::get($currentRequestId);
+		else $currentRequest = null;
+
+		// Look if the target account already belongs to my matched accounts, in which case protected data can be displayed
+		$myAccount = Account::get($context->getContactId(), 'contact_1_id');
+		$matchedAccounts = explode(',', $myAccount->property_2);
+		if (in_array($account_id, $matchedAccounts)) $matched = true;
+		else $matched = false;
+
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('profile/'.$place_identifier);
+		else $content = Config::get($place_identifier.'_profile', 'identifier')->content;
+		
+		$description = Account::getDescription('pbc');
+		$viewData = array();
+		$viewData['profile_id'] = $profile->id;
+		$viewData['photo_link_id'] = ($profile->photo_link_id) ? $profile->photo_link_id : 'no-photo.png';
+		
+		foreach ($content['detail']['properties'] as $inputId => $options) {
+			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
+			else {
+				$property = $description['properties'][$inputId];
+				if (array_key_exists('mandatory', $options)) $property['mandatory'] = $options['mandatory'];
+				if (array_key_exists('updatable', $options)) $property['updatable'] = $options['updatable'];
+				if (array_key_exists('focused', $options)) $property['focused'] = $options['focused'];
+				if (array_key_exists('protected', $options)) $property['protected'] = $options['protected'];
+			}
+			if (array_key_exists('repository', $property)) $property['repository'] = $context->getConfig($property['repository']);
+			if (!array_key_exists('mandatory', $property)) $property['mandatory'] = false;
+			if (!array_key_exists('updatable', $property)) $property['updatable'] = true;
+			if (!array_key_exists('placeholder', $property)) $property['placeholder'] = null;
+			if (!array_key_exists('focused', $property)) $property['focused'] = false;
+			if ($matched || !array_key_exists('protected', $property)) $property['protected'] = false;
+			$content['detail']['properties'][$inputId] = $property;
+			if (array_key_exists('property_id', $property)) $propertyId = $property['property_id'];
+			else $propertyId = $inputId;
+			//			if ($id) {
+			if ($inputId != $propertyId) $viewData[$inputId] = (in_array($property['value'], explode(',', $profile->properties[$propertyId])) ? $property['value'] : null);
+			else $viewData[$inputId] = $profile->properties[$propertyId];
+			$queryValue = $this->params()->fromQuery($inputId);
+			if ($queryValue !== null) $viewData[$inputId] = $queryValue;
+			/*			}
+			 else $viewData[$inputId] = (array_key_exists('default', $property)) ? $property['default'] : null;*/
+		}
+		
+		$actions = array();
+		if ($currentRequest) {
+			if (in_array($account_id, explode(',', $currentRequest->matched_accounts))) {
+				$currentMatching = $currentRequest->matching_log[$account_id];
+				if ($currentMatching['action'] == 'propose') {
+					$actions['accept'] = $content['detail']['actions']['accept'];
+					$actions['decline'] = $content['detail']['actions']['decline'];
+				}
+				elseif ($currentMatching['action'] != 'accept') {
+					$actions['abandon'] = $content['detail']['actions']['abandon'];
+				}
+			}
+			else $actions['contact'] = $content['detail']['actions']['contact'];
+		}
+		$content['detail']['actions'] = $actions;
+
+		// Return the view
+		$view = new ViewModel(array(
+			'context' => $context,
+			'content' => $content,
+			'locale' => $locale,
+			'viewData' => $viewData,
+			'matched' => $matched,
+		));
+		$view->setTerminal(true);
+		return $view;
+	}
+/*	
+	public function contactAction()
+	{
+		// Retrieve the context and the parameters
+		$context = Context::getCurrent();
+		$place = Place::get($context->getPlaceId());
+		$place_identifier = $place->identifier;
+		$account_id = $this->params()->fromRoute('account_id');
+		$otherAccount = Account::get($account_id);
+		$locale = $this->params()->fromQuery('locale');
+		
+		// Mark the other account as matched in the requests in basket
+		$myProfile = Vcard::get($context->getContactId());
+		if (array_key_exists('request_basket', $myProfile->specifications)) {
+			foreach ($myProfile->specifications['request_basket'] as $requestId => $unused) {
+				$request = Event::get($requestId);
+				$matchedAccounts = explode(',', $request->matched_accounts);
+				$matchedAccounts[] = $account_id;
+				$request->matchedAccounts = implode(',', $matchedAccounts);
+				$request->log[] = array(
+					'time' => Date('Y-m-d G:i:s'),
+					'user_id' => $context->getUserId(),
+					'n_fn' => $context->getFormatedName(),
+					'action' => 'profile/contact',
+					'matched_account' => $account_id,
+				);
+				$request->update(null);
+			}
+		}
+		
+		// Mark the other account as matched in my account
+		$myAccount = Account::get($context->getContactId(), 'contact_1_id');
+		$matchedAccounts = explode(',', $myAccount->property_2);
+		$matchedAccounts[] = $account_id;
+		$myAccount->property_2 = implode(',', $matchedAccounts);
+		$myAccount->update(null);
+		return $this->response;
+	}
+*/
+	public function removeContactAction()
+	{
+		// Retrieve the context and the parameters
+		$context = Context::getCurrent();
+		$place = Place::get($context->getPlaceId());
+		$place_identifier = $place->identifier;
+		$account_id = $this->params()->fromRoute('account_id');
+		$otherAccount = Account::get($account_id);
+		$locale = $this->params()->fromQuery('locale');
+	
+		// Mark the other account as unmatched in the requests in basket
+		$myProfile = Vcard::get($context->getContactId());
+		if (array_key_exists('request_basket', $myProfile->specifications)) {
+			foreach ($myProfile->specifications['request_basket'] as $requestId => $unused) {
+				$request = Event::get($requestId);
+				$matchedAccounts = array(); 
+				foreach(explode(',', $request->matched_accounts) as $item) {
+					if ($item != $otherAccount->id) $matchedAccounts[] = $item;
+				}
+				$request->matched_accounts = implode(',', $matchedAccounts);
+				$request->log[] = array(
+					'time' => Date('Y-m-d G:i:s'),
+					'user_id' => $context->getUserId(),
+					'n_fn' => $context->getFormatedName(),
+					'action' => 'profile/removeContact',
+					'unmatched_account' => $otherAccount->id,
+				);
+				$request->update(null);
+			}
+		}
+	
+		// Mark the other account as unmatched in my account
+		$myAccount = Account::get($context->getContactId(), 'contact_1_id');
+		$matchedAccounts = explode(',', $myAccount->property_2);
+		if (in_array($otherAccount->id, $matchedAccounts)) {
+			$requests = Event::getList('request', ['account_id' => $myAccount->id], '-update_time', null);
+			$accountIsMatched = false;
+			foreach ($requests as $requestId => $request) {
+				$requestMatchedAccounts = explode(',', $request->matched_accounts);
+				if (array_key_exists($otherAccount->id, $requestMatchedAccounts)) $accountIsMatched = true;
+			}
+			if (!$accountIsMatched) {
+				$matchedAccounts = array(); 
+				foreach(explode(',', $myAccount->property_2) as $item) {
+					if ($item != $otherAccount->id) $matchedAccounts[] = $item;
+				}
+				$myAccount->property_2 = implode(',', $matchedAccounts);
+				$myAccount->update(null);
+			}
+		}
+		return $this->response;
+	}
 	
 	public function dashboardAction()
 	{
 		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
 		$account = Account::get($context->getContactId(), 'contact_1_id');
-		$requests = Event::getList('request', ['account_id' => $account->id]);
+		$requests = Event::getList('request', ['status' => 'new,connected,realized,completed', 'account_id' => $account->id]);
+		$locale = $this->params()->fromQuery('locale');
+		
 		$content = array();
 		$content['description'] = Event::getDescription('request');
-		$content['description']['list'] = ['property_5' => [], 'caption' => [], 'property_3' => [], 'matched_accounts' => []];
+		$content['description']['list'] = ['property_5' => [], 'caption' => [], 'property_3' => []];
 		$content['data'] = array();
 		foreach ($requests as $request) $content['data'][$request->id] = $request->getProperties();
 
@@ -156,6 +490,7 @@ class ProfileController extends AbstractActionController
 		$view = new ViewModel(array(
 			'context' => $context,
 			'content' => $content,
+			'locale' => $locale,
 		));
 		$view->setTerminal(true);
 		return $view;

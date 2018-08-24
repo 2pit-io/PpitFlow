@@ -55,7 +55,6 @@ class LandingController extends AbstractActionController
 			if ($context->getConfig('specificationMode') == 'config') $content['form'] = $content['surveys'][$survey][$step];
 			else $content['form'] = Config::get($place_identifier.'_survey_'.$survey, 'identifier')->content;
 		}
-
 		$viewData = array();
 		$viewData['photo_link_id'] = ($account->photo_link_id) ? $account->photo_link_id : 'no-photo.png';
 		foreach ($content['form']['inputs'] as $inputId => $options) {
@@ -82,7 +81,8 @@ class LandingController extends AbstractActionController
 		}
 		
 		// Process the post data after input
-		$message = $error = null;
+		$message = $this->params()->fromQuery('message');
+		$error = null;
 		if ($this->request->isPost()) {
 			$data = array();
 			$data['status'] = 'interested';
@@ -121,32 +121,37 @@ class LandingController extends AbstractActionController
 			}
 		}
 
-		// Return the view
+		// Feed the layout
+		$this->layout('/layout/flow-layout');
+		$this->layout()->setVariables(array(
+			'context' => $context,
+			'place_identifier' => $place_identifier,
+			'type' => $context->getConfig('landing_account_type'),
+			'header' => $content['header'],
+			'intro' => $content['intro'],
+			'locale' => $locale,
+			'photo_link_id' => ($account) ? $account->photo_link_id : null,
+			'pageScripts' => 'ppit-flow/landing/scripts',
+			'message' => $message,
+			'error' => $error,
+		));
+		
+		// Feed and return the view
 		$view = new ViewModel(array(
 			'context' => $context,
-			'mode' => $this->params()->fromQuery('mode'),
 			'locale' => $locale,
-			'type' => $context->getConfig('landing_account_type'),
 			'place_identifier' => $place_identifier,
 			'id' => $id,
 			'token' => $token,
-			'template' => [],
-			'links' => $links,
 			'content' => $content,
 			'viewData' => $viewData,
 			'message' => $message,
 			'error' => $error,
 		));
-		$view->setTerminal(true);
 		return $view;
 	}
 	
 	public function template2Action()
-	{
-		return $this->template1Action();
-	}
-	
-	public function templatePlpAction()
 	{
 		return $this->template1Action();
 	}

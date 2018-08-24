@@ -44,13 +44,6 @@ return array (
 							'defaults' => array('action' => 'template2'),
 						),
 					),
-					'templatePlp' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/template-plp[/:place_identifier][/:id]',
-							'defaults' => array('action' => 'templatePlp'),
-						),
-					),
 				),
 			),
 			'profile' => array(
@@ -64,6 +57,20 @@ return array (
 				),
 				'may_terminate' => true,
 				'child_routes' => array(
+					'home' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/home[/:place_identifier][/:account_id]',
+							'defaults' => array('action' => 'home'),
+						),
+					),
+					'list' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/list[/:request_id]',
+							'defaults' => array('action' => 'list'),
+						),
+					),
 					'template1' => array(
 						'type' => 'segment',
 						'options' => array(
@@ -76,6 +83,33 @@ return array (
 						'options' => array(
 							'route' => '/template2[/:place_identifier][/:account_id]',
 							'defaults' => array('action' => 'template2'),
+						),
+					),
+					'profile' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/profile[/:account_id]',
+							'defaults' => array(
+								'action' => 'profile',
+							),
+						),
+					),
+					'contact' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/contact[/:account_id]',
+							'defaults' => array(
+								'action' => 'contact',
+							),
+						),
+					),
+					'removeContact' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/remove-contact[/:account_id]',
+							'defaults' => array(
+								'action' => 'removeContact',
+							),
 						),
 					),
 					'dashboard' => array(
@@ -111,11 +145,102 @@ return array (
 				),
 				'may_terminate' => true,
 				'child_routes' => array(
+					'home' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/home',
+							'defaults' => array('action' => 'home'),
+						),
+					),
+					'dashboard' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/dashboard',
+							'defaults' => array('action' => 'dashboard'),
+						),
+					),
+					'detail' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/detail[/:id]',
+							'defaults' => array('action' => 'detail'),
+						),
+					),
+					'accountList' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/account-list[/:id]',
+							'defaults' => array('action' => 'accountList'),
+						),
+					),
 					'fill' => array(
 						'type' => 'segment',
 						'options' => array(
 							'route' => '/fill[/:id]',
 							'defaults' => array('action' => 'fill'),
+						),
+					),
+					'contact' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/contact[/:id]',
+							'defaults' => array('action' => 'contact'),
+						),
+					),
+					'propose' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/propose[/:id]',
+							'defaults' => array('action' => 'propose'),
+						),
+					),
+					'accept' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/accept[/:id]',
+							'defaults' => array('action' => 'accept'),
+						),
+					),
+					'decline' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/decline[/:id]',
+							'defaults' => array('action' => 'decline'),
+						),
+					),
+					'abandon' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/abandon[/:id]',
+							'defaults' => array('action' => 'abandon'),
+						),
+					),
+					'complete' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/complete[/:id]',
+							'defaults' => array('action' => 'complete'),
+						),
+					),
+					'cancel' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/cancel[/:id]',
+							'defaults' => array('action' => 'cancel'),
+						),
+					),
+					'addToBasket' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/add-to-basket[/:id]',
+							'defaults' => array('action' => 'addToBasket'),
+						),
+					),
+					'removeFromBasket' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/remove-from-basket[/:id]',
+							'defaults' => array('action' => 'removeFromBasket'),
 						),
 					),
 				),
@@ -196,17 +321,34 @@ return array (
 	'bjyauthorize' => array(
 		// Guard listeners to be attached to the application event manager
 		'guards' => array(
-			'BjyAuthorize\Guard\Route' => array(
+			'BjyAuthorize\Guard\Route' => array(				
 				array('route' => 'landing/template1', 'roles' => array('guest')),
 				array('route' => 'landing/template2', 'roles' => array('guest')),
-				array('route' => 'landing/templatePlp', 'roles' => array('guest')),
 				
+				array('route' => 'profile/home', 'roles' => array('user')),
+				array('route' => 'profile/list', 'roles' => array('user')),
 				array('route' => 'profile/template1', 'roles' => array('user')),
 				array('route' => 'profile/template2', 'roles' => array('user')),
+				array('route' => 'profile/profile', 'roles' => array('user')),
+				array('route' => 'profile/contact', 'roles' => array('user')),
+				array('route' => 'profile/removeContact', 'roles' => array('user')),
 				array('route' => 'profile/dashboard', 'roles' => array('user')),
 				array('route' => 'profile/photoUpload', 'roles' => array('user')),
 
+				array('route' => 'request/home', 'roles' => array('user')),
+				array('route' => 'request/dashboard', 'roles' => array('user')),
+				array('route' => 'request/detail', 'roles' => array('user')),
+				array('route' => 'request/accountList', 'roles' => array('user')),
 				array('route' => 'request/fill', 'roles' => array('user')),
+				array('route' => 'request/contact', 'roles' => array('user')),
+				array('route' => 'request/abandon', 'roles' => array('user')),
+				array('route' => 'request/complete', 'roles' => array('user')),
+				array('route' => 'request/propose', 'roles' => array('user')),
+				array('route' => 'request/accept', 'roles' => array('user')),
+				array('route' => 'request/decline', 'roles' => array('user')),
+				array('route' => 'request/cancel', 'roles' => array('user')),
+				array('route' => 'request/addToBasket', 'roles' => array('user')),
+				array('route' => 'request/removeFromBasket', 'roles' => array('user')),
 				
 				array('route' => 'survey/fill', 'roles' => array('guest')),
 				array('route' => 'survey/template1', 'roles' => array('guest')),

@@ -8,7 +8,7 @@
   <div>
   </div>
 
-  <a href="" class="white-text mx-3"><?php echo $this->translate('My requests', 'ppit-flow', $context->getLocale()) ?></a>
+  <h3><a href="" class="white-text mx-3"><?php echo $this->translate('Current requests', 'ppit-flow', $context->getLocale()) ?></a></h3>
 
   <div>
   </div>
@@ -37,10 +37,10 @@ $properties = $content['description']['properties'];
     <tbody>
 <?php foreach ($content['data'] as $itemId => $item) : ?>
         <tr>
-          <td>
-            <a type="button" class="btn-rounded btn-sm btn-secondary" href="<?php echo $this->url('request/detail', ['id' => $itemId]) ?>">
-                <i class="fa fa-search-plus mt-0"></i>
-            </a>
+           <td>
+          <a type="button" class="btn-rounded btn-sm btn-secondary" href="<?php echo $this->url('request/detail', ['id' => $itemId]) ?>">
+              <i class="fa fa-plus mt-0"></i>
+          </a>
           </td>
 
 	<?php foreach ($content['description']['list'] as $propertyId => $options) : ?>
@@ -97,9 +97,6 @@ $properties = $content['description']['properties'];
     </tbody>
 </table>
       </div>
-      <div class="center-on-small-only">
-		<a href="<?php echo $this->url('request/fill') ?>" class="btn btn-secondary btn-rounded"><?php echo $this->translate('New request', 'ppit-flow', $context->getLocale()) ?></a>
-	  </div>
       
 </div>
 <!--Bottom Table UI-->

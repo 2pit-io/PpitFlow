@@ -1,6 +1,20 @@
 <?php
 return array(
+	'Accepted' => 'Accepté',
+	'Contact' => 'Contacter',
+	'Current requests' => 'Demandes en cours',
 	'Invite to a test' => 'Inviter à un test',
+	'My profile' => 'Mon profil',
+	'My requests' => 'Mes demandes',
+	'New request' => 'Nouvelle demande',
 	'Other example' => 'Autre exemple',
+	'Please confirm the cancellation' => 'Veuillez confirmer l’annulation',
+	'Please confirm the completion' => 'Veuillez confirmer la finalisation',
+	'Please confirm the proposal' => 'Veuillez confirmer la proposition',
+	'Request detail' => 'Détail d\'une demande',
 	'Select the test' => 'Sélectionner le test',
+	'Search for a skill' => 'Recherchez une compétence',
+	'Submit a new request' => 'Soumettre une nouvelle demande',
+	'To be contacted' => 'A contacter',
+	'View/update a request' => 'Visualiser/modifier une demande',
 );
