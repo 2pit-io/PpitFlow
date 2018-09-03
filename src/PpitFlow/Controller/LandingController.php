@@ -32,13 +32,11 @@ class LandingController extends AbstractActionController
 		else $content = Config::get($place->identifier.'_landing', 'identifier', $place->id)->content;
 		$locale = $this->params()->fromQuery('locale');
 		
-		$token = null;
 		$id = $this->params()->fromRoute('id');
 		$account = null;
 		if ($id) {
 			$account = Account::get($id);
-			$token = $this->params()->fromQuery('hash', null);
-	    	if ($token != $account->authentication_token) return $this->redirect()->toRoute('landing/template2', ['place_identifier' => $place_identifier]);
+//	    	if ($token != $account->authentication_token) return $this->redirect()->toRoute('landing/template2', ['place_identifier' => $place_identifier]);
 		}
 		elseif ($context->isAuthenticated()) {
 			$account = Account::get($context->getContactId(), 'contact_1_id');
@@ -55,6 +53,7 @@ class LandingController extends AbstractActionController
 			if ($context->getConfig('specificationMode') == 'config') $content['form'] = $content['surveys'][$survey][$step];
 			else $content['form'] = Config::get($place_identifier.'_survey_'.$survey, 'identifier')->content;
 		}
+		
 		$viewData = array();
 		$viewData['photo_link_id'] = ($account->photo_link_id) ? $account->photo_link_id : 'no-photo.png';
 		foreach ($content['form']['inputs'] as $inputId => $options) {
@@ -81,7 +80,7 @@ class LandingController extends AbstractActionController
 		}
 		
 		// Process the post data after input
-		$message = $this->params()->fromQuery('message');
+		$message = null;
 		$error = null;
 		if ($this->request->isPost()) {
 			$data = array();
@@ -125,15 +124,18 @@ class LandingController extends AbstractActionController
 		$this->layout('/layout/flow-layout');
 		$this->layout()->setVariables(array(
 			'context' => $context,
+			'panel' => $this->params()->fromQuery('panel', null),
+			'token' => $this->params()->fromQuery('hash', null),
 			'place_identifier' => $place_identifier,
 			'type' => $context->getConfig('landing_account_type'),
 			'header' => $content['header'],
 			'intro' => $content['intro'],
+			'footer' => $content['footer'],
 			'locale' => $locale,
 			'photo_link_id' => ($account) ? $account->photo_link_id : null,
 			'pageScripts' => 'ppit-flow/landing/scripts',
-			'message' => $message,
-			'error' => $error,
+			'message' => $this->params()->fromQuery('message'),
+			'error' => $this->params()->fromQuery('error'),
 		));
 		
 		// Feed and return the view
@@ -142,7 +144,6 @@ class LandingController extends AbstractActionController
 			'locale' => $locale,
 			'place_identifier' => $place_identifier,
 			'id' => $id,
-			'token' => $token,
 			'content' => $content,
 			'viewData' => $viewData,
 			'message' => $message,

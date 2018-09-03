@@ -1,8 +1,13 @@
 <?php
 return array(
+	'%s gave you this feedback:' => '%s vous a donné le feedback suivant :',
 	'Accepted' => 'Accepté',
+	'Concerning the request <em>%s</em>,' => 'Au sujet de la demande <em>%s</em>,',
 	'Contact' => 'Contacter',
 	'Current requests' => 'Demandes en cours',
+	'Feedback expected' => 'Feedback attendu',
+	'Feedback given' => 'Feedback donné',
+	'I contribute' => 'Je suis contributeur',
 	'Invite to a test' => 'Inviter à un test',
 	'My profile' => 'Mon profil',
 	'My requests' => 'Mes demandes',

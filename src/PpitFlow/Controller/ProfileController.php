@@ -65,9 +65,12 @@ class ProfileController extends AbstractActionController
 		$this->layout()->setVariables(array(
 			'context' => $context,
 			'place_identifier' => $place_identifier,
+			'panel' => $this->params()->fromQuery('panel', null),
+			'token' => $this->params()->fromQuery('hash', null),
 			'type' => $context->getConfig('landing_account_type'),
 			'header' => $content['header'],
 			'intro' => $content['intro'],
+			'footer' => $content['footer'],
 			'locale' => $locale,
 			'photo_link_id' => ($account) ? $account->photo_link_id : null,
 			'charter_status' => $charter_status,
@@ -266,9 +269,12 @@ class ProfileController extends AbstractActionController
 		$this->layout()->setVariables(array(
 			'context' => $context,
 			'place_identifier' => $place_identifier,
+			'panel' => $this->params()->fromQuery('panel', null),
+			'token' => $this->params()->fromQuery('hash', null),
 			'type' => $context->getConfig('landing_account_type'),
 			'header' => $content['header'],
 			'intro' => $content['intro'],
+			'footer' => $content['footer'],
 			'locale' => $locale,
 			'photo_link_id' => ($account) ? $account->photo_link_id : null,
 			'charter_status' => $charter_status,
@@ -361,7 +367,10 @@ class ProfileController extends AbstractActionController
 					$actions['accept'] = $content['detail']['actions']['accept'];
 					$actions['decline'] = $content['detail']['actions']['decline'];
 				}
-				elseif ($currentMatching['action'] != 'accept') {
+				elseif (in_array($currentMatching['action'], ['accept', 'give_feedback'])) {
+					if ($currentRequest->status == 'realized') $actions['feedback'] = $content['detail']['actions']['feedback'];
+				}
+				else {
 					$actions['abandon'] = $content['detail']['actions']['abandon'];
 				}
 			}

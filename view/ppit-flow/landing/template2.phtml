@@ -3,11 +3,11 @@
     <div class="container" name="descr" id="descr">
       <br><br><br>
  
- <?php foreach ($content['presentation'] as $section) : ?>
+ <?php foreach ($content['presentation'] as $sectionId => $section) : ?>
 
         <!-- Presentation section -->
         <div class="presentation-section">
-
+          <div class="portlet">
           <div class="portlet-header">
             <ul class="nav grey lighten-4">
               <li class="nav-item">
@@ -38,10 +38,10 @@
                 <div class="view view-cascade overlay">
   <?php endif;?>
 	
-  <?php foreach ($section['rows'] as $row) : ?>
+  <?php foreach ($section['rows'] as $rowId => $row) : ?>
                   <div class="row">
 
-    <?php foreach ($row as $column) : ?>
+    <?php foreach ($row as $columnId => $column) : ?>
                     <figure class="<?php echo $column['column-class']?>">
                       <div class="resizable ui-widget-content">
                         <span class="ui-widget-header">Drag for resizing</span>
@@ -68,7 +68,9 @@
       <?php endif;?>
 
       <?php if (array_key_exists('text', $column)) : ?>
-                      <?php echo $context->localize($column['text'], $locale) ?>
+                      <span class="editable" id="presentation/<?php echo $sectionId ?>/rows/<?php echo $rowId ?>/<?php echo $columnId ?>/text<?php if (array_key_exists('text', $column)) echo '/'.$context->getLocaleFor($column['text']) ?>">
+                        <?php echo $context->localize($column['text'], $locale) ?>
+                      </span>
 
       <?php elseif (array_key_exists('img', $column)) : ?>
                       <img 
@@ -110,6 +112,7 @@
   <?php endif;?>
 
           </div>
+        </div>
         </div>
         <!--/ Presentation section -->
 
@@ -161,7 +164,7 @@
 
           <!--Grid column-->
           <div class="col-md-8 col-xl-9">
-            <form action="<?php echo $this->url('landing/template2', array('place_identifier' => $place_identifier, 'id' => $id)) ?>?hash=<?php echo $token ?>#survey" method="post">
+            <form action="<?php echo $this->url('landing/template2', array('place_identifier' => $place_identifier, 'id' => $id)) ?>#survey" method="post">
               <div class="row">
 
  <?php foreach ($content['form']['inputs'] as $inputId => $property) : ?>

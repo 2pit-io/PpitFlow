@@ -1,23 +1,22 @@
     <!--Main layout-->
     <main>
-<form action="<?php echo $this->url('request/fill', ['id' => $id]) ?>?locale=<?php echo $locale ?>" method="post">
+<form action="<?php echo $this->url('request/feedback', ['id' => $id]) ?>?contributor=<?php echo $contributor_id ?>&locale=<?php echo $locale ?>" method="post">
 <div class="container" name="descr" id="descr">
 	<br>
-	<section class="section feature-box wow fadeIn" data-wow-delay="0.3s">
-<?php if ($id) : ?>
-      <h3 class="font-weight-bold text-center h3 my-5"><?php echo $this->translate('View/update a request', 'ppit-flow', $context->getLocale()) ?></h3>
-<?php else : ?>
-      <h3 class="font-weight-bold text-center h3 my-5"><?php echo $this->translate('Submit a new request', 'ppit-flow', $context->getLocale()) ?></h3>
+	<section class="section feature-box">
+      <h3 class="font-weight-bold text-center h3 my-5"><?php echo $context->localize($content['feedback']['title'], $locale) ?></h3>
+<?php if ($message || $error) : ?>
+      <a href="<?php echo $this->url('request/detail', ['id' => $id]) ?>" class=""><?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?></a>
 <?php endif;?>
    	</section>
 
-	<section class="section pb-5 wow fadeIn" data-wow-delay="0.3s">
+	<section class="section pb-5">
 
 		<!--Grid column-->
 		<div class="col-md-12">
 	
 			<div class="row">
-<?php foreach ($content['form']['introduction'] as $paragraph) : ?>
+<?php foreach ($content['feedback']['introduction'] as $paragraph) : ?>
 	<?php if (array_key_exists('a', $paragraph)) : ?>
 				<a 
 					href="<?php echo $paragraph['a']['href']?>" 
@@ -46,14 +45,17 @@
 			</div>
 
 			<div class="row">
-<?php if ($content['form']['options']['examples']) : ?>
-				<div class="col-md-6">&nbsp;</div>
-				<div class="col-md-6"><a class="btn btn-secondary btn-sm" id="other-example"><?php echo $this->translate('Other example', 'ppit-flow', $locale) ?></a></div>
-<?php endif;?>
 
- <?php foreach ($content['form']['inputs'] as $inputId => $property) : ?>
- 	<?php $disabled = $message || $error || $id && !$property['updatable'] ?>
-				<div class="<?php echo (array_key_exists('class',$property)) ? $property['class'] : 'col-md-6' ?>">
+<?php foreach ($content['feedback']['inputs'] as $inputId => $property) : ?>
+  <?php $disabled = $message || $error || $id && !$property['updatable'] ?>
+
+     		  <?php if ($property['type'] == 'html') : ?>
+				<<?php echo $property['markup']?> class="<?php echo $property['class'] ?>" id="<?php echo $inputId ?>">
+                  <?php echo $context->localize($property['text'], $locale) ?>
+                </<?php echo $property['markup']?>>
+              <?php else : ?>
+
+				<div class="<?php echo (array_key_exists('class',$property)) ? $property['class'] : 'col-md-12' ?>">
 					<div class="md-form">
 
 				<?php if ($property['type'] == 'select') : ?>
@@ -68,6 +70,15 @@
      			<?php elseif ($property['type'] == 'radio') : ?>
 						<input type="radio" id="<?php echo $inputId ?>" name="<?php echo $property['property_id'] ?>" class="form-control validate with-gap" value="<?php echo $property['value'] ?>" <?php if ($disabled) echo 'disabled="disabled"' ?> <?php if ($viewData[$inputId]) echo 'checked="checked"' ?> />
 						<label for="<?php echo $inputId ?>" class=""><?php if ($property['mandatory']) echo '* ' ?><?php echo $context->localize($property['labels'], $locale) ?></label>
+
+                <?php elseif ($property['type'] == 'radio-inline') : ?>
+                    <div><?php if ($property['mandatory']) echo '* ' ?><?php echo $context->localize($property['labels'], $locale) ?></div>
+                    <?php foreach ($property['radio-values'] as $radioId => $radioValue) : ?>
+					<div class="form-check form-check-inline">
+					  <input type="radio" class="form-check-input" id="<?php echo $inputId ?>-<?php echo$radioId ?>" name="<?php echo $inputId ?>" value="<?php echo $radioId ?>" <?php if ($disabled) echo 'disabled="disabled"' ?>>
+					  <label class="form-check-label" for="<?php echo $inputId ?>-<?php echo$radioId ?>"><?php echo $radioValue ?></label>
+					</div>
+                    <?php endforeach;?>
 
      			<?php elseif ($property['type'] == 'checkbox') : ?>
 						<input type="checkbox" id="<?php echo $inputId ?>" name="<?php echo $inputId ?>" class="form-control validate" value="<?php echo $property['value'] ?>" <?php if ($disabled) echo 'disabled="disabled"' ?> <?php if ($viewData[$inputId]) echo 'checked="checked"' ?> />
@@ -128,32 +139,32 @@
 					<?php endforeach;?>
 						</div>
 
-     			<?php else : ?>
-						<span id='<?php echo $inputId ?>'></span>
-
 				<?php endif;?>
 					</div>
 				</div>
+    <?php endif;?>
 <?php endforeach;?>
 			</div>
 
 			<div class="row">
 
 				<div class="center-on-small-only">
-<?php if (!$message && !$error) : ?>
+<?php if ($message || $error) : ?>
+                    <a href="<?php echo $this->url('request/detail', ['id' => $id]) ?>" class=""><?php echo $this->translate('Return to list', 'ppit-core', $context->getLocale()) ?></a>
+<?php else : ?>
 					<button class="btn btn-secondary btn-rounded" type="submit"><?php echo $context->localize($content['form']['submit']['labels'], $locale) ?></button>&nbsp;&nbsp;
+                    <a href="<?php echo $this->url('request/detail', ['id' => $id]) ?>" class=""><?php echo $this->translate('Cancel', 'ppit-core', $context->getLocale()) ?></a>
 <?php endif;?>
-                    <a href="<?php echo $this->url('profile/template1') ?>" class=""><?php echo $this->translate('Cancel', 'ppit-core', $context->getLocale()) ?></a>
 				</div>
 			</div>
 	    </div>
 		<!--Grid column-->
 	</section> 
 
-	<section class="section pb-5 wow fadeIn" data-wow-delay="0.3s">
+	<section class="section pb-5">
 		<br>
 		<div class="row">
-<?php foreach ($content['form']['legal'] as $paragraph) : ?>
+<?php foreach ($content['feedback']['legal'] as $paragraph) : ?>
 		<?php if (array_key_exists('a', $paragraph)) : ?>
 					<a 
 						href="<?php echo $paragraph['a']['href']?>" 

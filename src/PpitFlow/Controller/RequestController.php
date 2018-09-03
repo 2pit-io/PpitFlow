@@ -121,6 +121,7 @@ class RequestController extends AbstractActionController
 		$context = Context::getCurrent();
 		$place = Place::get($context->getPlaceId());
 		$place_identifier = $place->identifier;
+		$myAccount = Account::get($context->getContactId(), 'contact_1_id');
 
 		$skills = $this->params()->fromQuery('skills');
 		if (!$skills) $requests = Event::getList('request', []);
@@ -154,7 +155,11 @@ class RequestController extends AbstractActionController
 		}
 		
 		$content['data'] = array();
-		foreach ($requests as $request) $content['data'][$request->id] = $request->getProperties();
+		foreach ($requests as $request) {
+			$content['data'][$request->id] = $request->getProperties();
+			if (in_array($myAccount->id, explode(',', $request->matched_accounts))) $content['data'][$request->id]['amContributor'] = true;
+			else $content['data'][$request->id]['amContributor'] = false;
+		}
 
 		// Return the view
 		$view = new ViewModel(array(
@@ -259,17 +264,16 @@ class RequestController extends AbstractActionController
 						$viewData[$propertyId] = $data[$propertyId]; // Updating the data to display in the confirmation form
 					}
 					elseif ($property['type'] == 'date') { // Workaround due to a bug in MDBootstrap that ignores formatSubmit
-						$data[$propertyId] = substr($viewData[$propertyId], 6, 4).'-'.substr($viewData[$propertyId], 3, 2).'-'.substr($viewData[$propertyId], 0, 2);
+						$data[$propertyId] = ($viewData[$propertyId]) ? substr($viewData[$propertyId], 6, 4).'-'.substr($viewData[$propertyId], 3, 2).'-'.substr($viewData[$propertyId], 0, 2) : null;
 					}
 					else $data[$propertyId] = $viewData[$propertyId];
 
 					if (array_key_exists('account_property', $property)) $accountData[$property['account_property']] = $data[$propertyId];
 				}
 			}
-
 			if ($id) $rc = $event->loadAndUpdate($data, $description['properties']);
 			else $rc = $event->loadAndAdd($data, $description['properties']);
-			if (in_array($rc[0], ['200'])) return $this->redirect()->toRoute('request/detail', ['id' => $id], ['query' => ['message' => 'OK']]);
+			if (in_array($rc[0], ['200'])) return $this->redirect()->toRoute('request/detail', ['id' => $event->id], ['query' => ['message' => 'OK']]);
 			else $error = $rc[1];
 		}
 		
@@ -278,12 +282,15 @@ class RequestController extends AbstractActionController
 		$this->layout()->setVariables(array(
 			'context' => $context,
 			'place_identifier' => $place_identifier,
+			'panel' => $this->params()->fromQuery('panel', null),
+			'token' => $this->params()->fromQuery('hash', null),
 			'type' => $context->getConfig('landing_account_type'),
 			'header' => $content['header'],
 			'intro' => $content['intro'],
 			'form' => $content['form'],
 			'tooltips' => $content['tooltips'],
 			'examples' => $content['examples'],
+			'footer' => $content['footer'],
 			'locale' => $locale,
 			'photo_link_id' => ($account) ? $account->photo_link_id : null,
 			'charter_status' => $charter_status,
@@ -373,15 +380,26 @@ class RequestController extends AbstractActionController
 		}
 
 		if ($mode == 'requestor') {
-			$content['detail']['title'] = $content['detail']['title']['requestor'][$request->status];
 			$actions = array();
 			if ($viewData['status'] == 'new') {
 				$actions['update'] = $content['detail']['requestor_actions']['update'];
 				$actions['cancel'] = $content['detail']['requestor_actions']['cancel'];
 				$actions['complete'] = $content['detail']['requestor_actions']['complete'];
+				$content['detail']['title'] = $content['detail']['title']['requestor'][$request->status];
 			}
 			else if ($viewData['status'] == 'connected') {
 				$actions['complete'] = $content['detail']['requestor_actions']['complete'];
+				$content['detail']['title'] = $content['detail']['title']['requestor'][$request->status];
+			}
+			else if ($viewData['status'] == 'realized') {
+				$requestorFeedbackGiven = true;
+				$contributorFeedbackGiven = true;
+				if (!array_key_exists($request->account_id, $request->feedbacks)) $content['detail']['title'] = $content['detail']['title']['requestor']['requestor_feedback'];
+				else $content['detail']['title'] = $content['detail']['title']['requestor']['contributor_feedback'];
+			}
+			else if ($viewData['status'] == 'completed') {
+				$content['detail']['title'] = $content['detail']['title']['requestor'][$request->status];
+				$actions['consult_feedback'] = $content['detail']['public_actions']['consult_feedback'];
 			}
 			$content['detail']['requestor_actions'] = $actions;
 		}
@@ -392,7 +410,26 @@ class RequestController extends AbstractActionController
 				$actions['propose'] = $content['detail']['public_actions']['propose'];
 			}
 			else {
-				$content['detail']['title'] = $content['detail']['title']['public']['linked'];
+				if ($request->status == 'realized') {
+					if ($request->matching_log[$myAccount->id]['action'] == 'accept') {
+						$content['detail']['title'] = $content['detail']['title']['public']['contributor_feedback'];
+						$actions['feedback'] = $content['detail']['public_actions']['feedback'];
+					}
+					elseif ($request->matching_log[$myAccount->id]['action'] == 'give_feedback') {
+						$content['detail']['title'] = $content['detail']['title']['public']['requestor_feedback'];
+					}
+					elseif ($request->matching_log[$myAccount->id]['action'] == 'receive_feedback') {
+						$content['detail']['title'] = $content['detail']['title']['public']['contributor_feedback'];
+						$actions['feedback'] = $content['detail']['public_actions']['feedback'];
+					}
+				}
+				elseif ($request->status == 'completed') {
+					$content['detail']['title'] = $content['detail']['title']['public']['completed'];
+					$actions['consult_feedback'] = $content['detail']['public_actions']['consult_feedback'];
+				}
+				else {
+					$content['detail']['title'] = $content['detail']['title']['public']['linked'];
+				}
 			}
 			$content['detail']['public_actions'] = $actions;
 		}
@@ -422,6 +459,8 @@ class RequestController extends AbstractActionController
 		$this->layout()->setVariables(array(
 			'context' => $context,
 			'place_identifier' => $place_identifier,
+			'panel' => $this->params()->fromQuery('panel', null),
+			'token' => $this->params()->fromQuery('hash', null),
 			'account_id' => $account->id,
 			'my_account_id' => $myAccount->id,
 			'id' => $id,
@@ -433,6 +472,7 @@ class RequestController extends AbstractActionController
 			'detail' => $content['detail'],
 			'tooltips' => $content['tooltips'],
 			'examples' => $content['examples'],
+			'footer' => $content['footer'],
 			'locale' => $locale,
 			'photo_link_id' => ($account) ? $account->photo_link_id : null,
 			'charter_status' => $charter_status,
@@ -497,8 +537,11 @@ class RequestController extends AbstractActionController
 			}
 		}
 		$viewData = array(
+			'owner_id' => $myAccount->id,
+			'request_status' => $request->status,
 			'matched_accounts' => $matchedAccounts,
 			'matching_log' => $request->matching_log,
+			'feedbacks' => $request->feedbacks,
 		);
 		
 		// Return the view
@@ -889,6 +932,240 @@ class RequestController extends AbstractActionController
 			return $this->response;
 		}
 	}
+
+	// Feedback
+	public function feedbackAction()
+	{
+		// Retrieve the context and parameters
+		$context = Context::getCurrent();
+		$id = $this->params()->fromRoute('id');
+		$locale = $this->params()->fromQuery('locale');
+		$place = Place::get($context->getPlaceId());
+		$place_identifier = $place->identifier;
+		$account = Account::get($context->getContactId(), 'contact_1_id');
+		$contributor_id = $this->params()->fromQuery('contributor');
+		$request = Event::get($id);
+		if (!$request) {
+			$this->response->setStatusCode('400');
+			return $this->response;
+		}
+		$feedback = (array_key_exists($account->id, $request->feedbacks)) ? $request->feedbacks[$account->id] : array();
+
+		// Retrieve the content
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('request/'.$place->identifier);
+		else $content = Config::get($place->identifier.'_request', 'identifier')->content;
+
+		// Discriminate between the mode 'requestor' (consultation of a request of mine) and the mode 'public' (requests from others)
+		if ($request->account_id == $account->id) $mode = 'requestor';
+		else $mode = 'public';
+		
+		$viewData = array();
+		
+		// Form
+		$inputs = array();
+		foreach ($content['feedback']['inputs'] as $inputId => $options) {
+			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
+			else {
+				$property = $description['properties'][$inputId];
+				if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
+				if (array_key_exists('mandatory', $options)) $property['mandatory'] = $options['mandatory'];
+				if (array_key_exists('updatable', $options)) $property['updatable'] = $options['updatable'];
+				if (array_key_exists('rows', $options)) $property['rows'] = $options['rows'];
+				if (array_key_exists('class', $options)) $property['class'] = $options['class'];
+				if (array_key_exists('labels', $options)) $property['labels'] = $options['labels'];
+			}
+			if ($property['type'] == 'html' && array_key_exists('params', $property)) {
+				$arguments = array();
+				foreach ($property['params'] as $paramId) $arguments[$paramId] = $request->properties[$paramId];
+				$text = array();
+				foreach ($property['text'] as $locale => $localized) $text[$locale] = vsprintf($localized, $arguments);
+				$property['text'] = $text;
+			}
+			if (array_key_exists('repository', $property)) $property['repository'] = $context->getConfig($property['repository']);
+			if (!array_key_exists('mandatory', $property)) $property['mandatory'] = false;
+			if (!array_key_exists('updatable', $property)) $property['updatable'] = true;
+			if (!array_key_exists('placeholder', $property)) $property['placeholder'] = null;
+  			if (!array_key_exists('mode', $property) || $property['mode'] == $mode) {
+				$inputs[$inputId] = $property;
+  			}
+			if (array_key_exists('property_id', $property)) $propertyId = $property['property_id'];
+			else $propertyId = $inputId;
+			if ($id && array_key_exists($propertyId, $feedback)) $viewData[$inputId] = $feedback[$propertyId];
+			else $viewData[$inputId] = (array_key_exists('default', $property)) ? $property['default'] : null;
+		}
+		$content['feedback']['inputs'] = $inputs;
+
+		if ($mode == 'requestor') {
+			$content['feedback']['title'] = $content['feedback']['title']['requestor']['new'];
+		}
+		else { // Public mode
+			$content['feedback']['title'] = $content['feedback']['title']['public']['new'];
+		}
+		
+		// Process the post data after input
+		$message = $error = null;
+		if ($this->request->isPost()) {
+					
+			// Atomicity
+			$connection = Event::getTable()->getAdapter()->getDriver()->getConnection();
+			$connection->beginTransaction();
+			try {
+		
+				if ($mode == 'requestor') {
+
+					// The contributor received a feedback 
+					$entry = array(
+						'user_id' => $context->getUserId(),
+						'n_fn' => $context->getFormatedName(),
+						'action' => 'request/feedback',
+					);
+					if (array_key_exists($contributor_id, $request->matching_log)) {
+						$request->matching_log[$contributor_id]['log'][date('Y-m-d H:i:s')] = $entry;
+					}
+					else {
+						$request->matching_log[$contributor_id] = ['log' => [date('Y-m-d H:i:s') => $entry]];
+					}
+					$request->matching_log[$contributor_id]['action'] = 'receive_feedback';
+					$request->matching_log[$contributor_id]['date'] = Date('Y-m-d');
+
+					// Log the feedback
+					$request->feedbacks[$account->id] = array(
+						$contributor_id => array(
+							'private_comment' => $this->getRequest()->getPost('private_comment'),
+							'platform_benefit' => $this->getRequest()->getPost('platform_benefit'),
+							'platform_satisfaction' => $this->getRequest()->getPost('platform_satisfaction'),
+							'platform_accessibility' => $this->getRequest()->getPost('platform_accessibility'),
+							'platform_comment' => $this->getRequest()->getPost('platform_comment'),
+							'community_comment' => $this->getRequest()->getPost('community_comment')
+						),
+					);
+				}
+				else {
+				
+					// The contributor gave a feedback 
+					$entry = array(
+						'user_id' => $context->getUserId(),
+						'n_fn' => $context->getFormatedName(),
+						'action' => 'request/feedback',
+					);
+					if (array_key_exists($account->id, $request->matching_log)) {
+						$request->matching_log[$account->id]['log'][date('Y-m-d H:i:s')] = $entry;
+					}
+					else {
+						$request->matching_log[$account->id] = ['log' => [date('Y-m-d H:i:s') => $entry]];
+					}
+					$request->matching_log[$account->id]['action'] = 'give_feedback';
+					$request->matching_log[$account->id]['date'] = Date('Y-m-d');
+
+					// Log the feedback
+					$request->feedbacks[$account->id] = array(
+						$request->account_id => array(
+							'private_comment' => $this->getRequest()->getPost('private_comment'),
+							'platform_benefit' => $this->getRequest()->getPost('platform_benefit'),
+							'platform_satisfaction' => $this->getRequest()->getPost('platform_satisfaction'),
+							'platform_accessibility' => $this->getRequest()->getPost('platform_accessibility'),
+							'platform_comment' => $this->getRequest()->getPost('platform_comment'),
+							'community_comment' => $this->getRequest()->getPost('community_comment')
+						),
+					);
+				}
+				
+				// Mark the request as completed if all the stakeholders (requestor and contributors gave their feedback)
+				$completed = true;
+				if (!array_key_exists($request->account_id, $request->feedbacks)) $completed = false;
+				foreach (explode(',', $request->matched_accounts) as $otherAccountId) {
+					if (!array_key_exists($otherAccountId, $request->feedbacks)) $completed = false;
+				}
+				if ($completed) $request->status = 'completed';
+				
+				$rc = $request->update(null);
+				if ($rc != 'OK') {
+					$connection->rollback();
+					$error = $rc;
+				}
+				
+				$connection->commit();
+				$message = 'OK';
+			}
+			catch (\Exception $e) {
+				$connection->rollback();
+				$error = 'technical';
+			}
+		}
+		
+		// Feed the layout
+		$this->layout('/layout/flow-layout');
+		$this->layout()->setVariables(array(
+			'context' => $context,
+			'place_identifier' => $place_identifier,
+			'panel' => $this->params()->fromQuery('panel', null),
+			'token' => $this->params()->fromQuery('hash', null),
+			'type' => $context->getConfig('landing_account_type'),
+			'header' => $content['header'],
+			'intro' => $content['intro'],
+			'form' => $content['feedback'],
+			'footer' => $content['footer'],
+			'locale' => $locale,
+			'charter_status' => $charter_status = $account->getCharterStatus(),
+			'gtou_status' => $account->getGtouStatus(),
+			'photo_link_id' => $account->photo_link_id,
+			'pageScripts' => 'ppit-flow/request/feedback-scripts',
+			'tooltips' => $content['tooltips'],
+			'message' => $message,
+			'error' => $error,
+		));
+		
+		// Return the view
+		$view = new ViewModel(array(
+			'context' => $context,
+			'id' => $id,
+			'contributor_id' => $contributor_id,
+			'locale' => $locale,
+			'event' => $request,
+			'content' => $content,
+			'viewData' => $viewData,
+			'message' => $message,
+			'error' => $error,
+		));
+		return $view;
+	}
+
+	public function consultFeedbackAction()
+	{
+		// Retrieve the context and the parameters
+		$context = Context::getCurrent();
+		$place = Place::get($context->getPlaceId());
+		$place_identifier = $place->identifier;
+		$id = $this->params()->fromRoute('id');
+		$request = Event::get($id);
+		$myAccount = Account::get($context->getContactId(), 'contact_1_id');
+		$locale = $this->params()->fromQuery('locale');
+				
+		// Retrieve the accounts for the feedback givers
+		$myReceivedFeedbacks = array();
+		foreach ($request->feedbacks as $giver_id => $receivers) {
+			foreach ($receivers as $receiver_id => $feedback) {
+				if ($receiver_id == $myAccount->id) {
+					$receiver = Account::get($receiver_id);
+					$myReceivedFeedbacks[] = array(
+						'n_fn' => $receiver->n_fn,
+						'text' => $feedback['private_comment'],
+					);
+				}
+			}
+		}
+
+		// Return the view
+		$view = new ViewModel(array(
+			'context' => $context,
+			'id' => $id,
+			'locale' => $locale,
+			'request' => $request,
+			'myReceivedFeedbacks' => $myReceivedFeedbacks,
+		));
+		$view->setTerminal(true);
+		return $view;
+	}
 	
 	public function cancelAction()
 	{
@@ -904,7 +1181,7 @@ class RequestController extends AbstractActionController
 		$this->response->setStatusCode('200');
 		return $this->response;
 	}
-	
+/*	
 	public function addToBasketAction()
 	{
 		// Retrieve the context and the parameters
@@ -933,5 +1210,5 @@ class RequestController extends AbstractActionController
 		unset($profile->specifications['request_basket'][$id]);
 		$profile->update(null);
 		return $this->response;
-	}
+	}*/
 }

@@ -57,7 +57,7 @@
 <?php foreach ($content['card']['properties'] as $inputId => $property) : ?>
   <?php if ($property['type'] == 'chips') : ?>
 
-    <?php $currentSkills = explode(',', $request[$inputId]) ?>
+    <?php $currentSkills = ($request[$inputId]) ? explode(',', $request[$inputId]) : [] ?>
     <div class="text-center">
     <?php foreach ($currentSkills as $entryId) : ?>
       <?php $entry = $property['repository'][$entryId] ?>
@@ -98,6 +98,10 @@
     
   <?php endif;?>
 <?php endforeach;?>
+
+<?php if ($request['amContributor']) : ?>
+    <div class="badge badge-success"><?php echo $this->translate('I contribute', 'ppit-flow', $context->getLocale()) ?></div>
+<?php endif;?>
 
   </div>
 

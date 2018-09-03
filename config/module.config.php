@@ -208,6 +208,13 @@ return array (
 							'defaults' => array('action' => 'decline'),
 						),
 					),
+					'feedback' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/feedback[/:id]',
+							'defaults' => array('action' => 'feedback'),
+						),
+					),
 					'abandon' => array(
 						'type' => 'segment',
 						'options' => array(
@@ -222,6 +229,13 @@ return array (
 							'defaults' => array('action' => 'complete'),
 						),
 					),
+					'consultFeedback' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/consult-feedback[/:id]',
+							'defaults' => array('action' => 'consultFeedback'),
+						),
+					),
 					'cancel' => array(
 						'type' => 'segment',
 						'options' => array(
@@ -229,7 +243,7 @@ return array (
 							'defaults' => array('action' => 'cancel'),
 						),
 					),
-					'addToBasket' => array(
+/*					'addToBasket' => array(
 						'type' => 'segment',
 						'options' => array(
 							'route' => '/add-to-basket[/:id]',
@@ -242,7 +256,7 @@ return array (
 							'route' => '/remove-from-basket[/:id]',
 							'defaults' => array('action' => 'removeFromBasket'),
 						),
-					),
+					),*/
 				),
 			),
 			'survey' => array(
@@ -346,9 +360,11 @@ return array (
 				array('route' => 'request/propose', 'roles' => array('user')),
 				array('route' => 'request/accept', 'roles' => array('user')),
 				array('route' => 'request/decline', 'roles' => array('user')),
+				array('route' => 'request/feedback', 'roles' => array('user')),
+				array('route' => 'request/consultFeedback', 'roles' => array('user')),
 				array('route' => 'request/cancel', 'roles' => array('user')),
-				array('route' => 'request/addToBasket', 'roles' => array('user')),
-				array('route' => 'request/removeFromBasket', 'roles' => array('user')),
+/*				array('route' => 'request/addToBasket', 'roles' => array('user')),
+				array('route' => 'request/removeFromBasket', 'roles' => array('user')),*/
 				
 				array('route' => 'survey/fill', 'roles' => array('guest')),
 				array('route' => 'survey/template1', 'roles' => array('guest')),

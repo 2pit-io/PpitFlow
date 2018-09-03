@@ -68,7 +68,9 @@
   <?php endforeach;?>
 
             <td class="text-center">
-  <?php if ($viewData['matching_log'][$itemId]['action'] == 'propose') : ?>
+  <?php if (array_key_exists($viewData['owner_id'], $viewData['feedbacks'])) : ?>
+                <span class="badge badge-success"><?php echo $this->translate('Feedback given', 'ppit-flow', $context->getLocale()) ?></span>
+  <?php elseif ($viewData['matching_log'][$itemId]['action'] == 'propose') : ?>
   <?php 
   $datetime1 = date_create($viewData['matching_log'][$itemId]['date']);
   $datetime2 = date_create(date('Y-m-d'));
@@ -76,7 +78,11 @@
   ?>
                 <span class="badge <?php echo ($age > 5) ? 'badge-danger pending_contact' : 'badge-warning' ?>"><?php echo $this->translate('To be contacted', 'ppit-flow', $context->getLocale()) ?></span>
   <?php elseif ($viewData['matching_log'][$itemId]['action'] == 'accept') : ?>
+    <?php if ($viewData['request_status'] == 'realized') : ?>
+                <span class="badge badge-danger"><?php echo $this->translate('Feedback expected', 'ppit-flow', $context->getLocale()) ?></span>
+    <?php else : ?>
                 <span class="badge badge-success"><?php echo $this->translate('Accepted', 'ppit-flow', $context->getLocale()) ?></span>
+    <?php endif;?>
   <?php endif;?>
             </td>
         </tr>
