@@ -56,7 +56,7 @@ class ProfileController extends AbstractActionController
 		$viewData = array();
 		$viewData['photo_link_id'] = ($account->photo_link_id) ? $account->photo_link_id : 'no-photo.png';
 		
-		$accounts = Account::getList('pbc', [], '+name', null);
+		$accounts = Account::getList('pbc', ['status' => 'active'], '+name', null);
 		$viewData['accounts'] = array();
 		foreach ($accounts as $accountId => $account) $viewData['accounts'][$accountId] = $account->getProperties();
 
@@ -158,7 +158,7 @@ class ProfileController extends AbstractActionController
 			$request = Event::get($request_id);
 			$skills = $request->property_2;
 			foreach (explode(',', $skills) as $skill) {
-				$result = Account::getList('pbc', ['profile_tiny_2' => $skill], '+name', null);
+				$result = Account::getList('pbc', ['status' => 'active', 'profile_tiny_2' => $skill], '+name', null);
 				foreach ($result as $account_id => $account) {
 					
 					// Exclude from the potential matching list myself aand the already matched accounts
@@ -169,7 +169,7 @@ class ProfileController extends AbstractActionController
 			}
 		}
 		else {
-			$result = Account::getList('pbc', [], '+name', null);
+			$result = Account::getList('pbc', ['status' => 'active'], '+name', null);
 			foreach ($result as $account_id => $account) {
 				
 				// Exclude from the potential matching list myself aand the already matched accounts

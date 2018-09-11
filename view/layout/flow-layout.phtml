@@ -130,6 +130,8 @@
   <?php elseif (array_key_exists('button', $paragraph)) : ?>
             <button type="button" 
     <?php if (array_key_exists('class', $paragraph['button'])) echo 'class="'.$paragraph['button']['class'].'"' ?>
+    <?php if (array_key_exists('data-toggle', $paragraph['button'])) echo 'data-toggle="'.$paragraph['button']['data-toggle'].'"' ?>
+    <?php if (array_key_exists('data-target', $paragraph['button'])) echo 'data-target="'.$paragraph['button']['data-target'].'"' ?>
     <?php if (array_key_exists('id', $paragraph['button'])) echo 'id="'.$paragraph['button']['id'].'"' ?>
             >
 

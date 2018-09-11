@@ -45,6 +45,10 @@
         <span class="font-weight-bold"><?php echo $context->localize($property['labels'], $locale) ?></span>: <?php echo $context->decodeDate($viewData[$propertyId]) ?>
       </div>
 
+    <?php elseif ($property['type'] == 'textarea') : ?>
+      <div class="text-left mb-3 grey-text font-weight-bold"><?php echo $context->localize($property['labels'], $locale) ?>:</div>
+      <div class="text-left mb-3 grey-text"><?php echo nl2br($viewData[$propertyId]) ?></div>
+
     <?php else : ?>
       <div class="text-left mb-3 grey-text">
         <span class="font-weight-bold"><?php echo $context->localize($property['labels'], $locale) ?></span>: <?php echo $viewData[$propertyId] ?>

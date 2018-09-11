@@ -49,9 +49,12 @@ class RequestController extends AbstractActionController
 		
 		$content['data'] = array();
 		foreach ($requests as $request) {
-			if ($mode == 'Owner' && $request->account_id == $myAccount->id || $mode != 'Owner' && $request->account_id != $myAccount->id) {
+
+			$actions = array();
+			if ($mode == 'Owner' && $request->account_id == $myAccount->id) {
+
 				$content['data'][$request->id] = $request->getProperties();
-	
+				
 				$matchedAccounts = array();
 				if ($request->matched_accounts) {
 					foreach (explode(',', $request->matched_accounts) as $matchedId) {
@@ -75,37 +78,38 @@ class RequestController extends AbstractActionController
 					
 				if (in_array($myAccount->id, explode(',', $request->matched_accounts))) $content['data'][$request->id]['amContributor'] = true;
 				else $content['data'][$request->id]['amContributor'] = false;
-	
-				$actions = array();
-				if ($mode == 'Owner') {
-					if ($request->status == 'new') {
-						$actions['cancel'] = $content['detail']['OwnerActions']['cancel'];
-						$actions['complete'] = $content['detail']['OwnerActions']['complete'];
-					}
-					elseif ($request->status == 'connected') {
-						$actions['complete'] = $content['detail']['OwnerActions']['complete'];
-					}
-					elseif ($request->status == 'realized') {
-						$requestorFeedbackGiven = true;
-						$contributorFeedbackGiven = true;
-						if (!array_key_exists($request->account_id, $request->feedbacks)) $content['detail']['title'] = $content['detail']['title']['Owner']['requestor_feedback'];
-					}
-					elseif ($request->status == 'completed') {
-						$actions['consultFeedback'] = $content['detail']['OwnerActions']['consultFeedback'];
-					}
-					$content['data'][$request->id]['OwnerActions'] = $actions;
+
+				if ($request->status == 'new') {
+					$actions['cancel'] = $content['detail']['OwnerActions']['cancel'];
+					$actions['complete'] = $content['detail']['OwnerActions']['complete'];
 				}
-				else {
-					if ($request->status == 'realized') {
-						if (in_array($request->matching_log[$myAccount->id]['action'], ['accept', 'receive_feedback'])) {
-							$actions['feedback'] = $content['detail']['ContributorActions']['feedback'];
-						}
-					}
-					elseif ($request->status == 'completed') {
-						$actions['consultFeedback'] = $content['detail']['ContributorActions']['consultFeedback'];
-					}
-					$content['data'][$request->id]['ContributorActions'] = $actions;
+				elseif ($request->status == 'connected') {
+					$actions['complete'] = $content['detail']['OwnerActions']['complete'];
 				}
+				elseif ($request->status == 'realized') {
+					$requestorFeedbackGiven = true;
+					$contributorFeedbackGiven = true;
+					if (!array_key_exists($request->account_id, $request->feedbacks)) $content['detail']['title'] = $content['detail']['title']['Owner']['requestor_feedback'];
+				}
+				elseif ($request->status == 'completed') {
+					$actions['consultFeedback'] = $content['detail']['OwnerActions']['consultFeedback'];
+				}
+				$content['data'][$request->id]['OwnerActions'] = $actions;
+			}
+
+			elseif ($mode == 'Contributor' && in_array($myAccount->id, explode(',', $request->matched_accounts))) {
+
+				$content['data'][$request->id] = $request->getProperties();
+				
+				if ($request->status == 'realized') {
+					if (in_array($request->matching_log[$myAccount->id]['action'], ['accept', 'receive_feedback'])) {
+						$actions['feedback'] = $content['detail']['ContributorActions']['feedback'];
+					}
+				}
+				elseif ($request->status == 'completed') {
+					$actions['consultFeedback'] = $content['detail']['ContributorActions']['consultFeedback'];
+				}
+				$content['data'][$request->id]['ContributorActions'] = $actions;
 			}
 		}
 		
@@ -153,7 +157,7 @@ class RequestController extends AbstractActionController
 		$myAccount = Account::get($context->getContactId(), 'contact_1_id');
 
 		$skills = $this->params()->fromQuery('skills');
-		if (!$skills) $requests = Event::getList('request', []);
+		if (!$skills) $requests = Event::getList('request', ['status' => 'new,connected', 'account_status' => 'active']);
 		else {
 			$requests = array();
 			foreach (explode(',', $skills) as $skill) {
