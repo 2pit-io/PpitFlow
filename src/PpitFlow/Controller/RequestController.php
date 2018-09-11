@@ -19,83 +19,112 @@ use Zend\View\Model\ViewModel;
 
 class RequestController extends AbstractActionController
 {
-/*	public function homeAction()
+	public function listAction()
 	{
+		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
-		$instance_caption = $context->getInstance()->caption;
-		$place_identifier = $this->params()->fromRoute('place_identifier');
-		if ($place_identifier) $place = Place::get($place_identifier, 'identifier');
-		else {
-			$place = Place::get($context->getPlaceId());
-			$place_identifier = $place->identifier;
-		}
-
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('profile/'.$place_identifier);
-		else $content = Config::get($place_identifier.'_profile', 'identifier')->content;
+		$place = Place::get($context->getPlaceId());
+		$place_identifier = $place->identifier;
+		$myAccount = Account::get($context->getContactId(), 'contact_1_id');
 		$locale = $this->params()->fromQuery('locale');
+		$mode = $this->params()->fromQuery('mode', 'Owner');
+		$requests = Event::getList('request', ['status' => 'new,connected,realized,completed']);
 		
-		$account_id = $this->params()->fromRoute('account_id');
-		$account = null;
-		if ($account_id) {
-			$account = Account::get($account_id);
-			$charter_status = $account->getCharterStatus();
-			$gtou_status = $account->getGtouStatus();
-		}
-		elseif ($context->isAuthenticated()) {
-			$account = Account::get($context->getContactId(), 'contact_1_id');
-			$charter_status = $account->getCharterStatus();
-			$gtou_status = $account->getGtouStatus();
-		}
-		else {
-			$account = Account::instanciate($context->getConfig('landing_account_type'));
-			$charter_status = null;
-			$gtou_status = null;
-		}
-
-		if (!$locale) if ($account) $locale = $account->locale; else $locale = $context->getLocale();
-
+		// Retrieve the content
 		$description = Event::getDescription('request');
-		$viewData = array();
-		$viewData['photo_link_id'] = ($account->photo_link_id) ? $account->photo_link_id : 'no-photo.png';
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('request/'.$place->identifier);
+		else $content = Config::get($place->identifier.'_request', 'identifier')->content;
 		
-		$requests = Event::getList('request', []);
-		$viewData['requests'] = array();
-		foreach ($requests as $requestId => $request) $viewData['requests'][$requestId] = $request->getProperties();
-
-		// Feed the layout
-		$this->layout('/layout/flow-layout');
-		$this->layout()->setVariables(array(
-			'context' => $context,
-			'place_identifier' => $place_identifier,
-			'type' => $context->getConfig('landing_account_type'),
-			'header' => $content['header'],
-			'intro' => $content['intro'],
-			'locale' => $locale,
-			'photo_link_id' => ($account) ? $account->photo_link_id : null,
-			'charter_status' => $charter_status,
-			'gtou_status' => $gtou_status,
-			'pageScripts' => 'ppit-flow/request/home-scripts',
-			'tooltips' => $content['tooltips'],
-			'message' => null,
-			'error' => null,
-		));
+		// Card
+		foreach ($content['card']['properties'] as $propertyId => $options) {
+			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
+			else {
+				$property = $description['properties'][$propertyId];
+				if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
+				if (array_key_exists('labels', $options)) $property['labels'] = $options['labels'];
+			}
+			if (array_key_exists('repository', $property)) $property['repository'] = $context->getConfig($property['repository']);
+			$content['card']['properties'][$propertyId] = $property;
+		}
 		
+		$content['data'] = array();
+		foreach ($requests as $request) {
+			if ($mode == 'Owner' && $request->account_id == $myAccount->id || $mode != 'Owner' && $request->account_id != $myAccount->id) {
+				$content['data'][$request->id] = $request->getProperties();
+	
+				$matchedAccounts = array();
+				if ($request->matched_accounts) {
+					foreach (explode(',', $request->matched_accounts) as $matchedId) {
+						$actions = array();
+						$matchedAccounts[$matchedId] = Account::get($matchedId)->properties;
+						$currentMatching = $request->matching_log[$matchedId];
+						if ($currentMatching['action'] == 'propose') {
+							$actions['accept'] = $content['detail']['MatchingActions']['accept'];
+							$actions['decline'] = $content['detail']['MatchingActions']['decline'];
+						}
+						elseif (in_array($currentMatching['action'], ['accept', 'give_feedback'])) {
+							if ($request->status == 'realized') $actions['feedback'] = $content['detail']['MatchingActions']['feedback'];
+						}
+						else {
+							$actions['abandon'] = $content['detail']['MatchingActions']['abandon'];
+						}
+						$matchedAccounts[$matchedId]['actions'] = $actions;
+					}
+				}
+				$content['data'][$request->id]['matched_accounts'] = $matchedAccounts;
+					
+				if (in_array($myAccount->id, explode(',', $request->matched_accounts))) $content['data'][$request->id]['amContributor'] = true;
+				else $content['data'][$request->id]['amContributor'] = false;
+	
+				$actions = array();
+				if ($mode == 'Owner') {
+					if ($request->status == 'new') {
+						$actions['cancel'] = $content['detail']['OwnerActions']['cancel'];
+						$actions['complete'] = $content['detail']['OwnerActions']['complete'];
+					}
+					elseif ($request->status == 'connected') {
+						$actions['complete'] = $content['detail']['OwnerActions']['complete'];
+					}
+					elseif ($request->status == 'realized') {
+						$requestorFeedbackGiven = true;
+						$contributorFeedbackGiven = true;
+						if (!array_key_exists($request->account_id, $request->feedbacks)) $content['detail']['title'] = $content['detail']['title']['Owner']['requestor_feedback'];
+					}
+					elseif ($request->status == 'completed') {
+						$actions['consultFeedback'] = $content['detail']['OwnerActions']['consultFeedback'];
+					}
+					$content['data'][$request->id]['OwnerActions'] = $actions;
+				}
+				else {
+					if ($request->status == 'realized') {
+						if (in_array($request->matching_log[$myAccount->id]['action'], ['accept', 'receive_feedback'])) {
+							$actions['feedback'] = $content['detail']['ContributorActions']['feedback'];
+						}
+					}
+					elseif ($request->status == 'completed') {
+						$actions['consultFeedback'] = $content['detail']['ContributorActions']['consultFeedback'];
+					}
+					$content['data'][$request->id]['ContributorActions'] = $actions;
+				}
+			}
+		}
+		
+		// Return the view
 		$view = new ViewModel(array(
 			'context' => $context,
-			'locale' => $locale,
-			'description' => $description,
-			'viewData' => $viewData,
-			'requests' => $requests,
+			'mode' => $mode,
 			'content' => $content,
+			'locale' => $locale,
 		));
+		$view->setTerminal(true);
 		return $view;
-	}*/
-
+	}
+	
 	public function dashboardAction()
 	{
 		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
-		$requests = Event::getList('request', 'new,connected,realized,completed');
+		$requests = Event::getList('request', ['status' => 'new,connected,realized,completed']);
 		$locale = $this->params()->fromQuery('locale');
 		
 		$content = array();
@@ -338,8 +367,8 @@ class RequestController extends AbstractActionController
 		$account = Account::get($request->account_id);
 		
 		// Discriminate between the mode 'requestor' (consultation of a request of mine) and the mode 'public' (requests from others)
-		if ($request->account_id == $myAccount->id) $mode = 'requestor';
-		else $mode = 'public';
+		if ($request->account_id == $myAccount->id) $mode = 'Owner';
+		else $mode = 'Public';
 		
 		// Retrieve the request description according to its type
 		$description = Event::getDescription($request->type);
@@ -349,7 +378,7 @@ class RequestController extends AbstractActionController
 		else $content = Config::get($place->identifier.'_'.$survey, 'identifier')->content;
 		if (!array_key_exists('options', $content['detail'])) $content['detail']['options'] = array();
 		
-		$viewData = array('status' => $request->status);
+		$viewData = $request->getProperties();
 	
 		// Form
 		foreach ($content['detail']['properties'] as $inputId => $options) {
@@ -379,59 +408,59 @@ class RequestController extends AbstractActionController
 			else $viewData[$inputId] = (array_key_exists('default', $property)) ? $property['default'] : null;
 		}
 
-		if ($mode == 'requestor') {
+		if ($mode == 'Owner') {
 			$actions = array();
 			if ($viewData['status'] == 'new') {
-				$actions['update'] = $content['detail']['requestor_actions']['update'];
-				$actions['cancel'] = $content['detail']['requestor_actions']['cancel'];
-				$actions['complete'] = $content['detail']['requestor_actions']['complete'];
-				$content['detail']['title'] = $content['detail']['title']['requestor'][$request->status];
+				$actions['update'] = $content['detail']['OwnerActions']['update'];
+				$actions['cancel'] = $content['detail']['OwnerActions']['cancel'];
+				$actions['complete'] = $content['detail']['OwnerActions']['complete'];
+				$content['detail']['title'] = $content['detail']['title']['Owner'][$request->status];
 			}
 			else if ($viewData['status'] == 'connected') {
-				$actions['complete'] = $content['detail']['requestor_actions']['complete'];
-				$content['detail']['title'] = $content['detail']['title']['requestor'][$request->status];
+				$actions['complete'] = $content['detail']['OwnerActions']['complete'];
+				$content['detail']['title'] = $content['detail']['title']['Owner'][$request->status];
 			}
 			else if ($viewData['status'] == 'realized') {
 				$requestorFeedbackGiven = true;
 				$contributorFeedbackGiven = true;
-				if (!array_key_exists($request->account_id, $request->feedbacks)) $content['detail']['title'] = $content['detail']['title']['requestor']['requestor_feedback'];
-				else $content['detail']['title'] = $content['detail']['title']['requestor']['contributor_feedback'];
+				if (!array_key_exists($request->account_id, $request->feedbacks)) $content['detail']['title'] = $content['detail']['title']['Owner']['requestor_feedback'];
+				else $content['detail']['title'] = $content['detail']['title']['Owner']['contributor_feedback'];
 			}
 			else if ($viewData['status'] == 'completed') {
-				$content['detail']['title'] = $content['detail']['title']['requestor'][$request->status];
-				$actions['consult_feedback'] = $content['detail']['public_actions']['consult_feedback'];
+				$content['detail']['title'] = $content['detail']['title']['Owner'][$request->status];
+				$actions['consultFeedback'] = $content['detail']['PublicActions']['consultFeedback'];
 			}
-			$content['detail']['requestor_actions'] = $actions;
+			$content['detail']['OwnerActions'] = $actions;
 		}
 		else { // Public mode
 			$actions = array();
 			if (!in_array($myAccount->id, explode(',', $request->matched_accounts))) {
-				$content['detail']['title'] = $content['detail']['title']['public']['new'];
-				$actions['propose'] = $content['detail']['public_actions']['propose'];
+				$content['detail']['title'] = $content['detail']['title']['Public']['new'];
+				$actions['propose'] = $content['detail']['PublicActions']['propose'];
 			}
 			else {
 				if ($request->status == 'realized') {
 					if ($request->matching_log[$myAccount->id]['action'] == 'accept') {
-						$content['detail']['title'] = $content['detail']['title']['public']['contributor_feedback'];
-						$actions['feedback'] = $content['detail']['public_actions']['feedback'];
+						$content['detail']['title'] = $content['detail']['title']['Public']['contributor_feedback'];
+						$actions['feedback'] = $content['detail']['PublicActions']['feedback'];
 					}
 					elseif ($request->matching_log[$myAccount->id]['action'] == 'give_feedback') {
-						$content['detail']['title'] = $content['detail']['title']['public']['requestor_feedback'];
+						$content['detail']['title'] = $content['detail']['title']['Public']['requestor_feedback'];
 					}
 					elseif ($request->matching_log[$myAccount->id]['action'] == 'receive_feedback') {
-						$content['detail']['title'] = $content['detail']['title']['public']['contributor_feedback'];
-						$actions['feedback'] = $content['detail']['public_actions']['feedback'];
+						$content['detail']['title'] = $content['detail']['title']['Public']['contributor_feedback'];
+						$actions['feedback'] = $content['detail']['PublicActions']['feedback'];
 					}
 				}
 				elseif ($request->status == 'completed') {
-					$content['detail']['title'] = $content['detail']['title']['public']['completed'];
-					$actions['consult_feedback'] = $content['detail']['public_actions']['consult_feedback'];
+					$content['detail']['title'] = $content['detail']['title']['Public']['completed'];
+					$actions['consultFeedback'] = $content['detail']['PublicActions']['consultFeedback'];
 				}
 				else {
-					$content['detail']['title'] = $content['detail']['title']['public']['linked'];
+					$content['detail']['title'] = $content['detail']['title']['Public']['linked'];
 				}
 			}
-			$content['detail']['public_actions'] = $actions;
+			$content['detail']['PublicActions'] = $actions;
 		}
 				
 		// Matched Accounts
@@ -482,7 +511,7 @@ class RequestController extends AbstractActionController
 			'message' => $message,
 			'error' => null,
 		));
-	
+
 		// Return the view
 		$view = new ViewModel(array(
 			'context' => $context,
@@ -490,6 +519,7 @@ class RequestController extends AbstractActionController
 			'status' => $request->status,
 			'mode' => $mode,
 			'locale' => $locale,
+			'description' => $description,
 			'content' => $content,
 			'viewData' => $viewData,
 			'availableSkills' => $availableSkills,
@@ -497,6 +527,38 @@ class RequestController extends AbstractActionController
 		return $view;
 	}
 
+	public function detailv2Action()
+	{
+		$view = $this->detailAction();
+		$view->setTerminal(true); // Version sprint 07/09
+		return $view;
+	}
+
+	public function updateAction()
+	{
+		$view = $this->detailAction();
+		$view->setTerminal(true); // Version sprint 07/09
+		return $view;
+	}
+
+	public function cancelAction()
+	{
+		$context = Context::getCurrent();
+		$id = $this->params()->fromRoute('id');
+		$request = Event::get($id);
+		if (!$request) {
+			$this->response->setStatusCode('400');
+			return $this->response;
+		}
+		if ($this->request->isPost()) {
+			$request->status = 'canceled';
+			$request->update(null);
+		}
+		$view = $this->detailAction();
+		$view->setTerminal(true); // Version sprint 07/09
+		return $view;
+	}
+	
 	public function accountListAction()
 	{
 		// Retrieve the context and the parameters
@@ -999,7 +1061,7 @@ class RequestController extends AbstractActionController
 			$content['feedback']['title'] = $content['feedback']['title']['requestor']['new'];
 		}
 		else { // Public mode
-			$content['feedback']['title'] = $content['feedback']['title']['public']['new'];
+			$content['feedback']['title'] = $content['feedback']['title']['contributor']['new'];
 		}
 		
 		// Process the post data after input
@@ -1166,49 +1228,4 @@ class RequestController extends AbstractActionController
 		$view->setTerminal(true);
 		return $view;
 	}
-	
-	public function cancelAction()
-	{
-		$context = Context::getCurrent();
-		$id = $this->params()->fromRoute('id');
-		$request = Event::get($id);
-		if (!$request) {
-			$this->response->setStatusCode('400');
-			return $this->response;
-		}
-		$request->status = 'canceled';
-		$request->update(null);
-		$this->response->setStatusCode('200');
-		return $this->response;
-	}
-/*	
-	public function addToBasketAction()
-	{
-		// Retrieve the context and the parameters
-		$context = Context::getCurrent();
-		$place = Place::get($context->getPlaceId());
-		$place_identifier = $place->identifier;
-		$profile = Vcard::get($context->getContactId());
-		$locale = $this->params()->fromQuery('locale');
-		$id = $this->params()->fromRoute('id');
-		if (!array_key_exists('request_basket', $profile->specifications)) $profile->specifications['request_basket'] = array();
-		$profile->specifications['request_basket'][$id] = array();
-		$profile->update(null);
-		return $this->response;
-	}
-	
-	public function removeFromBasketAction()
-	{
-		// Retrieve the context and the parameters
-		$context = Context::getCurrent();
-		$place = Place::get($context->getPlaceId());
-		$place_identifier = $place->identifier;
-		$profile = Vcard::get($context->getContactId());
-		$locale = $this->params()->fromQuery('locale');
-		$id = $this->params()->fromRoute('id');
-		if (!array_key_exists('request_basket', $profile->specifications)) $profile->specifications['request_basket'] = array();
-		unset($profile->specifications['request_basket'][$id]);
-		$profile->update(null);
-		return $this->response;
-	}*/
 }

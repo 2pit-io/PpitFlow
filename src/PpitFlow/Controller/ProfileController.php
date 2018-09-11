@@ -108,6 +108,27 @@ class ProfileController extends AbstractActionController
 		else $content = Config::get($place_identifier.'_profile', 'identifier')->content;
 		$locale = $this->params()->fromQuery('locale');
 
+		$description = Account::getDescription('pbc');
+		foreach ($content['list']['properties'] as $inputId => $options) {
+			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
+			else {
+				$property = $description['properties'][$inputId];
+				if (array_key_exists('mandatory', $options)) $property['mandatory'] = $options['mandatory'];
+				if (array_key_exists('updatable', $options)) $property['updatable'] = $options['updatable'];
+				if (array_key_exists('focused', $options)) $property['focused'] = $options['focused'];
+				if (array_key_exists('protected', $options)) $property['protected'] = $options['protected'];
+			}
+			if (array_key_exists('repository', $property)) $property['repository'] = $context->getConfig($property['repository']);
+			if (!array_key_exists('mandatory', $property)) $property['mandatory'] = false;
+			if (!array_key_exists('updatable', $property)) $property['updatable'] = true;
+			if (!array_key_exists('placeholder', $property)) $property['placeholder'] = null;
+			if (!array_key_exists('focused', $property)) $property['focused'] = false;
+			if (!array_key_exists('protected', $property)) $property['protected'] = false;
+			$content['list']['properties'][$inputId] = $property;
+			if (array_key_exists('property_id', $property)) $propertyId = $property['property_id'];
+			else $propertyId = $inputId;
+		}
+		
 		$myAccountId = Account::get($context->getContactId(), 'contact_1_id')->id;
 		$account_id = $this->params()->fromRoute('account_id');
 		$account = null;
@@ -129,35 +150,107 @@ class ProfileController extends AbstractActionController
 	
 		if (!$locale) if ($account) $locale = $account->locale; else $locale = $context->getLocale();
 	
-		$description = Event::getDescription('request');
 		$viewData = array();
 		$viewData['photo_link_id'] = ($account->photo_link_id) ? $account->photo_link_id : 'no-photo.png';
 
+		$accounts = array();
 		if ($request_id) {
 			$request = Event::get($request_id);
 			$skills = $request->property_2;
-			$accounts = array();
 			foreach (explode(',', $skills) as $skill) {
 				$result = Account::getList('pbc', ['profile_tiny_2' => $skill], '+name', null);
 				foreach ($result as $account_id => $account) {
 					
 					// Exclude from the potential matching list myself aand the already matched accounts
 					if ($account_id != $myAccountId && (!$request->matched_accounts || !in_array($account_id, explode(',', $request->matched_accounts)))) {
-						$accounts[$account_id] = $account;
+						$accounts[$account_id] = $account->getProperties();
 					}
 				}
 			}
 		}
-		else $accounts = Account::getList('pbc', [], '+name', null);
-		$viewData['accounts'] = array();
-		foreach ($accounts as $accountId => $account) $viewData['accounts'][$accountId] = $account->getProperties();
+		else {
+			$result = Account::getList('pbc', [], '+name', null);
+			foreach ($result as $account_id => $account) {
+				
+				// Exclude from the potential matching list myself aand the already matched accounts
+				if ($account_id != $myAccountId && (!$request->matched_accounts || !in_array($account_id, explode(',', $request->matched_accounts)))) {
+					$accounts[$account_id] = $account->getProperties();
+				}
+			}
+		}
 	
 		$view = new ViewModel(array(
 			'context' => $context,
 			'locale' => $locale,
 			'description' => $description,
-			'viewData' => $viewData,
 			'accounts' => $accounts,
+			'content' => $content,
+		));
+		$view->setTerminal(true);
+		return $view;
+	}
+
+	public function detailAction()
+	{
+		$context = Context::getCurrent();
+		$instance_caption = $context->getInstance()->caption;
+		$place_identifier = $this->params()->fromRoute('place_identifier');
+		if ($place_identifier) $place = Place::get($place_identifier, 'identifier');
+		else {
+			$place = Place::get($context->getPlaceId());
+			$place_identifier = $place->identifier;
+		}
+		$request_id = $this->params()->fromRoute('request_id');
+		$request = Event::get($request_id);
+		$account_id = $this->params()->fromRoute('account_id');
+		$account = Account::get($account_id);
+		$matched = (in_array($account_id, explode(',', $request->matched_accounts)));
+		$actionIds = $this->params()->fromQuery('actions');
+		if ($actionIds) $actionIds = explode(',', $actionIds);
+		else $actionIds = array();
+
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('profile/'.$place_identifier);
+		else $content = Config::get($place_identifier.'_profile', 'identifier')->content;
+		$locale = $this->params()->fromQuery('locale');
+		if (!$locale) if ($account) $locale = $account->locale; else $locale = $context->getLocale();
+		
+		$description = Account::getDescription('pbc');
+		foreach ($content['list']['properties'] as $inputId => $options) {
+			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
+			else {
+				$property = $description['properties'][$inputId];
+				if (array_key_exists('mandatory', $options)) $property['mandatory'] = $options['mandatory'];
+				if (array_key_exists('updatable', $options)) $property['updatable'] = $options['updatable'];
+				if (array_key_exists('focused', $options)) $property['focused'] = $options['focused'];
+				if (array_key_exists('protected', $options)) $property['protected'] = $options['protected'];
+			}
+			if (array_key_exists('repository', $property)) $property['repository'] = $context->getConfig($property['repository']);
+			if (!array_key_exists('mandatory', $property)) $property['mandatory'] = false;
+			if (!array_key_exists('updatable', $property)) $property['updatable'] = true;
+			if (!array_key_exists('placeholder', $property)) $property['placeholder'] = null;
+			if (!array_key_exists('focused', $property)) $property['focused'] = false;
+			if (!array_key_exists('protected', $property)) $property['protected'] = false;
+			$content['list']['properties'][$inputId] = $property;
+			if (array_key_exists('property_id', $property)) $propertyId = $property['property_id'];
+			else $propertyId = $inputId;
+		}
+
+		$actions = array();
+		foreach ($actionIds as $actionId) $actions[$actionId] = $content['detail']['actions'][$actionId];
+		$content['detail']['actions'] = $actions;
+
+		$viewData = $account->getProperties();
+		$viewData['photo_link_id'] = ($account->photo_link_id) ? $account->photo_link_id : 'no-photo.png';
+	
+		$view = new ViewModel(array(
+			'context' => $context,
+			'locale' => $locale,
+			'description' => $description,
+			'request_id' => $request_id,
+			'request_caption' => $request->caption,
+			'account_id' => $account_id,
+			'account' => $viewData,
+			'matched' => $matched,
 			'content' => $content,
 		));
 		$view->setTerminal(true);
@@ -264,6 +357,11 @@ class ProfileController extends AbstractActionController
 			else $error = $rc;
 		}
 
+		// Requests
+
+		if ($context->getConfig('specificationMode') == 'config') $requestContent = $context->getConfig('request/'.$place_identifier);
+		else $requestContent = Config::get($place_identifier.'_request', 'identifier')->content;
+		
 		// Feed the layout
 		$this->layout('/layout/flow-layout');
 		$this->layout()->setVariables(array(
@@ -284,6 +382,9 @@ class ProfileController extends AbstractActionController
 			'tooltips' => $content['tooltips'],
 			'message' => $message,
 			'error' => $error,
+			
+			// Requests
+			'requestContent' => $requestContent,
 		));
 		
 		// Return the view

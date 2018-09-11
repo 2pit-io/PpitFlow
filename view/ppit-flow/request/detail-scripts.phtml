@@ -137,7 +137,7 @@ xhttp.onload = function () {
 xhttp.send();
 }
 
-<?php if ($mode == 'requestor') : ?>
+<?php if ($mode == 'Owner') : ?>
 
 <?php if (in_array($status, ['new', 'connected'])) : ?>
 showContributors();
@@ -185,7 +185,7 @@ function showProfile(account_id) {
 	            if (xhttp.status == 200) {
 	              if (xhttp.status == 200) toastr.success('<h4 class="text-center"><?php echo $this->translate('Your request has been registered', 'ppit-core', $context->getLocale()) ?></h4>');
 	              showProfile(account_id);
-	              showContributors();
+//	              showContributors();
 	              showAccountList();
 	            }
 	            else technicalError();
@@ -204,7 +204,7 @@ function showProfile(account_id) {
 	            if (xhttp.status == 200) {
 	              if (xhttp.status == 200) toastr.success('<h4 class="text-center"><?php echo $this->translate('Your request has been registered', 'ppit-core', $context->getLocale()) ?></h4>');
 	              showProfile(account_id);
-	              showContributors();
+//	              showContributors();
 	              showAccountList();
 	            }
 	            else technicalError();
@@ -223,7 +223,7 @@ function showProfile(account_id) {
 	            if (xhttp.status == 200) {
 	              if (xhttp.status == 200) toastr.success('<h4 class="text-center"><?php echo $this->translate('Your request has been registered', 'ppit-core', $context->getLocale()) ?></h4>');
 	              showProfile(account_id);
-	              showContributors();
+//	              showContributors();
 	              showAccountList();
 	            }
 	            else technicalError();
@@ -242,7 +242,7 @@ function showProfile(account_id) {
 	            if (xhttp.status == 200) {
 	              if (xhttp.status == 200) toastr.success('<h4 class="text-center"><?php echo $this->translate('Your request has been registered', 'ppit-core', $context->getLocale()) ?></h4>');
 	              showProfile(account_id);
-	              showContributors();
+//	              showContributors();
 	              showAccountList();
 	            }
 	            else technicalError();

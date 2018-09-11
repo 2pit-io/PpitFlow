@@ -156,4 +156,11 @@ class LandingController extends AbstractActionController
 	{
 		return $this->template1Action();
 	}
+	
+	public function testAction()
+	{
+		$view = new ViewModel(array());
+		$view->setTerminal(true);
+		return $view;
+	}
 }

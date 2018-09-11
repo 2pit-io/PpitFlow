@@ -44,6 +44,13 @@ return array (
 							'defaults' => array('action' => 'template2'),
 						),
 					),
+					'test' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/test',
+							'defaults' => array('action' => 'test'),
+						),
+					),
 				),
 			),
 			'profile' => array(
@@ -69,6 +76,13 @@ return array (
 						'options' => array(
 							'route' => '/list[/:request_id]',
 							'defaults' => array('action' => 'list'),
+						),
+					),
+					'detail' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/detail[/:request_id][/:account_id]',
+							'defaults' => array('action' => 'detail'),
 						),
 					),
 					'template1' => array(
@@ -145,6 +159,15 @@ return array (
 				),
 				'may_terminate' => true,
 				'child_routes' => array(
+					'list' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/list',
+							'defaults' => array(
+								'action' => 'list',
+							),
+						),
+					),
 					'home' => array(
 						'type' => 'segment',
 						'options' => array(
@@ -164,6 +187,20 @@ return array (
 						'options' => array(
 							'route' => '/detail[/:id]',
 							'defaults' => array('action' => 'detail'),
+						),
+					),
+					'detailv2' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/detailv2[/:id]',
+							'defaults' => array('action' => 'detailv2'),
+						),
+					),
+					'update' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/update[/:id]',
+							'defaults' => array('action' => 'update'),
 						),
 					),
 					'accountList' => array(
@@ -243,20 +280,6 @@ return array (
 							'defaults' => array('action' => 'cancel'),
 						),
 					),
-/*					'addToBasket' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/add-to-basket[/:id]',
-							'defaults' => array('action' => 'addToBasket'),
-						),
-					),
-					'removeFromBasket' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/remove-from-basket[/:id]',
-							'defaults' => array('action' => 'removeFromBasket'),
-						),
-					),*/
 				),
 			),
 			'survey' => array(
@@ -338,9 +361,11 @@ return array (
 			'BjyAuthorize\Guard\Route' => array(				
 				array('route' => 'landing/template1', 'roles' => array('guest')),
 				array('route' => 'landing/template2', 'roles' => array('guest')),
+				array('route' => 'landing/test', 'roles' => array('guest')),
 				
 				array('route' => 'profile/home', 'roles' => array('user')),
 				array('route' => 'profile/list', 'roles' => array('user')),
+				array('route' => 'profile/detail', 'roles' => array('user')),
 				array('route' => 'profile/template1', 'roles' => array('user')),
 				array('route' => 'profile/template2', 'roles' => array('user')),
 				array('route' => 'profile/profile', 'roles' => array('user')),
@@ -349,9 +374,12 @@ return array (
 				array('route' => 'profile/dashboard', 'roles' => array('user')),
 				array('route' => 'profile/photoUpload', 'roles' => array('user')),
 
+				array('route' => 'request/list', 'roles' => array('user')),
 				array('route' => 'request/home', 'roles' => array('user')),
 				array('route' => 'request/dashboard', 'roles' => array('user')),
 				array('route' => 'request/detail', 'roles' => array('user')),
+				array('route' => 'request/detailv2', 'roles' => array('user')),
+				array('route' => 'request/update', 'roles' => array('user')),
 				array('route' => 'request/accountList', 'roles' => array('user')),
 				array('route' => 'request/fill', 'roles' => array('user')),
 				array('route' => 'request/contact', 'roles' => array('user')),
@@ -363,8 +391,6 @@ return array (
 				array('route' => 'request/feedback', 'roles' => array('user')),
 				array('route' => 'request/consultFeedback', 'roles' => array('user')),
 				array('route' => 'request/cancel', 'roles' => array('user')),
-/*				array('route' => 'request/addToBasket', 'roles' => array('user')),
-				array('route' => 'request/removeFromBasket', 'roles' => array('user')),*/
 				
 				array('route' => 'survey/fill', 'roles' => array('guest')),
 				array('route' => 'survey/template1', 'roles' => array('guest')),

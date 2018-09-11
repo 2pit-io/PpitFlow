@@ -52,7 +52,11 @@
                       <a 
         <?php foreach ($column['a'] as $attrId => $attr) : ?>
           <?php if ($attrId == 'href') : ?>
+            <?php if (substr($attr, 4) == 'http') : ?>
+                        <?php echo $attrId ?>="<?php echo $attr ?>"
+            <?php else : ?>
                         <?php echo $attrId ?>="<?php echo $this->basePath($attr) ?>"
+            <?php endif;?>
           <?php else : ?>
                         <?php echo $attrId ?>="<?php echo $attr ?>"
           <?php endif;?>
@@ -163,7 +167,7 @@
         <div class="row">
 
           <!--Grid column-->
-          <div class="col-md-8 col-xl-9">
+          <div class="<?php echo (array_key_exists('column-class', $content['form'])) ? $content['form']['column-class'] : 'col-md-8 col-xl-9' ?>">
             <form action="<?php echo $this->url('landing/template2', array('place_identifier' => $place_identifier, 'id' => $id)) ?>#survey" method="post">
               <div class="row">
 
@@ -244,7 +248,12 @@
 
 <?php if (array_key_exists('contact_section', $content)) : ?>
           <!--Grid column-->
-          <div class="col-md-4 col-xl-3">
+          <div class="<?php echo (array_key_exists('column-class', $content['contact_section'])) ? $content['contact_section']['column-class'] : 'col-md-4 col-xl-3' ?>">
+
+<?php if (array_key_exists('img', $content['contact_section'])) : ?> 
+            <img class="<?php echo $content['contact_section']['img']['class'] ?>" src="<?php echo $this->basePath($content['contact_section']['img']['src']) ?>" alt="<?php echo $content['contact_section']['img']['alt'] ?>" />
+<?php endif;?> 
+        
             <ul class="contact-icons text-center list-unstyled">
 
   <?php if (array_key_exists('location', $content['contact_section'])) : ?>
@@ -266,6 +275,43 @@
   <?php endif;?>
 
             </ul>
+          </div>
+          <!--Grid column-->
+          
+<?php elseif (array_key_exists('map-container', $content)) : ?>
+
+         <!--Grid column-->
+          <div class="col-lg-7">
+
+      <!-- Google map-->
+      <div id="map-container" class="rounded z-depth-1-half map-container" style="height: 400px">
+      </div>
+      <br>
+      <!-- Buttons-->
+      <div class="row text-center">
+        <div class="col-md-4">
+          <a class="btn-floating blue accent-1">
+            <i class="fa fa-map-marker"></i>
+          </a>
+          <p>New York, 94126</p>
+          <p class="mb-md-0">United States</p>
+        </div>
+        <div class="col-md-4">
+          <a class="btn-floating blue accent-1">
+            <i class="fa fa-phone"></i>
+          </a>
+          <p>+ 01 234 567 89</p>
+          <p class="mb-md-0">Mon - Fri, 8:00-22:00</p>
+        </div>
+        <div class="col-md-4">
+          <a class="btn-floating blue accent-1">
+            <i class="fa fa-envelope"></i>
+          </a>
+          <p>info@gmail.com</p>
+          <p class="mb-0">sale@gmail.com</p>
+        </div>
+      </div>
+
           </div>
           <!--Grid column-->
 
