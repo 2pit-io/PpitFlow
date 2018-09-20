@@ -17,7 +17,7 @@ use Zend\Http\Response\Stream;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 
-class RequestController extends AbstractActionController
+class EventController extends AbstractActionController
 {
 	public function indexAction()
 	{
@@ -35,36 +35,38 @@ class RequestController extends AbstractActionController
 		$charter_status = $account->getCharterStatus();
 		$gtou_status = $account->getGtouStatus();
 		$locale = $this->params()->fromQuery('locale');
-		$mode = $this->params()->fromQuery('mode', 'Owner');
+		$mode = $this->params()->fromQuery('mode', 'Public');
 		$filters = array();
 		foreach ($description['search']['properties'] as $propertyId => $unused) {
 			$predicate = $this->params()->fromQuery($propertyId, null);
 			if ($predicate !== null) $filters[$propertyId] = $predicate;
 		}
 		
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('request/'.$place_identifier);
-		else $content = Config::get($place_identifier.'_request', 'identifier')->content;
-	
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('event/'.$place_identifier);
+		else $content = Config::get($place_identifier.'_event', 'identifier')->content;
+
 		// Feed the layout
 		$this->layout('/layout/flow-layout');
 		$this->layout()->setVariables(array(
 			'context' => $context,
 			'place_identifier' => $place_identifier,
+			'mode' => $mode,
 			'panel' => $this->params()->fromQuery('panel', null),
 			'token' => $this->params()->fromQuery('hash', null),
 			'type' => $context->getConfig('landing_account_type'),
 			'header' => $content['header'],
 			'index' => $content['index'],
 			'intro' => $content['intro'],
+			'actions' => $content['actions'],
 			'detail' => $content['detail'],
 			'footer' => $content['footer'],
+			'tooltips' => $content['tooltips'],
 			'locale' => $locale,
 			'photo_link_id' => ($account) ? $account->photo_link_id : null,
 			'charter_status' => $charter_status,
 			'gtou_status' => $gtou_status,
-			'pageScripts' => 'ppit-flow/request/index-scripts',
+			'pageScripts' => 'ppit-flow/event/index-scripts',
 			'filters' => $filters,
-			'tooltips' => $content['tooltips'],
 			'message' => null,
 			'error' => null,
 		));
@@ -96,9 +98,9 @@ class RequestController extends AbstractActionController
 		}
 		
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('request/'.$place->identifier);
-		else $content = Config::get($place->identifier.'_request', 'identifier')->content;
-		
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('event/'.$place->identifier);
+		else $content = Config::get($place->identifier.'_event', 'identifier')->content;
+
 		// Card
 		foreach ($content['card']['properties'] as $propertyId => $options) {
 			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
@@ -111,46 +113,53 @@ class RequestController extends AbstractActionController
 			$content['card']['properties'][$propertyId] = $property;
 		}
 		
-		$content['data'] = array();
-
 		// Retrieve my requests in owner mode
+		$content['data'] = array();
 		if ($mode == 'Owner') {
 			$requests = Event::getListV2($description, ['status' => 'new,connected,realized,completed', 'account_id' => '='.$myAccount->id]);
 			foreach ($requests as $request) {
 	
 				$actions = array();
 				$content['data'][$request->id] = $request->getProperties();
-				
+				$content['data'][$request->id]['role'] = null;
+
 				$matchedAccounts = array();
 				if ($request->matched_accounts) {
 					foreach (explode(',', $request->matched_accounts) as $matchedId) {
 						$matchingActions = array();
 						$matchedAccounts[$matchedId] = Account::get($matchedId)->properties;
+
+						// Actions depending on the current matching status
 						$currentMatching = $request->matching_log[$matchedId];
 						if (array_key_exists('action', $currentMatching) && $currentMatching['action'] == 'propose') {
-							$matchingActions['accept'] = $content['detail']['MatchingActions']['accept'];
-							$matchingActions['decline'] = $content['detail']['MatchingActions']['decline'];
+							$matchingActions['accept'] = $content['actions']['Matching']['accept'];
+							$matchingActions['decline'] = $content['actions']['Matching']['decline'];
 						}
-						elseif (array_key_exists('action', $currentMatching) && in_array($currentMatching['action'], ['accept', 'give_feedback'])) {
-							if ($request->status == 'realized') $matchingActions['feedback'] = $content['detail']['MatchingActions']['feedback'];
+						elseif (!in_array($request->status, ['realized', 'completed']) && (!array_key_exists('action', $request->matching_log[$matchedId]) || $request->matching_log[$matchedId]['action'] != 'accept')) {
+							$matchingActions['abandon'] = $content['actions']['Matching']['abandon'];
 						}
-						else {
-							$matchingActions['abandon'] = $content['detail']['MatchingActions']['abandon'];
+						
+						// Feedback to give
+						if ($request->status == 'realized') {
+							if (!array_key_exists($myAccount->id, $request->feedbacks) || !array_key_exists($matchedId, $request->feedbacks[$myAccount->id])) {
+								$matchingActions['feedback'] = $content['actions']['Matching']['feedback'];
+							}
 						}
+						
 						$matchedAccounts[$matchedId]['actions'] = $matchingActions;
 					}
 				}
 				$content['data'][$request->id]['matched_accounts'] = $matchedAccounts;
-					
+				
 				if (in_array($myAccount->id, explode(',', $request->matched_accounts))) $content['data'][$request->id]['amContributor'] = true;
 				else $content['data'][$request->id]['amContributor'] = false;
 
 				if ($request->status == 'new') {
-					$actions['cancel'] = $content['detail']['OwnerActions']['cancel'];
-					$actions['complete'] = $content['detail']['OwnerActions']['complete'];
+					$actions['cancel'] = $content['actions']['Owner']['cancel'];
+					$actions['complete'] = $content['actions']['Owner']['complete'];
 				}
 				elseif ($request->status == 'connected') {
-					$actions['complete'] = $content['detail']['OwnerActions']['complete'];
+					$actions['complete'] = $content['actions']['Owner']['complete'];
 				}
 				elseif ($request->status == 'realized') {
 					$requestorFeedbackGiven = true;
@@ -158,7 +167,7 @@ class RequestController extends AbstractActionController
 					if (!array_key_exists($request->account_id, $request->feedbacks)) $content['detail']['title'] = $content['detail']['title']['Owner']['requestor_feedback'];
 				}
 				elseif ($request->status == 'completed') {
-					$actions['consultFeedback'] = $content['detail']['OwnerActions']['consultFeedback'];
+					$actions['consultFeedback'] = $content['actions']['Owner']['consultFeedback'];
 				}
 				$content['data'][$request->id]['OwnerActions'] = $actions;
 			}
@@ -170,15 +179,17 @@ class RequestController extends AbstractActionController
 			foreach ($requests as $request) {
 				if (in_array($myAccount->id, explode(',', $request->matched_accounts))) {
 
-					$actions = array();
 					$content['data'][$request->id] = $request->getProperties();
+					$content['data'][$request->id]['role'] = null;
+					
+					$actions = array();
 					if ($request->status == 'realized') {
 						if (in_array($request->matching_log[$myAccount->id]['action'], ['accept', 'receive_feedback'])) {
-							$actions['feedback'] = $content['detail']['ContributorActions']['feedback'];
+							$actions['feedback'] = $content['actions']['Contributor']['feedback'];
 						}
 					}
 					elseif ($request->status == 'completed') {
-						$actions['consultFeedback'] = $content['detail']['ContributorActions']['consultFeedback'];
+						$actions['consultFeedback'] = $content['actions']['Contributor']['consultFeedback'];
 					}
 					$content['data'][$request->id]['ContributorActions'] = $actions;
 				}
@@ -205,8 +216,15 @@ class RequestController extends AbstractActionController
 				}
 			}
 			foreach ($requests as $request) {
+				$actions = array();
 				$content['data'][$request->id] = $request->getProperties();
-				$content['data'][$request->id]['PublicActions'] = [];
+				if ($myAccount->id == $request->account_id) $content['data'][$request->id]['role'] = 'requestor';
+				elseif (in_array($myAccount->id, explode(',', $request->matched_accounts))) $content['data'][$request->id]['role'] = 'contributor';
+				else $content['data'][$request->id]['role'] = null;
+				if (in_array($request->status, ['new', 'connected']) && $myAccount->id != $request->account_id && !in_array($myAccount->id, explode(',', $request->matched_accounts))) {
+					$actions['propose'] = $content['actions']['Public']['propose'];
+				}
+				$content['data'][$request->id]['PublicActions'] = $actions;
 			}
 		}
 		
@@ -214,86 +232,7 @@ class RequestController extends AbstractActionController
 		$view = new ViewModel(array(
 			'context' => $context,
 			'mode' => $mode,
-			'content' => $content,
-			'locale' => $locale,
-		));
-		$view->setTerminal(true);
-		return $view;
-	}
-	
-	public function dashboardAction()
-	{
-		// Retrieve the context and the parameters
-		$context = Context::getCurrent();
-		$requests = Event::getList('request', ['status' => 'new,connected,realized,completed']);
-		$locale = $this->params()->fromQuery('locale');
-		
-		$content = array();
-		$content['description'] = Event::getDescription('request');
-		$content['description']['properties']['n_first']['labels'] = ['default' => 'Requestor', 'fr_FR' => 'Demandeur'];
-		$content['description']['list'] = ['n_first' => [], 'property_5' => [], 'caption' => [], 'property_3' => []];
-		$content['data'] = array();
-		foreach ($requests as $request) $content['data'][$request->id] = $request->getProperties();
-
-		// Return the view
-		$view = new ViewModel(array(
-			'context' => $context,
-			'content' => $content,
-			'locale' => $locale,
-		));
-		$view->setTerminal(true);
-		return $view;
-	}
-
-	public function homeAction()
-	{
-		// Retrieve the context and the parameters
-		$context = Context::getCurrent();
-		$place = Place::get($context->getPlaceId());
-		$place_identifier = $place->identifier;
-		$myAccount = Account::get($context->getContactId(), 'contact_1_id');
-
-		$skills = $this->params()->fromQuery('skills');
-		if (!$skills) $requests = Event::getList('request', ['status' => 'new,connected', 'account_status' => 'active']);
-		else {
-			$requests = array();
-			foreach (explode(',', $skills) as $skill) {
-				$result = Event::getList('request', ['property_2' => $skill]);
-				foreach ($result as $request_id => $request) {
-					$requests[$request_id] = $request;
-				}
-			}
-		}
-		
-		$locale = $this->params()->fromQuery('locale');
-
-		// Retrieve the content
-		$description = Event::getDescription('request');
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('request/'.$place->identifier);
-		else $content = Config::get($place->identifier.'_request', 'identifier')->content;
-
-		// Card
-		foreach ($content['card']['properties'] as $propertyId => $options) {
-			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
-			else {
-				$property = $description['properties'][$propertyId];
-				if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
-				if (array_key_exists('labels', $options)) $property['labels'] = $options['labels'];
-			}
-			if (array_key_exists('repository', $property)) $property['repository'] = $context->getConfig($property['repository']);
-			$content['card']['properties'][$propertyId] = $property;
-		}
-		
-		$content['data'] = array();
-		foreach ($requests as $request) {
-			$content['data'][$request->id] = $request->getProperties();
-			if (in_array($myAccount->id, explode(',', $request->matched_accounts))) $content['data'][$request->id]['amContributor'] = true;
-			else $content['data'][$request->id]['amContributor'] = false;
-		}
-
-		// Return the view
-		$view = new ViewModel(array(
-			'context' => $context,
+			'my_account_id' => $myAccount->id,
 			'content' => $content,
 			'locale' => $locale,
 		));
@@ -307,7 +246,6 @@ class RequestController extends AbstractActionController
 		$context = Context::getCurrent();
 		$id = $this->params()->fromRoute('id');
 		$availableSkills = $context->getConfig('matching/skills');
-		$survey = 'request';
 		$locale = $this->params()->fromQuery('locale');
 		
 		// Retrieve the account
@@ -325,8 +263,8 @@ class RequestController extends AbstractActionController
 		$description = Event::getDescription($event->type);
 		
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($survey.'/'.$place->identifier);
-		else $content = Config::get($place->identifier.'_'.$survey, 'identifier')->content;
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('event/'.$place->identifier);
+		else $content = Config::get($place->identifier.'_event', 'identifier')->content;
 		if (!array_key_exists('options', $content['form'])) $content['form']['options'] = array();
 		if (!array_key_exists('examples', $content['form']['options'])) $content['form']['options']['examples'] = false;
 		
@@ -403,7 +341,10 @@ class RequestController extends AbstractActionController
 			}
 			if ($id) $rc = $event->loadAndUpdate($data, $description['properties']);
 			else $rc = $event->loadAndAdd($data, $description['properties']);
-			if (in_array($rc[0], ['200'])) return $this->redirect()->toRoute('request/detail', ['id' => $event->id], ['query' => ['message' => 'OK']]);
+			if (in_array($rc[0], ['200'])) {
+				$id = $event->id;
+				$message = 'OK';
+			}
 			else $error = $rc[1];
 		}
 		
@@ -425,8 +366,7 @@ class RequestController extends AbstractActionController
 			'photo_link_id' => ($account) ? $account->photo_link_id : null,
 			'charter_status' => $charter_status,
 			'gtou_status' => $gtou_status,
-			'pageScripts' => 'ppit-flow/request/fill-scripts',
-			'tooltips' => $content['tooltips'],
+			'pageScripts' => 'ppit-flow/event/fill-scripts',
 			'message' => null,
 			'error' => null,
 		));
@@ -452,7 +392,6 @@ class RequestController extends AbstractActionController
 		$context = Context::getCurrent();
 		$id = $this->params()->fromRoute('id');
 		$availableSkills = $context->getConfig('matching/skills');
-		$survey = 'request';
 		$locale = $this->params()->fromQuery('locale');
 		$message = $this->params()->fromQuery('message');
 		
@@ -475,8 +414,8 @@ class RequestController extends AbstractActionController
 		$description = Event::getDescription($request->type);
 	
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($survey.'/'.$place->identifier);
-		else $content = Config::get($place->identifier.'_'.$survey, 'identifier')->content;
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('event/'.$place->identifier);
+		else $content = Config::get($place->identifier.'_event', 'identifier')->content;
 		if (!array_key_exists('options', $content['detail'])) $content['detail']['options'] = array();
 		
 		$viewData = $request->getProperties();
@@ -512,13 +451,13 @@ class RequestController extends AbstractActionController
 		if ($mode == 'Owner') {
 			$actions = array();
 			if ($viewData['status'] == 'new') {
-				$actions['update'] = $content['detail']['OwnerActions']['update'];
-				$actions['cancel'] = $content['detail']['OwnerActions']['cancel'];
-				$actions['complete'] = $content['detail']['OwnerActions']['complete'];
+				$actions['update'] = $content['actions']['Owner']['update'];
+				$actions['cancel'] = $content['actions']['Owner']['cancel'];
+				$actions['complete'] = $content['actions']['Owner']['complete'];
 				$content['detail']['title'] = $content['detail']['title']['Owner'][$request->status];
 			}
 			else if ($viewData['status'] == 'connected') {
-				$actions['complete'] = $content['detail']['OwnerActions']['complete'];
+				$actions['complete'] = $content['actions']['Owner']['complete'];
 				$content['detail']['title'] = $content['detail']['title']['Owner'][$request->status];
 			}
 			else if ($viewData['status'] == 'realized') {
@@ -529,39 +468,39 @@ class RequestController extends AbstractActionController
 			}
 			else if ($viewData['status'] == 'completed') {
 				$content['detail']['title'] = $content['detail']['title']['Owner'][$request->status];
-				$actions['consultFeedback'] = $content['detail']['PublicActions']['consultFeedback'];
+				$actions['consultFeedback'] = $content['actions']['Public']['consultFeedback'];
 			}
-			$content['detail']['OwnerActions'] = $actions;
+			$content['actions']['Owner'] = $actions;
 		}
 		else { // Public mode
 			$actions = array();
 			if (!in_array($myAccount->id, explode(',', $request->matched_accounts))) {
 				$content['detail']['title'] = $content['detail']['title']['Public']['new'];
-				$actions['propose'] = $content['detail']['PublicActions']['propose'];
+				$actions['propose'] = $content['actions']['Public']['propose'];
 			}
 			else {
 				if ($request->status == 'realized') {
 					if ($request->matching_log[$myAccount->id]['action'] == 'accept') {
 						$content['detail']['title'] = $content['detail']['title']['Public']['contributor_feedback'];
-						$actions['feedback'] = $content['detail']['PublicActions']['feedback'];
+						$actions['feedback'] = $content['actions']['Public']['feedback'];
 					}
 					elseif ($request->matching_log[$myAccount->id]['action'] == 'give_feedback') {
 						$content['detail']['title'] = $content['detail']['title']['Public']['requestor_feedback'];
 					}
 					elseif ($request->matching_log[$myAccount->id]['action'] == 'receive_feedback') {
 						$content['detail']['title'] = $content['detail']['title']['Public']['contributor_feedback'];
-						$actions['feedback'] = $content['detail']['PublicActions']['feedback'];
+						$actions['feedback'] = $content['actions']['Public']['feedback'];
 					}
 				}
 				elseif ($request->status == 'completed') {
 					$content['detail']['title'] = $content['detail']['title']['Public']['completed'];
-					$actions['consultFeedback'] = $content['detail']['PublicActions']['consultFeedback'];
+					$actions['consultFeedback'] = $content['actions']['Public']['consultFeedback'];
 				}
 				else {
 					$content['detail']['title'] = $content['detail']['title']['Public']['linked'];
 				}
 			}
-			$content['detail']['PublicActions'] = $actions;
+			$content['actions']['Public'] = $actions;
 		}
 				
 		// Matched Accounts
@@ -583,35 +522,6 @@ class RequestController extends AbstractActionController
 		}
 		$viewData['matched_accounts'] = $matchedAccounts;
 		$viewData['matching_log'] = $request->matching_log;
-		
-		// Feed the layout
-		$this->layout('/layout/flow-layout');
-		$this->layout()->setVariables(array(
-			'context' => $context,
-			'place_identifier' => $place_identifier,
-			'panel' => $this->params()->fromQuery('panel', null),
-			'token' => $this->params()->fromQuery('hash', null),
-			'account_id' => $account->id,
-			'my_account_id' => $myAccount->id,
-			'id' => $id,
-			'status' => $request->status,
-			'mode' => $mode,
-			'type' => $context->getConfig('landing_account_type'),
-			'header' => $content['header'],
-			'intro' => $content['intro'],
-			'detail' => $content['detail'],
-			'tooltips' => $content['tooltips'],
-			'examples' => $content['examples'],
-			'footer' => $content['footer'],
-			'locale' => $locale,
-			'photo_link_id' => ($account) ? $account->photo_link_id : null,
-			'charter_status' => $charter_status,
-			'gtou_status' => $gtou_status,
-			'pageScripts' => 'ppit-flow/request/detail-scripts',
-			'tooltips' => $content['tooltips'],
-			'message' => $message,
-			'error' => null,
-		));
 
 		// Return the view
 		$view = new ViewModel(array(
@@ -625,12 +535,6 @@ class RequestController extends AbstractActionController
 			'viewData' => $viewData,
 			'availableSkills' => $availableSkills,
 		));
-		return $view;
-	}
-
-	public function detailv2Action()
-	{
-		$view = $this->detailAction();
 		$view->setTerminal(true); // Version sprint 07/09
 		return $view;
 	}
@@ -641,7 +545,7 @@ class RequestController extends AbstractActionController
 		$view->setTerminal(true); // Version sprint 07/09
 		return $view;
 	}
-
+	
 	public function cancelAction()
 	{
 		$context = Context::getCurrent();
@@ -679,8 +583,8 @@ class RequestController extends AbstractActionController
 		$description = Event::getDescription($request->type);
 	
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('request/'.$place->identifier);
-		else $content = Config::get($place->identifier.'_request', 'identifier')->content;
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('event/'.$place->identifier);
+		else $content = Config::get($place->identifier.'_event', 'identifier')->content;
 	
 		// Matched Accounts
 		foreach ($content['matched_accounts']['properties'] as $propertyId => $options) {
@@ -1039,7 +943,7 @@ class RequestController extends AbstractActionController
 		try {
 
 			// Retrieve the accounts who propose
-			$otherAccounts = explode(',', $this->params()->fromQuery('accounts'));
+			$otherAccounts = [Account::get($context->getContactId(), 'contact_1_id')->id]; //explode(',', $this->params()->fromQuery('accounts'));
 
 			// Mark the other accounts as matched in the request
 			if ($request->matched_accounts) $matchedAccounts = explode(',', $request->matched_accounts);
@@ -1115,8 +1019,8 @@ class RequestController extends AbstractActionController
 		$feedback = (array_key_exists($account->id, $request->feedbacks)) ? $request->feedbacks[$account->id] : array();
 
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('request/'.$place->identifier);
-		else $content = Config::get($place->identifier.'_request', 'identifier')->content;
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('event/'.$place->identifier);
+		else $content = Config::get($place->identifier.'_event', 'identifier')->content;
 
 		// Discriminate between the mode 'requestor' (consultation of a request of mine) and the mode 'public' (requests from others)
 		if ($request->account_id == $account->id) $mode = 'requestor';
@@ -1192,15 +1096,14 @@ class RequestController extends AbstractActionController
 					$request->matching_log[$contributor_id]['date'] = Date('Y-m-d');
 
 					// Log the feedback
-					$request->feedbacks[$account->id] = array(
-						$contributor_id => array(
-							'private_comment' => $this->getRequest()->getPost('private_comment'),
-							'platform_benefit' => $this->getRequest()->getPost('platform_benefit'),
-							'platform_satisfaction' => $this->getRequest()->getPost('platform_satisfaction'),
-							'platform_accessibility' => $this->getRequest()->getPost('platform_accessibility'),
-							'platform_comment' => $this->getRequest()->getPost('platform_comment'),
-							'community_comment' => $this->getRequest()->getPost('community_comment')
-						),
+					if (!array_key_exists($account->id, $request->feedbacks)) $request->feedbacks[$account->id] = array();
+					$request->feedbacks[$account->id][$contributor_id] = array(
+						'private_comment' => $this->getRequest()->getPost('private_comment'),
+						'platform_benefit' => $this->getRequest()->getPost('platform_benefit'),
+						'platform_satisfaction' => $this->getRequest()->getPost('platform_satisfaction'),
+						'platform_accessibility' => $this->getRequest()->getPost('platform_accessibility'),
+						'platform_comment' => $this->getRequest()->getPost('platform_comment'),
+						'community_comment' => $this->getRequest()->getPost('community_comment')
 					);
 				}
 				else {
@@ -1309,9 +1212,9 @@ class RequestController extends AbstractActionController
 		foreach ($request->feedbacks as $giver_id => $receivers) {
 			foreach ($receivers as $receiver_id => $feedback) {
 				if ($receiver_id == $myAccount->id) {
-					$receiver = Account::get($receiver_id);
+					$giver = Account::get($giver_id);
 					$myReceivedFeedbacks[] = array(
-						'n_fn' => $receiver->n_fn,
+						'n_fn' => $giver->n_fn,
 						'text' => $feedback['private_comment'],
 					);
 				}

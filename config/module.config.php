@@ -10,6 +10,7 @@
 return array (
 	'controllers' => array(
 		'invokables' => array(
+			'PpitFlow\Controller\Event' => 'PpitFlow\Controller\EventController',
 			'PpitFlow\Controller\Landing' => 'PpitFlow\Controller\LandingController',
 			'PpitFlow\Controller\Profile' => 'PpitFlow\Controller\ProfileController',
 			'PpitFlow\Controller\Request' => 'PpitFlow\Controller\RequestController',
@@ -19,6 +20,129 @@ return array (
 	
 	'router' => array(
 		'routes' => array(
+			'flowEvent' => array(
+				'type'    => 'literal',
+				'options' => array(
+					'route'    => '/flow-event',
+					'constraints' => ['id' => '[0-9]*'],
+					'defaults' => array(
+						'controller' => 'PpitFlow\Controller\Event',
+						'action'     => 'index',
+					),
+				),
+				'may_terminate' => true,
+				'child_routes' => array(
+					'index' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/index',
+							'defaults' => array(
+								'action' => 'index',
+							),
+						),
+					),
+					'list' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/list',
+							'defaults' => array(
+								'action' => 'list',
+							),
+						),
+					),
+					'detail' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/detail[/:id]',
+							'defaults' => array('action' => 'detail'),
+						),
+					),
+					'update' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/update[/:id]',
+							'defaults' => array('action' => 'update'),
+						),
+					),
+					'accountList' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/account-list[/:id]',
+							'defaults' => array('action' => 'accountList'),
+						),
+					),
+					'fill' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/fill[/:id]',
+							'defaults' => array('action' => 'fill'),
+						),
+					),
+					'contact' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/contact[/:id]',
+							'defaults' => array('action' => 'contact'),
+						),
+					),
+					'propose' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/propose[/:id]',
+							'defaults' => array('action' => 'propose'),
+						),
+					),
+					'accept' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/accept[/:id]',
+							'defaults' => array('action' => 'accept'),
+						),
+					),
+					'decline' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/decline[/:id]',
+							'defaults' => array('action' => 'decline'),
+						),
+					),
+					'feedback' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/feedback[/:id]',
+							'defaults' => array('action' => 'feedback'),
+						),
+					),
+					'abandon' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/abandon[/:id]',
+							'defaults' => array('action' => 'abandon'),
+						),
+					),
+					'complete' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/complete[/:id]',
+							'defaults' => array('action' => 'complete'),
+						),
+					),
+					'consultFeedback' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/consult-feedback[/:id]',
+							'defaults' => array('action' => 'consultFeedback'),
+						),
+					),
+					'cancel' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/cancel[/:id]',
+							'defaults' => array('action' => 'cancel'),
+						),
+					),
+				),
+			),
 			'landing' => array(
 				'type'    => 'literal',
 				'options' => array(
@@ -59,11 +183,18 @@ return array (
 					'route'    => '/profile',
 					'defaults' => array(
 						'controller' => 'PpitFlow\Controller\Profile',
-						'action'     => 'template1',
+						'action'     => 'index',
 					),
 				),
 				'may_terminate' => true,
 				'child_routes' => array(
+					'index' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/index[/:place_identifier][/:account_id]',
+							'defaults' => array('action' => 'index'),
+						),
+					),
 					'home' => array(
 						'type' => 'segment',
 						'options' => array(
@@ -154,11 +285,20 @@ return array (
 					'constraints' => ['id' => '[0-9]*'],
 					'defaults' => array(
 						'controller' => 'PpitFlow\Controller\Request',
-						'action'     => 'fill',
+						'action'     => 'index',
 					),
 				),
 				'may_terminate' => true,
 				'child_routes' => array(
+					'index' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/index',
+							'defaults' => array(
+								'action' => 'index',
+							),
+						),
+					),
 					'list' => array(
 						'type' => 'segment',
 						'options' => array(
@@ -362,7 +502,26 @@ return array (
 				array('route' => 'landing/template1', 'roles' => array('guest')),
 				array('route' => 'landing/template2', 'roles' => array('guest')),
 				array('route' => 'landing/test', 'roles' => array('guest')),
+
+				array('route' => 'flowEvent', 'roles' => array('user')),
+				array('route' => 'flowEvent/index', 'roles' => array('user')),
+				array('route' => 'flowEvent/list', 'roles' => array('user')),
+				array('route' => 'flowEvent/detail', 'roles' => array('user')),
+				array('route' => 'flowEvent/update', 'roles' => array('user')),
+				array('route' => 'flowEvent/accountList', 'roles' => array('user')),
+				array('route' => 'flowEvent/fill', 'roles' => array('user')),
+				array('route' => 'flowEvent/contact', 'roles' => array('user')),
+				array('route' => 'flowEvent/abandon', 'roles' => array('user')),
+				array('route' => 'flowEvent/complete', 'roles' => array('user')),
+				array('route' => 'flowEvent/propose', 'roles' => array('user')),
+				array('route' => 'flowEvent/accept', 'roles' => array('user')),
+				array('route' => 'flowEvent/decline', 'roles' => array('user')),
+				array('route' => 'flowEvent/feedback', 'roles' => array('user')),
+				array('route' => 'flowEvent/consultFeedback', 'roles' => array('user')),
+				array('route' => 'flowEvent/cancel', 'roles' => array('user')),
 				
+				array('route' => 'profile', 'roles' => array('user')),
+				array('route' => 'profile/index', 'roles' => array('user')),
 				array('route' => 'profile/home', 'roles' => array('user')),
 				array('route' => 'profile/list', 'roles' => array('user')),
 				array('route' => 'profile/detail', 'roles' => array('user')),
@@ -374,6 +533,8 @@ return array (
 				array('route' => 'profile/dashboard', 'roles' => array('user')),
 				array('route' => 'profile/photoUpload', 'roles' => array('user')),
 
+				array('route' => 'request', 'roles' => array('user')),
+				array('route' => 'request/index', 'roles' => array('user')),
 				array('route' => 'request/list', 'roles' => array('user')),
 				array('route' => 'request/home', 'roles' => array('user')),
 				array('route' => 'request/dashboard', 'roles' => array('user')),

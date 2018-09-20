@@ -7,7 +7,7 @@ return array(
 	'Current requests' => 'Demandes en cours',
 	'Feedback expected' => 'Feedback attendu',
 	'Feedback given' => 'Feedback donné',
-	'I contribute' => 'Je suis contributeur',
+	'Feedback received' => 'Feedback reçu',
 	'Invite to a test' => 'Inviter à un test',
 	'My profile' => 'Mon profil',
 	'My contributions' => 'Mes contributions',

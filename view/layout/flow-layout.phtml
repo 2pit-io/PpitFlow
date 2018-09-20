@@ -294,7 +294,7 @@ $('#a_survey').click(function () {
       <?php if ($link['target'] == 'modal') : ?>
     $('#<?php echo $link['data-target'] ?>').on('show.bs.modal', function () { 
     var xhttp = new XMLHttpRequest();
-    xhttp.open('GET', '<?php echo $this->url($link['href']['route']) ?>', true);
+    xhttp.open('GET', '<?php echo $this->url($link['href']['route']) ?>?locale=<?php echo $locale ?>', true);
     xhttp.onload = function () {
       if (xhttp.readyState == 4 && xhttp.status == 200) $('#<?php echo $link['content_id'] ?>').html(xhttp.responseText);
       else toastr.error("<?php echo $this->translate('A technical error has occured. PLease try again later', 'ppit-core', $context->getLocale()) ?>");

@@ -16,7 +16,12 @@ use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 
 class ProfileController extends AbstractActionController
-{	
+{
+	public function indexAction()
+	{
+		return $this->template1Action();
+	}
+	
 	public function homeAction()
 	{
 		$context = Context::getCurrent();
@@ -72,7 +77,7 @@ class ProfileController extends AbstractActionController
 			'intro' => $content['intro'],
 			'footer' => $content['footer'],
 			'locale' => $locale,
-			'photo_link_id' => ($account) ? $account->photo_link_id : null,
+//			'photo_link_id' => ($account) ? $account->photo_link_id : null,
 			'charter_status' => $charter_status,
 			'gtou_status' => $gtou_status,
 			'pageScripts' => 'ppit-flow/profile/home-scripts',
@@ -367,6 +372,7 @@ class ProfileController extends AbstractActionController
 		$this->layout()->setVariables(array(
 			'context' => $context,
 			'place_identifier' => $place_identifier,
+			'account_id' => $account->id,
 			'panel' => $this->params()->fromQuery('panel', null),
 			'token' => $this->params()->fromQuery('hash', null),
 			'type' => $context->getConfig('landing_account_type'),

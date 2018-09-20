@@ -14,12 +14,28 @@
   </div> -->
 
 <?php foreach ($content['data'] as $requestId => $request) : ?>
+  
   <div class="media d-block d-md-flex my-5">
     <img  class="card-img-64 rounded-circle d-flex mx-auto mb-3" src="<?php echo $this->basePath('photos/'.(($request['photo_link_id']) ? $request['photo_link_id'] : 'no-photo.png')) ?>" width="40" height="40" alt="Sample image" />
     <div class="media-body text-md-left ml-md-3">
+      
+      <div class="progress md-progress" style="height: 15px">
+        <div class="progress-bar <?php echo $content['status'][$request['status']]['color'] ?>" role="progressbar" style="width: <?php echo $content['status'][$request['status']]['value'] ?>%; height: 15px" aria-valuenow="<?php echo $content['status'][$request['status']]['value'] ?>" aria-valuemin="0" aria-valuemax="100"><?php echo $context->localize($content['status'][$request['status']]['labels'], $locale) ?></div>
+      </div>
+
       <div class="grey-text font-weight-bold">
-        <span class="h5"><?php echo $request['n_first'] ?></span> -
-        <?php echo $request['caption'] ?><a class="text-secondary aDetailAction" id="aDetailAction-<?php echo $requestId ?>">&nbsp;&nbsp;<i class="fa fa-search mr-1"></i></a>
+        <span class="h5"><?php echo $request['n_first'] ?></span>&nbsp;&nbsp;|&nbsp;&nbsp;
+        <?php echo $request['caption'] ?>&nbsp;&nbsp;
+
+<!-- Current user connected on this event -->
+    <?php if ($request['role'] == 'requestor') : ?>
+        <span class="badge badge-info"><?php echo $context->localize($content['card']['roles']['requestor']['labels'], $locale) ?></span>&nbsp;&nbsp;
+    <?php elseif ($request['role'] == 'contributor') : ?>
+        <span class="badge badge-info"><?php echo $context->localize($content['card']['roles']['contributor']['labels'], $locale) ?></span>&nbsp;&nbsp;
+    <?php endif;?>
+
+        <a class="text-secondary aDetailAction" id="aDetailAction-<?php echo $requestId ?>"><i class="fa fa-search mr-1"></i></a>
+
       </div>
       
       <div class="">
@@ -29,7 +45,7 @@
   <?php if ($mode == 'Owner' && $request['status'] == 'new') : ?>
     <?php 
     $first = false;
-    $action = $content['detail']['OwnerActions']['update'];
+    $action = $content['actions']['Owner']['update'];
     ?>
         <a class="text-secondary font-weight-bold aUpdateAction" id="aUpdateAction-<?php echo $requestId ?>">
     <?php if (array_key_exists('icon', $action)) : ?>
@@ -131,9 +147,19 @@
           <?php echo $account['n_fn'] ?>
         </span>&nbsp;&nbsp;
         <a class="text-secondary font-small aMatchingDetailAction" id="aMatchingDetailAction-<?php echo $requestId ?>-<?php echo $account_id ?>"><i class="fa fa-search mr-1"></i></a>
+
+<!-- Feedback given -->
     <?php if (array_key_exists($request['account_id'], $request['feedbacks']) && array_key_exists($account['id'], $request['feedbacks'][$request['account_id']])) : ?>
         <span class="badge badge-success"><?php echo $this->translate('Feedback given', 'ppit-flow', $context->getLocale()) ?></span>
-    <?php elseif (array_key_exists('action', $request['matching_log'][$account['id']]) && $request['matching_log'][$account['id']]['action'] == 'propose') : ?>
+    <?php endif;?>
+
+<!-- Feedback received -->
+    <?php if (array_key_exists($account['id'], $request['feedbacks']) && array_key_exists($request['account_id'], $request['feedbacks'][$account['id']])) : ?>
+        <span class="badge badge-success"><?php echo $this->translate('Feedback received', 'ppit-flow', $context->getLocale()) ?></span>
+    <?php endif;?>
+
+    <?php if (array_key_exists('action', $request['matching_log'][$account['id']]) && $request['matching_log'][$account['id']]['action'] == 'propose') : ?>
+
     <?php 
     $datetime1 = date_create($request['matching_log'][$account['id']]['date']);
     $datetime2 = date_create(date('Y-m-d'));
@@ -163,10 +189,10 @@
       $first = false;
       ?>
         <a class="text-secondary font-weight-bold font-small aMatchingAction aMatchingAction-<?php echo $actionId ?>" id="aMatchingAction-<?php echo $actionId ?>-<?php echo $requestId ?>-<?php echo $account_id ?>">
-      <?php if (array_key_exists('icon', $content['detail']['MatchingActions'][$actionId])) : ?>
-          <i class="far fa-<?php echo $content['detail']['MatchingActions'][$actionId]['icon'] ?> mr-1"></i>
+      <?php if (array_key_exists('icon', $content['actions']['Matching'][$actionId])) : ?>
+          <i class="far fa-<?php echo $content['actions']['Matching'][$actionId]['icon'] ?> mr-1"></i>
       <?php endif;?>
-          <?php echo $context->localize($content['detail']['MatchingActions'][$actionId]['labels']) ?>
+          <?php echo $context->localize($content['actions']['Matching'][$actionId]['labels']) ?>
         </a>
         
     <?php endforeach;?>
