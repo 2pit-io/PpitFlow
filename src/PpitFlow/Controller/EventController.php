@@ -23,6 +23,7 @@ class EventController extends AbstractActionController
 	{
 		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'request');
 		$description = Event::getDescription('request');
 		$instance_caption = $context->getInstance()->caption;
 		$place_identifier = $this->params()->fromRoute('place_identifier');
@@ -42,18 +43,19 @@ class EventController extends AbstractActionController
 			if ($predicate !== null) $filters[$propertyId] = $predicate;
 		}
 		
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('event/'.$place_identifier);
-		else $content = Config::get($place_identifier.'_event', 'identifier')->content;
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($type.'/'.$place_identifier);
+		else $content = Config::get($place_identifier.'_'.$type, 'identifier')->content;
 
 		// Feed the layout
 		$this->layout('/layout/flow-layout');
 		$this->layout()->setVariables(array(
 			'context' => $context,
+			'type' => $type,
 			'place_identifier' => $place_identifier,
 			'mode' => $mode,
 			'panel' => $this->params()->fromQuery('panel', null),
 			'token' => $this->params()->fromQuery('hash', null),
-			'type' => $context->getConfig('landing_account_type'),
+			'accountType' => $context->getConfig('landing_account_type'),
 			'header' => $content['header'],
 			'index' => $content['index'],
 			'intro' => $content['intro'],
@@ -74,6 +76,7 @@ class EventController extends AbstractActionController
 		// Return the view
 		$view = new ViewModel(array(
 			'context' => $context,
+			'type' => $type,
 			'locale' => $locale,
 			'place_identifier' => $place_identifier,
 			'content' => $content,
@@ -85,7 +88,8 @@ class EventController extends AbstractActionController
 	{
 		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
-    	$description = Event::getDescription('request');
+		$type = $this->params()->fromRoute('type', 'event');
+		$description = Event::getDescription($type);
 		$place = Place::get($context->getPlaceId());
 		$place_identifier = $place->identifier;
 		$myAccount = Account::get($context->getContactId(), 'contact_1_id');
@@ -98,8 +102,8 @@ class EventController extends AbstractActionController
 		}
 		
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('event/'.$place->identifier);
-		else $content = Config::get($place->identifier.'_event', 'identifier')->content;
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($type.'/'.$place->identifier);
+		else $content = Config::get($place->identifier.'_'.$type, 'identifier')->content;
 
 		// Card
 		foreach ($content['card']['properties'] as $propertyId => $options) {
@@ -175,7 +179,7 @@ class EventController extends AbstractActionController
 		
 		// Retrieve my contributions in contributor mode
 		elseif ($mode == 'Contributor') {
-			$requests = Event::getList('request', ['status' => 'new,connected,realized,completed']);
+			$requests = Event::getList($type, ['status' => 'new,connected,realized,completed']);
 			foreach ($requests as $request) {
 				if (in_array($myAccount->id, explode(',', $request->matched_accounts))) {
 
@@ -244,6 +248,7 @@ class EventController extends AbstractActionController
 	{
 		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'event');
 		$id = $this->params()->fromRoute('id');
 		$availableSkills = $context->getConfig('matching/skills');
 		$locale = $this->params()->fromQuery('locale');
@@ -259,12 +264,12 @@ class EventController extends AbstractActionController
 		if (!$locale) $locale = $profile->locale;
 		
 		if ($id) $event = Event::get($id);
-		else $event = Event::instanciate('request');
+		else $event = Event::instanciate($type);
 		$description = Event::getDescription($event->type);
 		
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('event/'.$place->identifier);
-		else $content = Config::get($place->identifier.'_event', 'identifier')->content;
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($type.'/'.$place->identifier);
+		else $content = Config::get($place->identifier.'_'.$type, 'identifier')->content;
 		if (!array_key_exists('options', $content['form'])) $content['form']['options'] = array();
 		if (!array_key_exists('examples', $content['form']['options'])) $content['form']['options']['examples'] = false;
 		
@@ -355,7 +360,7 @@ class EventController extends AbstractActionController
 			'place_identifier' => $place_identifier,
 			'panel' => $this->params()->fromQuery('panel', null),
 			'token' => $this->params()->fromQuery('hash', null),
-			'type' => $context->getConfig('landing_account_type'),
+			'accountType' => $context->getConfig('landing_account_type'),
 			'header' => $content['header'],
 			'intro' => $content['intro'],
 			'form' => $content['form'],
@@ -374,6 +379,7 @@ class EventController extends AbstractActionController
 		// Return the view
 		$view = new ViewModel(array(
 			'context' => $context,
+			'type' => $type,
 			'id' => $id,
 			'locale' => $locale,
 			'event' => $event,
@@ -390,6 +396,7 @@ class EventController extends AbstractActionController
 	{
 		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'event');
 		$id = $this->params()->fromRoute('id');
 		$availableSkills = $context->getConfig('matching/skills');
 		$locale = $this->params()->fromQuery('locale');
@@ -414,8 +421,8 @@ class EventController extends AbstractActionController
 		$description = Event::getDescription($request->type);
 	
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('event/'.$place->identifier);
-		else $content = Config::get($place->identifier.'_event', 'identifier')->content;
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($type.'/'.$place->identifier);
+		else $content = Config::get($place->identifier.'_'.$type, 'identifier')->content;
 		if (!array_key_exists('options', $content['detail'])) $content['detail']['options'] = array();
 		
 		$viewData = $request->getProperties();
@@ -549,6 +556,7 @@ class EventController extends AbstractActionController
 	public function cancelAction()
 	{
 		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'event');
 		$id = $this->params()->fromRoute('id');
 		$request = Event::get($id);
 		if (!$request) {
@@ -563,7 +571,7 @@ class EventController extends AbstractActionController
 		$view->setTerminal(true); // Version sprint 07/09
 		return $view;
 	}
-	
+/*	
 	public function accountListAction()
 	{
 		// Retrieve the context and the parameters
@@ -621,12 +629,13 @@ class EventController extends AbstractActionController
 		));
 		$view->setTerminal(true);
 		return $view;
-	}
+	}*/
 	
 	public function contactAction()
 	{
 		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'event');
 		$place = Place::get($context->getPlaceId());
 		$place_identifier = $place->identifier;
 		$id = $this->params()->fromRoute('id');
@@ -699,6 +708,7 @@ class EventController extends AbstractActionController
 	{
 		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'event');
 		$place = Place::get($context->getPlaceId());
 		$place_identifier = $place->identifier;
 		$id = $this->params()->fromRoute('id');
@@ -738,7 +748,7 @@ class EventController extends AbstractActionController
 			}
 	
 			// Mark the other account as unmatched in my account
-			$account = Account::get($request->account_id);
+/*			$account = Account::get($request->account_id);
 			if ($account->property_2) {
 				$matchedAccounts = explode(',', $account->property_2);
 				foreach ($otherAccounts as $other_id) {
@@ -766,7 +776,7 @@ class EventController extends AbstractActionController
 						}
 					}
 				}
-			}
+			}*/
 			$connection->commit();
 			$this->response->setStatusCode('200');
 		}
@@ -781,6 +791,7 @@ class EventController extends AbstractActionController
 	{
 		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'event');
 		$place = Place::get($context->getPlaceId());
 		$place_identifier = $place->identifier;
 		$id = $this->params()->fromRoute('id');
@@ -830,6 +841,7 @@ class EventController extends AbstractActionController
 	{
 		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'event');
 		$place = Place::get($context->getPlaceId());
 		$place_identifier = $place->identifier;
 		$id = $this->params()->fromRoute('id');
@@ -871,7 +883,7 @@ class EventController extends AbstractActionController
 			}
 	
 			// Mark the other account as unmatched in my account
-			$account = Account::get($request->account_id);
+/*			$account = Account::get($request->account_id);
 			if ($account->property_2) {
 				$matchedAccounts = explode(',', $account->property_2);
 				foreach ($otherAccounts as $other_id) {
@@ -899,7 +911,7 @@ class EventController extends AbstractActionController
 						}
 					}
 				}
-			}
+			}*/
 			$connection->commit();
 			$this->response->setStatusCode('200');
 		}
@@ -913,6 +925,7 @@ class EventController extends AbstractActionController
 	public function completeAction()
 	{
 		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'event');
 		$id = $this->params()->fromRoute('id');
 		$request = Event::get($id);
 		if (!$request) {
@@ -928,6 +941,7 @@ class EventController extends AbstractActionController
 	public function proposeAction()
 	{
 		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'event');
 		$id = $this->params()->fromRoute('id');
 		$account_id = $this->params()->fromQuery('account_id');
 
@@ -1005,6 +1019,7 @@ class EventController extends AbstractActionController
 	{
 		// Retrieve the context and parameters
 		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'event');
 		$id = $this->params()->fromRoute('id');
 		$locale = $this->params()->fromQuery('locale');
 		$place = Place::get($context->getPlaceId());
@@ -1200,6 +1215,7 @@ class EventController extends AbstractActionController
 	{
 		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'event');
 		$place = Place::get($context->getPlaceId());
 		$place_identifier = $place->identifier;
 		$id = $this->params()->fromRoute('id');

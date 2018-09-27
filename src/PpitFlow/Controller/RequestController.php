@@ -52,7 +52,7 @@ class RequestController extends AbstractActionController
 			'place_identifier' => $place_identifier,
 			'panel' => $this->params()->fromQuery('panel', null),
 			'token' => $this->params()->fromQuery('hash', null),
-			'type' => $context->getConfig('landing_account_type'),
+			'accountType' => $context->getConfig('landing_account_type'),
 			'header' => $content['header'],
 			'index' => $content['index'],
 			'intro' => $content['intro'],

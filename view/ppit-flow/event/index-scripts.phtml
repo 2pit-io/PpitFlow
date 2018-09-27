@@ -84,7 +84,7 @@ function resetHomeSearch() {
   
 $('.aDetailAction').click(function () {
   var request_id = $(this).attr('id').split('-')[1];
-  xhttp.open('GET', '<?php echo $this->url('flowEvent/detail') ?>/' + request_id, true);
+  xhttp.open('GET', '<?php echo $this->url('flowEvent/detail', ['type' => $type]) ?>/' + request_id, true);
   xhttp.onload = function () {
     if (xhttp.readyState == 4 && xhttp.status == 200) {
       $('#modalRequestDetailTitle').html('<?php echo $this->translate('Request detail', 'ppit-flow', $locale) ?>');
@@ -105,7 +105,7 @@ function showList() {
     }
   }
   var xhttp = new XMLHttpRequest();
-  var route = '<?php echo $this->url('flowEvent/list') ?>?mode=' + mode + '&skills=' + skills;
+  var route = '<?php echo $this->url('flowEvent/list', ['type' => $type]) ?>?mode=' + mode + '&skills=' + skills;
 
 <?php foreach ($filters as $filterId => $predicate) : ?>
   route += '&' + '<?php echo $filterId ?>' + '=' + '<?php echo $predicate ?>';
@@ -116,13 +116,17 @@ function showList() {
     if (xhttp.readyState == 4 && xhttp.status == 200) {
       document.getElementById('requests').innerHTML = xhttp.responseText;
 
-      <?php $action = $actions['Owner']['update'] ?>
+      $('.aUpdateAction').click(function () {
+        var request_id = $(this).attr('id').split('-')[1];
+      	location.href = '<?php echo $this->url('flowEvent/fill', ['type' => $type]) ?>/' + request_id;
+      });
+      
       $('.aDetailAction').click(function () {
           var request_id = $(this).attr('id').split('-')[1];
-          xhttp.open('GET', '<?php echo $this->url('flowEvent/detail') ?>/' + request_id, true);
+          xhttp.open('GET', '<?php echo $this->url('flowEvent/detail', ['type' => $type]) ?>/' + request_id, true);
           xhttp.onload = function () {
             if (xhttp.readyState == 4 && xhttp.status == 200) {
-              $('#modalRequestDetailTitle').html('<?php echo $this->translate('Request detail', 'ppit-flow', $locale) ?>');
+              $('#modalRequestDetailTitle').html('<?php echo $context->localize($detail['title']['detail'], $locale) ?>');
               $('#modalRequestDetailContent').html(xhttp.responseText);
               $('#modalRequestDetailForm').modal('show');
             }
@@ -136,7 +140,7 @@ function showList() {
       $('.aOwnerAction-<?php echo $action_id ?>').click(function () {
         var request_id = $(this).attr('id').split('-')[2];
         $('#modalShowProfileTitle').html('<?php echo $context->localize($action['labels'], $locale) ?>');
-        xhttp.open('GET', '<?php echo $this->url('flowEvent/consultFeedback') ?>/' + request_id, true);
+        xhttp.open('GET', '<?php echo $this->url('flowEvent/consultFeedback', ['type' => $type]) ?>/' + request_id, true);
         xhttp.onload = function () {
           if (xhttp.readyState == 4 && xhttp.status == 200) {
             $('#modalShowProfileContent').html(xhttp.responseText);
@@ -152,7 +156,7 @@ function showList() {
         var action = $(this).attr('id').split('-')[1];
         var request_id = $(this).attr('id').split('-')[2];
         $('#modalRequestActionTitle').html('<?php echo $context->localize($action['labels'], $locale) ?>');
-        xhttp.open('GET', '<?php echo $this->url('flowEvent/detail') ?>/' + request_id, true);
+        xhttp.open('GET', '<?php echo $this->url('flowEvent/detail', ['type' => $type]) ?>/' + request_id, true);
         xhttp.onload = function () {
           if (xhttp.readyState == 4 && xhttp.status == 200) {
             $('#modalRequestActionContent').html(xhttp.responseText);
@@ -160,7 +164,7 @@ function showList() {
             $('#buttonRequestAction').unbind();
             $('#buttonRequestAction').click(function () {
               var xhttp = new XMLHttpRequest();
-              xhttp.open('POST', '<?php echo $this->url('flowEvent/'.$action_id) ?>/' + request_id, true);
+              xhttp.open('POST', '<?php echo $this->url('flowEvent/'.$action_id, ['type' => $type]) ?>/' + request_id, true);
               xhttp.onload = function () {
                 if (xhttp.readyState == 4) {
                   if (xhttp.status == 200) {
@@ -211,7 +215,7 @@ function showList() {
             $('.buttonContact').click(function () {
               var account_id = $(this).attr('id').split('-')[1];
               var xhttp = new XMLHttpRequest();
-              xhttp.open('POST', '<?php echo $this->url('flowEvent/contact') ?>/' + id + '?accounts=' + account_id, true);
+              xhttp.open('POST', '<?php echo $this->url('flowEvent/contact', ['type' => $type]) ?>/' + id + '?accounts=' + account_id, true);
               xhttp.onload = function () {
                 if (xhttp.readyState == 4) {
                   if (xhttp.status == 200) {
@@ -253,7 +257,7 @@ function showList() {
             $('#buttonRequestAction').unbind();
             $('#buttonRequestAction').click(function () {
               var xhttp = new XMLHttpRequest();
-              xhttp.open('POST', '<?php echo $this->url('flowEvent/'.$action_id) ?>/' + request_id + '?accounts=' + account_id, true);
+              xhttp.open('POST', '<?php echo $this->url('flowEvent/'.$action_id, ['type' => $type]) ?>/' + request_id + '?accounts=' + account_id, true);
               xhttp.onload = function () {
                 if (xhttp.readyState == 4) {
                   if (xhttp.status == 200) {
@@ -281,7 +285,7 @@ function showList() {
       $('.aContributorAction-<?php echo $action_id ?>').click(function () {
         var request_id = $(this).attr('id').split('-')[2];
         var account_id = $(this).attr('id').split('-')[3];
-        location.href = '<?php echo $this->url('flowEvent/feedback')?>/' + request_id + '?contributor=' + account_id;
+        location.href = '<?php echo $this->url('flowEvent/feedback', ['type' => $type])?>/' + request_id + '?contributor=' + account_id;
       });
 
     <?php elseif ($action_id == 'consultFeedback') : ?>
@@ -289,7 +293,7 @@ function showList() {
       $('.aContributorAction-<?php echo $action_id ?>').click(function () {
         var request_id = $(this).attr('id').split('-')[2];
         $('#modalShowProfileTitle').html('<?php echo $context->localize($action['labels'], $locale) ?>');
-        xhttp.open('GET', '<?php echo $this->url('flowEvent/consultFeedback') ?>/' + request_id, true);
+        xhttp.open('GET', '<?php echo $this->url('flowEvent/consultFeedback', ['type' => $type]) ?>/' + request_id, true);
         xhttp.onload = function () {
           if (xhttp.readyState == 4 && xhttp.status == 200) {
             $('#modalShowProfileContent').html(xhttp.responseText);
@@ -304,7 +308,7 @@ function showList() {
           var action = $(this).attr('id').split('-')[1];
           var request_id = $(this).attr('id').split('-')[2];
           $('#modalRequestActionTitle').html('<?php echo $context->localize($action['labels'], $locale) ?>');
-          xhttp.open('GET', '<?php echo $this->url('flowEvent/detail') ?>/' + request_id, true);
+          xhttp.open('GET', '<?php echo $this->url('flowEvent/detail', ['type' => $type]) ?>/' + request_id, true);
           xhttp.onload = function () {
             if (xhttp.readyState == 4 && xhttp.status == 200) {
               $('#modalRequestActionContent').html(xhttp.responseText);
@@ -312,7 +316,7 @@ function showList() {
               $('#buttonRequestAction').unbind();
               $('#buttonRequestAction').click(function () {
                 var xhttp = new XMLHttpRequest();
-                xhttp.open('POST', '<?php echo $this->url('flowEvent/'.$action_id) ?>/' + request_id, true);
+                xhttp.open('POST', '<?php echo $this->url('flowEvent/'.$action_id, ['type' => $type]) ?>/' + request_id, true);
                 xhttp.onload = function () {
                   if (xhttp.readyState == 4) {
                     if (xhttp.status == 200) {
@@ -340,7 +344,7 @@ function showList() {
           var action = $(this).attr('id').split('-')[1];
           var request_id = $(this).attr('id').split('-')[2];
           $('#modalRequestActionTitle').html('<?php echo $context->localize($action['labels'], $locale) ?>');
-          xhttp.open('GET', '<?php echo $this->url('flowEvent/detail') ?>/' + request_id, true);
+          xhttp.open('GET', '<?php echo $this->url('flowEvent/detail', ['type' => $type]) ?>/' + request_id, true);
           xhttp.onload = function () {
             if (xhttp.readyState == 4 && xhttp.status == 200) {
               $('#modalRequestActionContent').html(xhttp.responseText);
@@ -348,7 +352,7 @@ function showList() {
               $('#buttonRequestAction').unbind();
               $('#buttonRequestAction').click(function () {
                 var xhttp = new XMLHttpRequest();
-                xhttp.open('POST', '<?php echo $this->url('flowEvent/'.$action_id) ?>/' + request_id, true);
+                xhttp.open('POST', '<?php echo $this->url('flowEvent/'.$action_id, ['type' => $type]) ?>/' + request_id, true);
                 xhttp.onload = function () {
                   if (xhttp.readyState == 4) {
                     if (xhttp.status == 200) {

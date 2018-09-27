@@ -13,7 +13,7 @@ return array (
 			'PpitFlow\Controller\Event' => 'PpitFlow\Controller\EventController',
 			'PpitFlow\Controller\Landing' => 'PpitFlow\Controller\LandingController',
 			'PpitFlow\Controller\Profile' => 'PpitFlow\Controller\ProfileController',
-			'PpitFlow\Controller\Request' => 'PpitFlow\Controller\RequestController',
+//			'PpitFlow\Controller\Request' => 'PpitFlow\Controller\RequestController',
 			'PpitFlow\Controller\Survey' => 'PpitFlow\Controller\SurveyController',
 		),
 	),
@@ -35,7 +35,7 @@ return array (
 					'index' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/index',
+							'route' => '/index[/:type]',
 							'defaults' => array(
 								'action' => 'index',
 							),
@@ -44,7 +44,7 @@ return array (
 					'list' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/list',
+							'route' => '/list[/:type]',
 							'defaults' => array(
 								'action' => 'list',
 							),
@@ -53,7 +53,7 @@ return array (
 					'detail' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/detail[/:id]',
+							'route' => '/detail[/:type][/:id]',
 							'defaults' => array('action' => 'detail'),
 						),
 					),
@@ -64,80 +64,80 @@ return array (
 							'defaults' => array('action' => 'update'),
 						),
 					),
-					'accountList' => array(
+/*					'accountList' => array(
 						'type' => 'segment',
 						'options' => array(
 							'route' => '/account-list[/:id]',
 							'defaults' => array('action' => 'accountList'),
 						),
-					),
+					),*/
 					'fill' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/fill[/:id]',
+							'route' => '/fill[/:type][/:id]',
 							'defaults' => array('action' => 'fill'),
 						),
 					),
 					'contact' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/contact[/:id]',
+							'route' => '/contact[/:type][/:id]',
 							'defaults' => array('action' => 'contact'),
 						),
 					),
 					'propose' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/propose[/:id]',
+							'route' => '/propose[/:type][/:id]',
 							'defaults' => array('action' => 'propose'),
 						),
 					),
 					'accept' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/accept[/:id]',
+							'route' => '/accept[/:type][/:id]',
 							'defaults' => array('action' => 'accept'),
 						),
 					),
 					'decline' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/decline[/:id]',
+							'route' => '/decline[/:type][/:id]',
 							'defaults' => array('action' => 'decline'),
 						),
 					),
 					'feedback' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/feedback[/:id]',
+							'route' => '/feedback[/:type][/:id]',
 							'defaults' => array('action' => 'feedback'),
 						),
 					),
 					'abandon' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/abandon[/:id]',
+							'route' => '/abandon[/:type][/:id]',
 							'defaults' => array('action' => 'abandon'),
 						),
 					),
 					'complete' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/complete[/:id]',
+							'route' => '/complete[/:type][/:id]',
 							'defaults' => array('action' => 'complete'),
 						),
 					),
 					'consultFeedback' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/consult-feedback[/:id]',
+							'route' => '/consult-feedback[/:type][/:id]',
 							'defaults' => array('action' => 'consultFeedback'),
 						),
 					),
 					'cancel' => array(
 						'type' => 'segment',
 						'options' => array(
-							'route' => '/cancel[/:id]',
+							'route' => '/cancel[/:type][/:id]',
 							'defaults' => array('action' => 'cancel'),
 						),
 					),
@@ -278,7 +278,7 @@ return array (
 					),
 				),
 			),
-			'request' => array(
+/*			'request' => array(
 				'type'    => 'literal',
 				'options' => array(
 					'route'    => '/request',
@@ -421,7 +421,7 @@ return array (
 						),
 					),
 				),
-			),
+			),*/
 			'survey' => array(
 				'type'    => 'literal',
 				'options' => array(
@@ -508,7 +508,7 @@ return array (
 				array('route' => 'flowEvent/list', 'roles' => array('user')),
 				array('route' => 'flowEvent/detail', 'roles' => array('user')),
 				array('route' => 'flowEvent/update', 'roles' => array('user')),
-				array('route' => 'flowEvent/accountList', 'roles' => array('user')),
+//				array('route' => 'flowEvent/accountList', 'roles' => array('user')),
 				array('route' => 'flowEvent/fill', 'roles' => array('user')),
 				array('route' => 'flowEvent/contact', 'roles' => array('user')),
 				array('route' => 'flowEvent/abandon', 'roles' => array('user')),
@@ -532,7 +532,7 @@ return array (
 				array('route' => 'profile/removeContact', 'roles' => array('user')),
 				array('route' => 'profile/dashboard', 'roles' => array('user')),
 				array('route' => 'profile/photoUpload', 'roles' => array('user')),
-
+/*
 				array('route' => 'request', 'roles' => array('user')),
 				array('route' => 'request/index', 'roles' => array('user')),
 				array('route' => 'request/list', 'roles' => array('user')),
@@ -551,7 +551,7 @@ return array (
 				array('route' => 'request/decline', 'roles' => array('user')),
 				array('route' => 'request/feedback', 'roles' => array('user')),
 				array('route' => 'request/consultFeedback', 'roles' => array('user')),
-				array('route' => 'request/cancel', 'roles' => array('user')),
+				array('route' => 'request/cancel', 'roles' => array('user')),*/
 				
 				array('route' => 'survey/fill', 'roles' => array('guest')),
 				array('route' => 'survey/template1', 'roles' => array('guest')),
@@ -598,6 +598,13 @@ return array (
 		),
 	),
 
+	'ppitApplications' => array(
+		'frontOffice' => array(
+			'labels' => array('fr_FR' => 'Front office', 'en_US' => 'Front office'),
+			'url' => 'flowEvent',
+		),
+	),
+	
 	'landing_account_type' => 'generic',
 	
 	'matching/skills' => array(
@@ -639,5 +646,206 @@ return array (
 		'team_mangement' => ['labels' => ['default' => 'Team management', 'fr_FR' => 'Management d\'équipes'], 'color' => 'purple-gradient'],
 		'agility' => ['labels' => ['default' => 'Agility', 'fr_FR' => 'Agilité'], 'color' => 'purple-gradient'],
 		'training_engineering' => ['labels' => ['default' => 'Training engineering', 'fr_FR' => 'Ingénierie de formation'], 'color' => 'blue-gradient'],
+	),
+
+	// Request
+
+	'event/event/property/status' => array(
+		'definition' => 'inline',
+		'type' => 'select',
+		'modalities' => array(
+			'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
+			'connected' => array('en_US' => 'Organized', 'fr_FR' => 'Organisé'),
+			'realized' => array('en_US' => 'Realized', 'fr_FR' => 'Réalisé'),
+			'completed' => array('en_US' => 'Completed', 'fr_FR' => 'Finalisé'),
+			'canceled' => array('en_US' => 'Canceled', 'fr_FR' => 'Annulé'),
+		),
+		'labels' => array(
+			'en_US' => 'Status',
+			'fr_FR' => 'Statut',
+		),
+		'perspectives' => array(
+			'generic' => array('new', 'connected', 'realized', 'completed', 'canceled'),
+		),
+	),
+
+	'event/event/property/category' => array(
+		'definition' => 'inline',
+		'type' => 'select',
+		'modalities' => array(
+			'information' => ['default' => 'Informations', 'fr_FR' => 'Informations'],
+			'pro_bono_day' => ['default' => 'Pro bono day', 'fr_FR' => 'Pro bono day'],
+			'innovation' => ['default' => 'Innovation', 'fr_FR' => 'Inovation'],
+			'team_building' => ['default' => 'Team building', 'fr_FR' => 'Team building'],
+		),
+		'labels' => array(
+			'en_US' => 'Event type',
+			'fr_FR' => 'Type d’événement',
+		),
+	),
+	
+	'event/event/property/account_id' => array(
+		'definition' => 'inline',
+		'type' => 'select',
+		'account_type' => 'pbc',
+		'labels' => array(
+			'en_US' => 'Owner account',
+			'fr_FR' => 'Compte propriétaire',
+		),
+	),
+
+	'event/event/property/account_status' => array(
+		'definition' => 'core_account/generic/property/status',
+		'labels' => array(
+			'en_US' => 'Account status',
+			'fr_FR' => 'Statut du compte',
+		),
+	),
+	
+	'event/event/property/caption' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Event title',
+			'fr_FR' => 'Titre de l’évènement',
+		),
+	),
+
+	'event/event/property/matched_accounts' => array(
+		'definition' => 'inline',
+		'type' => 'multiselect',
+		'account_type' => 'generic',
+		'labels' => array(
+			'en_US' => 'Matched accounts',
+			'fr_FR' => 'Comptes connectés',
+		),
+	),
+	
+	'event/event/property/property_1' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Skills',
+			'fr_FR' => 'Compétences',
+		),
+	),
+	
+	'event/event/property/property_2' => array(
+		'definition' => 'inline',
+		'type' => 'multiselect',
+		'modalities' => ['definition' => 'matching/skills'],
+		'labels' => array(
+			'en_US' => 'Keyword skills',
+			'fr_FR' => 'Compétences mot-clés',
+		),
+	),
+	
+	'event/event/property/property_3' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'default' => 'Targeted participants',
+			'fr_FR' => 'Participants ciblés',
+		),
+	),
+
+	'event/event/property/property_20' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'default' => 'Logistic constraints',
+			'fr_FR' => 'Contraintes logistiques',
+		),
+	),
+	
+	'event/event/property/update_time' => array(
+		'definition' => 'inline',
+		'type' => 'datetime',
+		'labels' => array(
+			'en_US' => 'Update time',
+			'fr_FR' => 'Heure de mise à jour',
+		),
+	),
+	
+	'event/event' => array(
+		'statuses' => array(),
+		'dimensions' => array(),
+		'indicators' => array(),
+		'properties' => array(
+			'status', 'type', 'place_id', 'place_caption', 'account_id', 'n_fn', 'n_first', 'n_last', 'email', 'category', 'subcategory', 'identifier', 'caption', 'description',
+			'begin_date', 'end_date', 'day_of_week', 'day_of_month', 'exception_1', 'exception_2', 'exception_3', 'exception_4', 'begin_time', 'end_time', 'time_zone', 'location', 'latitude', 'longitude',
+			'matched_accounts', 'matching_log', 'rewards', 'feedbacks', 'value', 'comments',
+			'property_1', 'property_2', 'property_3', 'property_20',
+			'account_status', 'account_property_1', 'account_property_2', 'account_property_3', 'account_property_4', 'account_property_5', 'account_property_6', 'account_property_7', 'account_property_8', 'account_property_9', 'account_property_10', 'account_property_11', 'account_property_12', 'account_property_13', 'account_property_14', 'account_property_15', 'account_property_16',
+			'update_time'
+		),
+		'options' => [],
+	),
+	
+	'event/search/event' => array(
+		'title' => array('default' => 'Events', 'fr_FR' => 'Événements'),
+		'todoTitle' => array('default' => 'current', 'fr_FR' => 'en cours'),
+		'searchTitle' => array('default' => 'search', 'fr_FR' => 'recherche'),
+		'properties' => array(
+			'status' => ['multiple' => true],
+			'account_id' => [],
+			'caption' => [],
+			'category' => [],
+			'begin_date' => [],
+			'location' => [],
+			'property_2' => [],
+			'matched_accounts' => [],
+		),
+	),
+	
+	'event/list/event' => array(
+		'status' => [],
+		'account_id' => [],
+		'matched_accounts' => [],
+		'update_time' => [],
+		'caption' => [],
+		'category' => [],
+		'begin_date' => [],
+		'end_date' => [],
+		'location' => [],
+	),
+	
+	'event/update/event' => array(
+		'status' => ['mandatory' => true],
+		'account_id' => ['mandatory' => true],
+		'caption' => [],
+		'category' => [],
+		'begin_date' => [],
+		'end_date' => [],
+		'begin_time' => [],
+		'end_time' => [],
+		'location' => [],
+		'description' => [],
+		'property_1' => [],
+		'property_2' => [],
+		'property_3' => [],
+		'property_20' => [],
+		'matched_accounts' => [],
+	),
+	
+	'event/export/event' => array(
+		'status' => 'A',
+		'account_id' => 'B',
+		'matched_accounts' => 'C',
+		'caption' => 'D',
+		'category' => 'E',
+		'begin_date' => 'F',
+		'end_date' => 'G',
+		'begin_time' => 'H',
+		'end_time' => 'I',
+		'location' => 'J',
+		'description' => 'K',
+		'property_1' => 'L',
+		'property_2' => 'M',
+		'property_3' => 'N',
+		'property_20' => 'O',
+		'matching_log' => 'P',
+		'rewards' => 'Q',
+		'feedbacks' => 'R',
 	),
 );

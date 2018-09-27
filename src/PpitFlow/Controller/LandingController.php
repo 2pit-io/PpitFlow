@@ -127,7 +127,7 @@ class LandingController extends AbstractActionController
 			'panel' => $this->params()->fromQuery('panel', null),
 			'token' => $this->params()->fromQuery('hash', null),
 			'place_identifier' => $place_identifier,
-			'type' => $context->getConfig('landing_account_type'),
+			'accountType' => $context->getConfig('landing_account_type'),
 			'header' => $content['header'],
 			'intro' => $content['intro'],
 			'footer' => $content['footer'],

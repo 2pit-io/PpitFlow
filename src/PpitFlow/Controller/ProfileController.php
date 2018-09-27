@@ -72,7 +72,7 @@ class ProfileController extends AbstractActionController
 			'place_identifier' => $place_identifier,
 			'panel' => $this->params()->fromQuery('panel', null),
 			'token' => $this->params()->fromQuery('hash', null),
-			'type' => $context->getConfig('landing_account_type'),
+			'accountType' => $context->getConfig('landing_account_type'),
 			'header' => $content['header'],
 			'intro' => $content['intro'],
 			'footer' => $content['footer'],
@@ -375,7 +375,7 @@ class ProfileController extends AbstractActionController
 			'account_id' => $account->id,
 			'panel' => $this->params()->fromQuery('panel', null),
 			'token' => $this->params()->fromQuery('hash', null),
-			'type' => $context->getConfig('landing_account_type'),
+			'accountType' => $context->getConfig('landing_account_type'),
 			'header' => $content['header'],
 			'intro' => $content['intro'],
 			'footer' => $content['footer'],
@@ -567,7 +567,7 @@ class ProfileController extends AbstractActionController
 		}
 	
 		// Mark the other account as unmatched in my account
-		$myAccount = Account::get($context->getContactId(), 'contact_1_id');
+/*		$myAccount = Account::get($context->getContactId(), 'contact_1_id');
 		$matchedAccounts = explode(',', $myAccount->property_2);
 		if (in_array($otherAccount->id, $matchedAccounts)) {
 			$requests = Event::getList('request', ['account_id' => $myAccount->id], '-update_time', null);
@@ -584,7 +584,7 @@ class ProfileController extends AbstractActionController
 				$myAccount->property_2 = implode(',', $matchedAccounts);
 				$myAccount->update(null);
 			}
-		}
+		}*/
 		return $this->response;
 	}
 	

@@ -40,7 +40,7 @@ else {
                         <li class="nav-item">
 					        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 <?php if ($context->isAuthenticated()) : ?>
-                              <img src="<?php echo $this->basePath('/photos/'.$photo_link_id)?>" height="40" class="rounded-circle z-depth-0" alt="avatar image">
+                              <img src="<?php echo $this->basePath('/photos/'.$photo_link_id).'?random='.time() ?>" height="40" class="rounded-circle z-depth-0" alt="avatar image">
 <?php else : ?>
                               <i class="fa fa-user"></i>
                               <span class="clearfix d-none d-sm-inline-block"><?php echo $this->translate('Account', 'ppit-core', $context->getLocale())?></span>
