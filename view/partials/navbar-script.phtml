@@ -30,6 +30,7 @@ function register() {
   formData.append('n_first', $('#register-n_first').val());
   formData.append('n_last', $('#register-n_last').val());
   formData.append('password', $('#register-password').val());
+  formData.append('origine', $('#origine').val());
   formData.append('locale', '<?php echo $locale ?>');
   xhttp.open('POST', '<?php echo $this->url('user/v1').'?type='.$accountType.'&request=register' ?>', true);
   xhttp.setRequestHeader("Authorization", "Basic " + btoa($('#identity').val() + ':' + $('#credential').val()));
@@ -61,7 +62,7 @@ function login() {
 	xhttp.setRequestHeader("Authorization", "Basic " + btoa($('#identity').val() + ':' + $('#credential').val()));
 	xhttp.onload = function () {
 		if (xhttp.readyState == 4 && xhttp.status == 200) {
-			document.location.href = '<?php echo $this->url('flowEvent') ?>';
+			document.location.href = '<?php echo $this->url('home') ?>';
 		}
 		else if (xhttp.statusText == 'Activation') {
           toastr.error("<?php echo $this->translate('This account is not activated. You can ask for a new email activation link.', 'ppit-core', $context->getLocale()) ?>");

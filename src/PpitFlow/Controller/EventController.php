@@ -33,6 +33,9 @@ class EventController extends AbstractActionController
 			$place_identifier = $place->identifier;
 		}
 		$account = Account::get($context->getContactId(), 'contact_1_id');
+		if (!$account->properties['completeness'] || $account->properties['completeness'] == '0_not_completed') {
+			return $this->redirect()->toRoute('profile');
+		}
 		$charter_status = $account->getCharterStatus();
 		$gtou_status = $account->getGtouStatus();
 		$locale = $this->params()->fromQuery('locale');
@@ -160,9 +163,10 @@ class EventController extends AbstractActionController
 
 				if ($request->status == 'new') {
 					$actions['cancel'] = $content['actions']['Owner']['cancel'];
-					$actions['complete'] = $content['actions']['Owner']['complete'];
+					$actions['close'] = $content['actions']['Owner']['close'];
 				}
 				elseif ($request->status == 'connected') {
+					$actions['open'] = $content['actions']['Owner']['open'];
 					$actions['complete'] = $content['actions']['Owner']['complete'];
 				}
 				elseif ($request->status == 'realized') {
@@ -203,7 +207,7 @@ class EventController extends AbstractActionController
 		// Retrieve the request according to the given search criteria or the current requests in no search criterion is given
 		else {
 
-			if (!$filters) $filters = ['status' => 'new,connected'];
+			if (!$filters) $filters = ['status' => 'new'];
 			$filters['account_status'] = 'active';
 			$skills = $this->params()->fromQuery('skills');
 			if (!$skills) {
@@ -921,6 +925,40 @@ class EventController extends AbstractActionController
 		}
 		return $this->response;
 	}
+
+	public function closeAction()
+	{
+		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'event');
+		$id = $this->params()->fromRoute('id');
+		$request = Event::get($id);
+		if (!$request) {
+			$this->response->setStatusCode('400');
+			return $this->response;
+		}
+		$request->status = 'connected';
+		$request->update(null);
+	
+		$this->response->setStatusCode('200');
+		return $this->response;
+	}
+
+	public function openAction()
+	{
+		$context = Context::getCurrent();
+		$type = $this->params()->fromRoute('type', 'event');
+		$id = $this->params()->fromRoute('id');
+		$request = Event::get($id);
+		if (!$request) {
+			$this->response->setStatusCode('400');
+			return $this->response;
+		}
+		$request->status = 'new';
+		$request->update(null);
+	
+		$this->response->setStatusCode('200');
+		return $this->response;
+	}
 	
 	public function completeAction()
 	{
@@ -934,6 +972,35 @@ class EventController extends AbstractActionController
 		}
 		$request->status = 'realized';
 		$request->update(null);
+
+		// Email for feedback
+		if ($request->matched_accounts && array_key_exists('emails', $content) && array_key_exists('feedback', $content['emails'])) {
+			$url = $context->getServiceManager()->get('viewhelpermanager')->get('url');
+			foreach (explode(',', $request->matched_accounts) as $account_id) {
+				$otherAccount = Account::get($account_id);
+		
+				// Email title
+				$emailTitleFormat = $context->localize($content['emails']['feedback']['title']['format'], $request->locale);
+				$titleArguments = array();
+				foreach ($content['emails']['feedback']['title']['parameters'] as $parameter) {
+					if ($parameter == 'contributor_n_first') $titleArguments[] = $account->n_first;
+					else $titleArguments[] = $request->properties[$parameter];
+				}
+				$emailTitle = vsprintf($emailTitleFormat, $titleArguments);
+					
+				// Email body
+				$emailBodyFormat = $context->localize($content['emails']['feedback']['body']['format'], $request->locale);
+				$bodyArguments = array();
+				foreach ($content['emails']['feedback']['body']['parameters'] as $parameter) {
+					if ($parameter == 'contributor_n_first') $bodyArguments[] = $account->n_first;
+					else $bodyArguments[] = $request->properties[$parameter];
+				}
+				$emailBody = vsprintf($emailBodyFormat, $bodyArguments);
+					
+				Context::sendMail($request->email.','.$account->email, $emailBody, $emailTitle);
+			}
+		}
+		
 		$this->response->setStatusCode('200');
 		return $this->response;
 	}
@@ -951,6 +1018,10 @@ class EventController extends AbstractActionController
 			return $this->response;
 		}
 
+		// Retrieve the content
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($type.'/'.$place->identifier);
+		else $content = Config::get($place->identifier.'_'.$type, 'identifier')->content;
+		
 		// Atomicity
 		$connection = Event::getTable()->getAdapter()->getDriver()->getConnection();
 		$connection->beginTransaction();
@@ -981,13 +1052,13 @@ class EventController extends AbstractActionController
 			}
 
 			// Mark the request as connected
-			$request->status = 'connected';
+/*			$request->status = 'connected';
 			$rc = $request->update(null);
 			if ($rc != 'OK') {
 				$connection->rollback();
 				$this->response->setStatusCode('500');
 				return $this->response;
-			}
+			}*/
 
 			// Mark the other account as matched in the owner's account
 			$account = Account::get($request->account_id);
@@ -1006,6 +1077,34 @@ class EventController extends AbstractActionController
 			$connection->commit();
 			$this->response->setStatusCode('200');
 			return $this->response;
+
+			// Email
+			if (array_key_exists('emails', $content) && array_key_exists('matching', $content['emails'])) {
+				$url = $context->getServiceManager()->get('viewhelpermanager')->get('url');
+				foreach ($otherAccounts as $account_id) {
+					$otherAccount = Account::get($account_id);
+	
+					// Email title
+					$emailTitleFormat = $context->localize($content['emails']['matching']['title']['format'], $request->locale);
+					$titleArguments = array();
+					foreach ($content['emails']['matching']['title']['parameters'] as $parameter) {
+						if ($parameter == 'contributor_n_first') $titleArguments[] = $otherAccount->n_first;
+						else $titleArguments[] = $request->properties[$parameter];
+					}
+					$emailTitle = vsprintf($emailTitleFormat, $titleArguments);
+					
+					// Email body
+					$emailBodyFormat = $context->localize($content['emails']['matching']['body']['format'], $request->locale);
+					$bodyArguments = array();
+					foreach ($content['emails']['matching']['body']['parameters'] as $parameter) {
+						if ($parameter == 'contributor_n_first') $bodyArguments[] = $otherAccount->n_first;
+						else $bodyArguments[] = $request->properties[$parameter];
+					}
+					$emailBody = vsprintf($emailBodyFormat, $bodyArguments);
+					
+					Context::sendMail($request->email.','.$otherAccount->email, $emailBody, $emailTitle);
+				}
+			}
 		}
 		catch (\Exception $e) {
 			$connection->rollback();

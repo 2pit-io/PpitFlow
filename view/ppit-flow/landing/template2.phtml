@@ -46,7 +46,7 @@
                       <div class="resizable ui-widget-content">
                         <span class="ui-widget-header">Drag for resizing</span>
                       </div>
-                      <<?php echo $column['type']?> class="<?php if (array_key_exists('class', $column)) echo $column['class'] ?>">
+                        <<?php echo $column['type']?> class="<?php if (array_key_exists('class', $column)) echo $column['class'] ?>" style="<?php if (array_key_exists('style', $column)) echo $column['style'] ?>">
 
       <?php if (array_key_exists('a', $column)) : ?>
                       <a 
@@ -77,7 +77,7 @@
                       </span>
 
       <?php elseif (array_key_exists('img', $column)) : ?>
-                      <img 
+                      <img style="background-color: #FFF"
         <?php foreach ($column['img'] as $attrId => $attr) : ?>
           <?php if ($attrId == 'src') : ?>
                         <?php echo $attrId ?>="<?php echo $this->basePath($attr) ?>"
@@ -388,7 +388,7 @@
 
 <?php else : ?>
               <div class="center-on-small-only">
-                <button class="btn btn-light-blue btn-rounded" type="submit"><?php echo $context->localize($content['form']['submit']['labels'], $locale) ?></button>
+                <button class="<?php echo $content['form']['submit']['class'] ?>" type="submit"><?php echo $context->localize($content['form']['submit']['labels'], $locale) ?></button>
               </div>
 
 <?php endif;?>

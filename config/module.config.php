@@ -106,6 +106,20 @@ return array (
 							'defaults' => array('action' => 'decline'),
 						),
 					),
+					'close' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/close[/:type][/:id]',
+							'defaults' => array('action' => 'close'),
+						),
+					),
+					'open' => array(
+						'type' => 'segment',
+						'options' => array(
+							'route' => '/open[/:type][/:id]',
+							'defaults' => array('action' => 'open'),
+						),
+					),
 					'feedback' => array(
 						'type' => 'segment',
 						'options' => array(
@@ -512,11 +526,13 @@ return array (
 				array('route' => 'flowEvent/fill', 'roles' => array('user')),
 				array('route' => 'flowEvent/contact', 'roles' => array('user')),
 				array('route' => 'flowEvent/abandon', 'roles' => array('user')),
-				array('route' => 'flowEvent/complete', 'roles' => array('user')),
 				array('route' => 'flowEvent/propose', 'roles' => array('user')),
 				array('route' => 'flowEvent/accept', 'roles' => array('user')),
 				array('route' => 'flowEvent/decline', 'roles' => array('user')),
+				array('route' => 'flowEvent/close', 'roles' => array('user')),
+				array('route' => 'flowEvent/open', 'roles' => array('user')),
 				array('route' => 'flowEvent/feedback', 'roles' => array('user')),
+				array('route' => 'flowEvent/complete', 'roles' => array('user')),
 				array('route' => 'flowEvent/consultFeedback', 'roles' => array('user')),
 				array('route' => 'flowEvent/cancel', 'roles' => array('user')),
 				

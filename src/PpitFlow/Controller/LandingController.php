@@ -33,6 +33,7 @@ class LandingController extends AbstractActionController
 		$locale = $this->params()->fromQuery('locale');
 
 		$id = $this->params()->fromRoute('id');
+		$account_type = $context->getConfig('landing_account_type');
 		$account = null;
 		if ($id) {
 			$account = Account::get($id);
@@ -41,7 +42,7 @@ class LandingController extends AbstractActionController
 		elseif ($context->isAuthenticated()) {
 			$account = Account::get($context->getContactId(), 'contact_1_id');
 		}
-		if(!$account) $account = Account::instanciate($context->getConfig('landing_account_type'));
+		if(!$account) $account = Account::instanciate($account_type);
 
 		if (!$locale) if ($account) $locale = $account->locale; else $locale = $context->getLocale();
 		$links = $context->getConfig('public/'.$instance_caption.'/links');
@@ -53,13 +54,13 @@ class LandingController extends AbstractActionController
 			if ($context->getConfig('specificationMode') == 'config') $content['form'] = $content['surveys'][$survey][$step];
 			else $content['form'] = Config::get($place_identifier.'_survey_'.$survey, 'identifier')->content;
 		}
-		
+
 		$viewData = array();
 		$viewData['photo_link_id'] = ($account->photo_link_id) ? $account->photo_link_id : 'no-photo.png';
 		foreach ($content['form']['inputs'] as $inputId => $options) {
 			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
 			else {
-				$property = $context->getConfig('core_account/generic/property/'.$inputId);
+				$property = $context->getConfig('core_account/'.$account_type.'/property/'.$inputId);
 				if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
 				if (array_key_exists('mandatory', $options)) $property['mandatory'] = $options['mandatory'];
 				if (array_key_exists('updatable', $options)) $property['updatable'] = $options['updatable'];
