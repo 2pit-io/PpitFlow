@@ -172,7 +172,7 @@ class EventController extends AbstractActionController
 				elseif ($request->status == 'realized') {
 					$requestorFeedbackGiven = true;
 					$contributorFeedbackGiven = true;
-					if (!array_key_exists($request->account_id, $request->feedbacks)) $content['detail']['title'] = $content['detail']['title']['Owner']['requestor_feedback'];
+//					if (!array_key_exists($request->account_id, $request->feedbacks)) $content['detail']['title'] = $content['detail']['title']['Owner']['requestor_feedback'];
 				}
 				elseif ($request->status == 'completed') {
 					$actions['consultFeedback'] = $content['actions']['Owner']['consultFeedback'];
@@ -964,6 +964,7 @@ class EventController extends AbstractActionController
 	{
 		$context = Context::getCurrent();
 		$type = $this->params()->fromRoute('type', 'event');
+		$place = Place::get($context->getPlaceId());
 		$id = $this->params()->fromRoute('id');
 		$request = Event::get($id);
 		if (!$request) {
@@ -973,9 +974,31 @@ class EventController extends AbstractActionController
 		$request->status = 'realized';
 		$request->update(null);
 
+		// Retrieve the content
+		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($type.'/'.$place->identifier);
+		else $content = Config::get($place->identifier.'_'.$type, 'identifier')->content;
+
 		// Email for feedback
 		if ($request->matched_accounts && array_key_exists('emails', $content) && array_key_exists('feedback', $content['emails'])) {
 			$url = $context->getServiceManager()->get('viewhelpermanager')->get('url');
+
+			// Requestor
+			$account = Account::get($request->account_id);
+			$emailTitleFormat = $context->localize($content['emails']['feedback']['title']['format'], $request->locale);
+			$titleArguments = array();
+			foreach ($content['emails']['feedback']['title']['parameters'] as $parameter) {
+				$titleArguments[] = $request->properties[$parameter];
+			}
+			$emailTitle = vsprintf($emailTitleFormat, $titleArguments);
+			$emailBodyFormat = $context->localize($content['emails']['feedback']['body']['format'], $request->locale);
+			$bodyArguments = array();
+			foreach ($content['emails']['feedback']['body']['parameters'] as $parameter) {
+				$bodyArguments[] = $request->properties[$parameter];
+			}
+			$emailBody = vsprintf($emailBodyFormat, $bodyArguments);
+			Context::sendMail($request->email, $emailBody, $emailTitle);
+
+			// Contributors
 			foreach (explode(',', $request->matched_accounts) as $account_id) {
 				$otherAccount = Account::get($account_id);
 		
@@ -983,7 +1006,7 @@ class EventController extends AbstractActionController
 				$emailTitleFormat = $context->localize($content['emails']['feedback']['title']['format'], $request->locale);
 				$titleArguments = array();
 				foreach ($content['emails']['feedback']['title']['parameters'] as $parameter) {
-					if ($parameter == 'contributor_n_first') $titleArguments[] = $account->n_first;
+					if ($parameter == 'n_first') $titleArguments[] = $otherAccount->n_first;
 					else $titleArguments[] = $request->properties[$parameter];
 				}
 				$emailTitle = vsprintf($emailTitleFormat, $titleArguments);
@@ -992,12 +1015,12 @@ class EventController extends AbstractActionController
 				$emailBodyFormat = $context->localize($content['emails']['feedback']['body']['format'], $request->locale);
 				$bodyArguments = array();
 				foreach ($content['emails']['feedback']['body']['parameters'] as $parameter) {
-					if ($parameter == 'contributor_n_first') $bodyArguments[] = $account->n_first;
+					if ($parameter == 'n_first') $bodyArguments[] = $otherAccount->n_first;
 					else $bodyArguments[] = $request->properties[$parameter];
 				}
 				$emailBody = vsprintf($emailBodyFormat, $bodyArguments);
 					
-				Context::sendMail($request->email.','.$account->email, $emailBody, $emailTitle);
+				Context::sendMail($otherAccount->email, $emailBody, $emailTitle);
 			}
 		}
 		
@@ -1009,6 +1032,7 @@ class EventController extends AbstractActionController
 	{
 		$context = Context::getCurrent();
 		$type = $this->params()->fromRoute('type', 'event');
+		$place = Place::get($context->getPlaceId());
 		$id = $this->params()->fromRoute('id');
 		$account_id = $this->params()->fromQuery('account_id');
 
@@ -1052,13 +1076,13 @@ class EventController extends AbstractActionController
 			}
 
 			// Mark the request as connected
-/*			$request->status = 'connected';
+//			$request->status = 'connected';
 			$rc = $request->update(null);
 			if ($rc != 'OK') {
 				$connection->rollback();
 				$this->response->setStatusCode('500');
 				return $this->response;
-			}*/
+			}
 
 			// Mark the other account as matched in the owner's account
 			$account = Account::get($request->account_id);
@@ -1074,9 +1098,9 @@ class EventController extends AbstractActionController
 					return $this->response;
 				}
 			}
+
+			// Commit the update
 			$connection->commit();
-			$this->response->setStatusCode('200');
-			return $this->response;
 
 			// Email
 			if (array_key_exists('emails', $content) && array_key_exists('matching', $content['emails'])) {
@@ -1105,6 +1129,9 @@ class EventController extends AbstractActionController
 					Context::sendMail($request->email.','.$otherAccount->email, $emailBody, $emailTitle);
 				}
 			}
+
+			$this->response->setStatusCode('200');
+			return $this->response;
 		}
 		catch (\Exception $e) {
 			$connection->rollback();

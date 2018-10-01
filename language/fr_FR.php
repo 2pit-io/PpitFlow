@@ -9,6 +9,7 @@ return array(
 	'Feedback expected' => 'Feedback attendu',
 	'Feedback given' => 'Feedback donné',
 	'Feedback received' => 'Feedback reçu',
+	'How did you know us?' => 'Comment nous avez-vous connu ?',
 	'Invite to a test' => 'Inviter à un test',
 	'My profile' => 'Mon profil',
 	'My contributions' => 'Mes contributions',
