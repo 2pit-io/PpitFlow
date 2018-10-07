@@ -1019,7 +1019,7 @@ return array (
 	
 	// Profile
 	
-	'profile/probonocorpo' => array(
+	'profile/generic' => array(
 		'header' => array(
 			'title' => ['default' => 'PRO BONO corpo - My profile', 'fr_FR' => 'PRO BONO corpo - Mon profil'],
 			'description' => ['default' => 'Show yourself as you would like to be seen with Your CTO', 'fr_FR' => 'Montre-toi comme tu aimerais être vu avec My CTO'],
@@ -1214,7 +1214,7 @@ return array (
 	
 	// Flow Events
 	
-	'event/probonocorpo' => array(
+	'event/generic' => array(
 		'header' => array(
 			'title' => ['default' => 'ProBonoCorpo - Events', 'fr_FR' => 'ProBonoCorpo - Evénements'],
 			'description' => ['default' => 'Subscribe to events and organize your own ones', 'fr_FR' => 'Inscrits-toi aux événements et organize les tiens'],
@@ -1531,7 +1531,7 @@ return array (
 
 	// FLow Request
 	
-	'request/probonocorpo' => array(
+	'request/generic' => array(
 		'header' => array(
 			'title' => ['default' => 'ProBonoCorpo - Requests', 'fr_FR' => 'ProBonoCorpo - Demandes'],
 			'description' => ['default' => 'Describe your request for a perfect matching with the skill offer', 'fr_FR' => 'Décris ta demande pour un matching parfait avec l’offre de compétences'],

@@ -48,7 +48,10 @@ class EventController extends AbstractActionController
 		}
 
 		// Event content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($type.'/'.$place_identifier);
+		if ($context->getConfig('specificationMode') == 'config') {
+			$content = $context->getConfig($type.'/'.$place_identifier);
+			if (!$content) $content = $context->getConfig($type.'/generic');
+		}
 		else $content = Config::get($place_identifier.'_'.$type, 'identifier')->content;
 
 		// Profile form
