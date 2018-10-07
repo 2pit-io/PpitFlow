@@ -28,7 +28,10 @@ class LandingController extends AbstractActionController
 			$place_identifier = $place->identifier;
 		}
 		
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('landing/'.$place->identifier);
+		if ($context->getConfig('specificationMode') == 'config') {
+			$content = $context->getConfig('landing/'.$place->identifier);
+			if (!$content) $content = $context->getConfig('landing/generic');
+		}
 		else $content = Config::get($place->identifier.'_landing', 'identifier', $place->id)->content;
 		$locale = $this->params()->fromQuery('locale');
 
@@ -61,10 +64,13 @@ class LandingController extends AbstractActionController
 			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
 			else {
 				$property = $context->getConfig('core_account/'.$account_type.'/property/'.$inputId);
+				if (!$property) $property = $context->getConfig('core_account/generic/property/'.$inputId);
 				if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
+				if (array_key_exists('class', $options)) $property['class'] = $options['class'];
 				if (array_key_exists('mandatory', $options)) $property['mandatory'] = $options['mandatory'];
 				if (array_key_exists('updatable', $options)) $property['updatable'] = $options['updatable'];
 			}
+			if (!array_key_exists('class', $property)) $property['class'] = 'col-md-6';
 			if (!array_key_exists('mandatory', $property)) $property['mandatory'] = false;
 			if (!array_key_exists('updatable', $property)) $property['updatable'] = true;
 			if (!array_key_exists('placeholder', $property)) $property['placeholder'] = null;
@@ -128,6 +134,7 @@ class LandingController extends AbstractActionController
 			'panel' => $this->params()->fromQuery('panel', null),
 			'token' => $this->params()->fromQuery('hash', null),
 			'place_identifier' => $place_identifier,
+			'account_id' => $account->id,
 			'accountType' => $context->getConfig('landing_account_type'),
 			'header' => $content['header'],
 			'intro' => $content['intro'],

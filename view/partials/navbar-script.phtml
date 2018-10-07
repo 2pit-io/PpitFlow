@@ -102,7 +102,7 @@ function lostPassword() {
   xhttp.onload = function () {
     if (xhttp.readyState == 4) {
        if (xhttp.status == 200) {
-      toastr.success("<?php echo $this->translate('Your request has been registered. Please check you emails with a link to follow in order to set your new password.', 'ppit-core', $context->getLocale()) ?>");
+         toastr.success("<?php echo $this->translate('Your request has been registered. Please check you emails with a link to follow in order to set your new password.', 'ppit-core', $context->getLocale()) ?>");
          $('#modalLostPasswordForm').modal('hide');
        }
        else {
@@ -211,7 +211,29 @@ form.onsubmit = function(event) {
   requestActivation();
 }
 
+// Profile
+
+$('#modalProfileForm').on('hide.bs.modal', function () { 
+  $('#modalProfileInputs').html('');
+});
+
+$('#modalProfileForm').on('show.bs.modal', function () { 
+  var xhttp = new XMLHttpRequest();
+  xhttp.open('GET', '<?php echo $this->url('profile/update', ['account_id' => $account_id]) ?>', true);
+  xhttp.onload = function () {
+    if (xhttp.readyState == 4) {
+      if (xhttp.status == 200) {
+        $('#modalProfileInputs').html(xhttp.responseText);
+        connectProfileForm();
+      }
+      else toastr.error("<?php echo $this->translate('A technical error has occured. PLease try again later', 'ppit-core', $context->getLocale()) ?>");
+    }
+  };
+  xhttp.send();
+});
+
 // Validate charter
+
 $('#validate-charter-button').attr('disabled', 'disabled');
 $('#charter_checked').click(function() {
   if (!document.getElementById('charter_checked').checked) $('#validate-charter-button').attr('disabled', 'disabled');

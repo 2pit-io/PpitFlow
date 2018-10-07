@@ -86,9 +86,13 @@
         <div id="requests"></div>
       </div>
 
+<?php if ($type == 'event' && $account->credits) : ?>
       <div class="col-md-3">
-
+        <div class="text-center">
+          <span class="min-chart" id="chart-sales" data-percent="<?php echo $account->credits ?>"><span class="percent"></span>
+        <div class="label green">Innocoins: <?php echo $account->credits ?></div>
       </div>
+<?php endif;?>
     </div>
     <br>
     

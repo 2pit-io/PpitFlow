@@ -32,10 +32,11 @@ class EventController extends AbstractActionController
 			$place = Place::get($context->getPlaceId());
 			$place_identifier = $place->identifier;
 		}
+		$accountType = $context->getConfig('landing_account_type');
 		$account = Account::get($context->getContactId(), 'contact_1_id');
-		if (!$account->properties['completeness'] || $account->properties['completeness'] == '0_not_completed') {
+/*		if (!$account->properties['completeness'] || $account->properties['completeness'] == '0_not_completed') {
 			return $this->redirect()->toRoute('profile');
-		}
+		}*/
 		$charter_status = $account->getCharterStatus();
 		$gtou_status = $account->getGtouStatus();
 		$locale = $this->params()->fromQuery('locale');
@@ -45,20 +46,45 @@ class EventController extends AbstractActionController
 			$predicate = $this->params()->fromQuery($propertyId, null);
 			if ($predicate !== null) $filters[$propertyId] = $predicate;
 		}
-		
+
+		// Event content
 		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($type.'/'.$place_identifier);
 		else $content = Config::get($place_identifier.'_'.$type, 'identifier')->content;
 
+		// Profile form
+		if ($context->getConfig('specificationMode') == 'config') $profileForm = $context->getConfig('profile/'.$place_identifier)['form'];
+		else $profileForm = Config::get($place_identifier.'_profile', 'identifier')->content['form'];
+		$accountDescription = Account::getDescription($accountType);
+		foreach ($profileForm['inputs'] as $inputId => $options) {
+			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
+			else {
+				$property = $accountDescription['properties'][$inputId];
+				if (array_key_exists('mandatory', $options)) $property['mandatory'] = $options['mandatory'];
+				if (array_key_exists('updatable', $options)) $property['updatable'] = $options['updatable'];
+				if (array_key_exists('focused', $options)) $property['focused'] = $options['focused'];
+			}
+			if (array_key_exists('repository', $property)) $property['repository'] = $context->getConfig($property['repository']);
+			if (!array_key_exists('mandatory', $property)) $property['mandatory'] = false;
+			if (!array_key_exists('updatable', $property)) $property['updatable'] = true;
+			if (!array_key_exists('placeholder', $property)) $property['placeholder'] = null;
+			if (!array_key_exists('focused', $property)) $property['focused'] = false;
+			$profileForm['inputs'][$inputId] = $property;
+		}
+
+		$panel = $this->params()->fromQuery('panel', null);
+		if (!$panel && (!$account->properties['completeness'] || $account->properties['completeness'] == '0_not_completed')) $panel = 'modalProfileForm';
+		
 		// Feed the layout
 		$this->layout('/layout/flow-layout');
 		$this->layout()->setVariables(array(
 			'context' => $context,
 			'type' => $type,
 			'place_identifier' => $place_identifier,
+			'account_id' => $account->id,
 			'mode' => $mode,
-			'panel' => $this->params()->fromQuery('panel', null),
+			'panel' => $panel,
 			'token' => $this->params()->fromQuery('hash', null),
-			'accountType' => $context->getConfig('landing_account_type'),
+			'accountType' => $accountType,
 			'header' => $content['header'],
 			'index' => $content['index'],
 			'intro' => $content['intro'],
@@ -68,6 +94,7 @@ class EventController extends AbstractActionController
 			'tooltips' => $content['tooltips'],
 			'locale' => $locale,
 			'photo_link_id' => ($account) ? $account->photo_link_id : null,
+			'profileForm' => $profileForm,
 			'charter_status' => $charter_status,
 			'gtou_status' => $gtou_status,
 			'pageScripts' => 'ppit-flow/event/index-scripts',
@@ -82,9 +109,18 @@ class EventController extends AbstractActionController
 			'type' => $type,
 			'locale' => $locale,
 			'place_identifier' => $place_identifier,
+			'account' => $account,
 			'content' => $content,
 		));
 		return $view;
+	}
+	
+	public function compare($a, $b)
+	{
+		if ($a['rank'] == $b['rank']) {
+			return 0;
+		}
+		return ($a['rank'] > $b['rank']) ? -1 : 1;
 	}
 	
 	public function listAction()
@@ -207,12 +243,12 @@ class EventController extends AbstractActionController
 		// Retrieve the request according to the given search criteria or the current requests in no search criterion is given
 		else {
 
-			if (!$filters) $filters = ['status' => 'new'];
+			if (!$filters) $filters = ['status' => 'new,connected,realized,completed'];
 			$filters['account_status'] = 'active';
 			$skills = $this->params()->fromQuery('skills');
-			if (!$skills) {
+//			if (!$skills) {
 				$requests = Event::getListV2($description, $filters);
-			}
+/*			}
 			else {
 				$requests = array();
 				foreach (explode(',', $skills) as $skill) {
@@ -222,10 +258,37 @@ class EventController extends AbstractActionController
 						$requests[$request_id] = $request;
 					}
 				}
-			}
+			}*/
+			$ranking = array(
+				'event:status' => [['=', 'new', [], 9000], ['=', 'connected', [], 8000], ['=', 'realized', [], 7000], ['=', 'completed', [], 6000]],
+				'query:skills' => [['matches', '%s', ['property_2'], 900], ['matches', '%s', ['property_1'], 800], ['matches', '%s', ['caption'], 700], ['matches', '%s', ['property_3'], 600], ['matches', '%s', ['property_7'], 500]],
+				'profile:profile_tiny_4' => [['like', '%s', ['property_7'], 90]],
+			);
 			foreach ($requests as $request) {
+				// Ranking
+				$rank = 0;
+				foreach ($ranking as $key => $rules) {
+					$key = explode(':', $key);
+					$entity = $key[0];
+					$property = $key[1];
+					if ($entity == 'event') $value = $request->properties[$property];
+					elseif ($entity == 'query') $value = $this->params()->fromQuery($property);
+					elseif ($entity == 'profile') $value = $myAccount->properties[$property];
+					foreach ($rules as list($operator, $format, $parameters, $ponderation)) {
+						$arguments = array();
+						foreach ($parameters as $parameter) $arguments[] = $request->properties[$parameter];
+						$operand = vsprintf($format, $arguments);
+						if ($operator == '=' && $value == $operand) $rank += $ponderation;
+						elseif ($operator == 'matches') {
+							foreach (explode(',', $value) as $term) if (stripos($operand, $term) !== FALSE) $rank += $ponderation;
+						}
+						elseif ($operator == 'like') if (stripos($operand, $value) !== FALSE) $rank += $ponderation;
+					}
+				}
+				
 				$actions = array();
 				$content['data'][$request->id] = $request->getProperties();
+				$content['data'][$request->id]['rank'] = $rank;
 				if ($myAccount->id == $request->account_id) $content['data'][$request->id]['role'] = 'requestor';
 				elseif (in_array($myAccount->id, explode(',', $request->matched_accounts))) $content['data'][$request->id]['role'] = 'contributor';
 				else $content['data'][$request->id]['role'] = null;
@@ -234,8 +297,10 @@ class EventController extends AbstractActionController
 				}
 				$content['data'][$request->id]['PublicActions'] = $actions;
 			}
+			
+			uasort($content['data'], array($this, 'compare'));
 		}
-		
+
 		// Return the view
 		$view = new ViewModel(array(
 			'context' => $context,
@@ -269,6 +334,7 @@ class EventController extends AbstractActionController
 		
 		if ($id) $event = Event::get($id);
 		else $event = Event::instanciate($type);
+
 		$description = Event::getDescription($event->type);
 		
 		// Retrieve the content
@@ -348,6 +414,7 @@ class EventController extends AbstractActionController
 					if (array_key_exists('account_property', $property)) $accountData[$property['account_property']] = $data[$propertyId];
 				}
 			}
+
 			if ($id) $rc = $event->loadAndUpdate($data, $description['properties']);
 			else $rc = $event->loadAndAdd($data, $description['properties']);
 			if (in_array($rc[0], ['200'])) {
@@ -1099,9 +1166,6 @@ class EventController extends AbstractActionController
 				}
 			}
 
-			// Commit the update
-			$connection->commit();
-
 			// Email
 			if (array_key_exists('emails', $content) && array_key_exists('matching', $content['emails'])) {
 				$url = $context->getServiceManager()->get('viewhelpermanager')->get('url');
@@ -1130,6 +1194,8 @@ class EventController extends AbstractActionController
 				}
 			}
 
+			// Commit the update
+			$connection->commit();
 			$this->response->setStatusCode('200');
 			return $this->response;
 		}
@@ -1290,7 +1356,11 @@ class EventController extends AbstractActionController
 					$connection->rollback();
 					$error = $rc;
 				}
-				
+
+				// Credit the feedback giver with the credit value associated to this event
+				$account->credits += $request->value;
+				$account->update(null);
+
 				$connection->commit();
 				$message = 'OK';
 			}
@@ -1307,7 +1377,7 @@ class EventController extends AbstractActionController
 			'place_identifier' => $place_identifier,
 			'panel' => $this->params()->fromQuery('panel', null),
 			'token' => $this->params()->fromQuery('hash', null),
-			'type' => $context->getConfig('landing_account_type'),
+			'accountType' => $context->getConfig('landing_account_type'),
 			'header' => $content['header'],
 			'intro' => $content['intro'],
 			'form' => $content['feedback'],
@@ -1325,6 +1395,7 @@ class EventController extends AbstractActionController
 		// Return the view
 		$view = new ViewModel(array(
 			'context' => $context,
+			'type' => $type,
 			'id' => $id,
 			'contributor_id' => $contributor_id,
 			'locale' => $locale,

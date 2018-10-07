@@ -240,7 +240,7 @@ function showList() {
       $('.aMatchingAction-<?php echo $action_id ?>').click(function () {
         var request_id = $(this).attr('id').split('-')[2];
         var account_id = $(this).attr('id').split('-')[3];
-        location.href = '<?php echo $this->url('flowEvent/feedback')?>/' + request_id + '?contributor=' + account_id;
+        location.href = '<?php echo $this->url('flowEvent/feedback', ['type' => $type])?>/' + request_id + '?contributor=' + account_id;
       });
 
   <?php else : ?>
@@ -380,6 +380,17 @@ function showList() {
 }
 
 showList();
+
+// Dashboard
+
+$(function () {
+    $('.min-chart#chart-sales').easyPieChart({
+        barColor: "#4caf50",
+        onStep: function (from, to, percent) {
+            $(this.el).find('.percent').text(Math.round(percent));
+        }
+    });
+});
 
 // Tooltips
 
