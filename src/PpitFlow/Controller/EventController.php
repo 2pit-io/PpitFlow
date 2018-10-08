@@ -34,12 +34,12 @@ class EventController extends AbstractActionController
 		}
 		$accountType = $context->getConfig('landing_account_type');
 		$account = Account::get($context->getContactId(), 'contact_1_id');
-/*		if (!$account->properties['completeness'] || $account->properties['completeness'] == '0_not_completed') {
-			return $this->redirect()->toRoute('profile');
-		}*/
+		$locale = $this->params()->fromQuery('locale');
+		if (!$locale) if ($account) $locale = $account->locale; else $locale = $context->getLocale();
+
 		$charter_status = $account->getCharterStatus();
 		$gtou_status = $account->getGtouStatus();
-		$locale = $this->params()->fromQuery('locale');
+		
 		$mode = $this->params()->fromQuery('mode', 'Public');
 		$filters = array();
 		foreach ($description['search']['properties'] as $propertyId => $unused) {
