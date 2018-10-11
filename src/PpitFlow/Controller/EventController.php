@@ -23,7 +23,8 @@ class EventController extends AbstractActionController
 	{
 		// Retrieve the context and the parameters
 		$context = Context::getCurrent();
-		$type = $this->params()->fromRoute('type', 'request');
+		if ($context->hasRole('contributor')) $defaultType = 'request'; else $defaultType = 'event';
+		$type = $this->params()->fromRoute('type', $defaultType);
 		$description = Event::getDescription('request');
 		$instance_caption = $context->getInstance()->caption;
 		$place_identifier = $this->params()->fromRoute('place_identifier');
@@ -55,7 +56,10 @@ class EventController extends AbstractActionController
 		else $content = Config::get($place_identifier.'_'.$type, 'identifier')->content;
 
 		// Profile form
-		if ($context->getConfig('specificationMode') == 'config') $profileForm = $context->getConfig('profile/'.$place_identifier)['form'];
+		if ($context->getConfig('specificationMode') == 'config') {
+			$profileForm = $context->getConfig('profile/'.$place_identifier)['form'];
+			if (!$profileForm) $profileForm = $context->getConfig('profile/generic')['form'];
+		}
 		else $profileForm = Config::get($place_identifier.'_profile', 'identifier')->content['form'];
 		$accountDescription = Account::getDescription($accountType);
 		foreach ($profileForm['inputs'] as $inputId => $options) {
@@ -144,7 +148,10 @@ class EventController extends AbstractActionController
 		}
 		
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($type.'/'.$place->identifier);
+		if ($context->getConfig('specificationMode') == 'config') {
+			$content = $context->getConfig($type.'/'.$place->identifier);
+			if (!$content) $content = $context->getConfig($type.'/generic');
+		}
 		else $content = Config::get($place->identifier.'_'.$type, 'identifier')->content;
 
 		// Card
@@ -341,7 +348,10 @@ class EventController extends AbstractActionController
 		$description = Event::getDescription($event->type);
 		
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($type.'/'.$place->identifier);
+		if ($context->getConfig('specificationMode') == 'config') {
+			$content = $context->getConfig($type.'/'.$place->identifier);
+			if (!$content) $content = $context->getConfig($type.'/generic');
+		}
 		else $content = Config::get($place->identifier.'_'.$type, 'identifier')->content;
 		if (!array_key_exists('options', $content['form'])) $content['form']['options'] = array();
 		if (!array_key_exists('examples', $content['form']['options'])) $content['form']['options']['examples'] = false;
@@ -495,7 +505,10 @@ class EventController extends AbstractActionController
 		$description = Event::getDescription($request->type);
 	
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($type.'/'.$place->identifier);
+		if ($context->getConfig('specificationMode') == 'config') {
+			$content = $context->getConfig($type.'/'.$place->identifier);
+			if (!$content) $content = $context->getConfig($type.'/generic');
+		}
 		else $content = Config::get($place->identifier.'_'.$type, 'identifier')->content;
 		if (!array_key_exists('options', $content['detail'])) $content['detail']['options'] = array();
 		
@@ -645,65 +658,6 @@ class EventController extends AbstractActionController
 		$view->setTerminal(true); // Version sprint 07/09
 		return $view;
 	}
-/*	
-	public function accountListAction()
-	{
-		// Retrieve the context and the parameters
-		$context = Context::getCurrent();
-		$id = $this->params()->fromRoute('id');
-	
-		// Retrieve the context account and place
-		$myAccount = Account::get($context->getContactId(), 'contact_1_id');
-		$place = Place::get($myAccount->place_id);
-		$place_identifier = $place->identifier;
-	
-		// Retrieve the request, the owner profile and the matched accounts
-		$request = Event::get($id);
-		$account = Account::get($request->account_id);
-	
-		// Retrieve the request description according to its type
-		$description = Event::getDescription($request->type);
-	
-		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('event/'.$place->identifier);
-		else $content = Config::get($place->identifier.'_event', 'identifier')->content;
-	
-		// Matched Accounts
-		foreach ($content['matched_accounts']['properties'] as $propertyId => $options) {
-			if (array_key_exists('definition', $options) && $options['definition'] == 'inline') $property = $options;
-			else {
-				$property = $description['properties'][$propertyId];
-				if ($property['definition'] != 'inline') $property = $context->getConfig($property['definition']);
-				if (array_key_exists('labels', $options)) $property['labels'] = $options['labels'];
-			}
-			$content['matched_accounts']['properties'][$propertyId] = $property;
-		}
-	
-		$matchedAccounts = array();
-		if ($request->matched_accounts) {
-			foreach (explode(',', $request->matched_accounts) as $matchedId) {
-				$matchedAccounts[$matchedId] = Account::get($matchedId)->properties;
-			}
-		}
-		$viewData = array(
-			'owner_id' => $myAccount->id,
-			'request_status' => $request->status,
-			'matched_accounts' => $matchedAccounts,
-			'matching_log' => $request->matching_log,
-			'feedbacks' => $request->feedbacks,
-		);
-		
-		// Return the view
-		$view = new ViewModel(array(
-			'context' => $context,
-			'id' => $id,
-			'request' => $request,
-			'content' => $content,
-			'viewData' => $viewData,
-		));
-		$view->setTerminal(true);
-		return $view;
-	}*/
 	
 	public function contactAction()
 	{
@@ -1045,7 +999,10 @@ class EventController extends AbstractActionController
 		$request->update(null);
 
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($type.'/'.$place->identifier);
+		if ($context->getConfig('specificationMode') == 'config') {
+			$content = $context->getConfig($type.'/'.$place->identifier);
+			if (!$content) $content = $context->getConfig($type.'/generic');
+		}
 		else $content = Config::get($place->identifier.'_'.$type, 'identifier')->content;
 
 		// Email for feedback
@@ -1113,7 +1070,10 @@ class EventController extends AbstractActionController
 		}
 
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig($type.'/'.$place->identifier);
+		if ($context->getConfig('specificationMode') == 'config') {
+			$content = $context->getConfig($type.'/'.$place->identifier);
+			if (!$content) $content = $context->getConfig($type.'/generic');
+		}
 		else $content = Config::get($place->identifier.'_'.$type, 'identifier')->content;
 		
 		// Atomicity
@@ -1229,8 +1189,11 @@ class EventController extends AbstractActionController
 		$feedback = (array_key_exists($account->id, $request->feedbacks)) ? $request->feedbacks[$account->id] : array();
 
 		// Retrieve the content
-		if ($context->getConfig('specificationMode') == 'config') $content = $context->getConfig('event/'.$place->identifier);
-		else $content = Config::get($place->identifier.'_event', 'identifier')->content;
+		if ($context->getConfig('specificationMode') == 'config') {
+			$content = $context->getConfig($type.'/'.$place->identifier);
+			if (!$content) $content = $context->getConfig($type.'/generic');
+		}
+		else $content = Config::get($place->identifier.'_'.$type, 'identifier')->content;
 
 		// Discriminate between the mode 'requestor' (consultation of a request of mine) and the mode 'public' (requests from others)
 		if ($request->account_id == $account->id) $mode = 'requestor';

@@ -13,7 +13,6 @@ return array (
 			'PpitFlow\Controller\Event' => 'PpitFlow\Controller\EventController',
 			'PpitFlow\Controller\Landing' => 'PpitFlow\Controller\LandingController',
 			'PpitFlow\Controller\Profile' => 'PpitFlow\Controller\ProfileController',
-//			'PpitFlow\Controller\Request' => 'PpitFlow\Controller\RequestController',
 			'PpitFlow\Controller\Survey' => 'PpitFlow\Controller\SurveyController',
 		),
 	),
@@ -64,13 +63,6 @@ return array (
 							'defaults' => array('action' => 'update'),
 						),
 					),
-/*					'accountList' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/account-list[/:id]',
-							'defaults' => array('action' => 'accountList'),
-						),
-					),*/
 					'fill' => array(
 						'type' => 'segment',
 						'options' => array(
@@ -299,150 +291,6 @@ return array (
 					),
 				),
 			),
-/*			'request' => array(
-				'type'    => 'literal',
-				'options' => array(
-					'route'    => '/request',
-					'constraints' => ['id' => '[0-9]*'],
-					'defaults' => array(
-						'controller' => 'PpitFlow\Controller\Request',
-						'action'     => 'index',
-					),
-				),
-				'may_terminate' => true,
-				'child_routes' => array(
-					'index' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/index',
-							'defaults' => array(
-								'action' => 'index',
-							),
-						),
-					),
-					'list' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/list',
-							'defaults' => array(
-								'action' => 'list',
-							),
-						),
-					),
-					'home' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/home',
-							'defaults' => array('action' => 'home'),
-						),
-					),
-					'dashboard' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/dashboard',
-							'defaults' => array('action' => 'dashboard'),
-						),
-					),
-					'detail' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/detail[/:id]',
-							'defaults' => array('action' => 'detail'),
-						),
-					),
-					'detailv2' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/detailv2[/:id]',
-							'defaults' => array('action' => 'detailv2'),
-						),
-					),
-					'update' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/update[/:id]',
-							'defaults' => array('action' => 'update'),
-						),
-					),
-					'accountList' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/account-list[/:id]',
-							'defaults' => array('action' => 'accountList'),
-						),
-					),
-					'fill' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/fill[/:id]',
-							'defaults' => array('action' => 'fill'),
-						),
-					),
-					'contact' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/contact[/:id]',
-							'defaults' => array('action' => 'contact'),
-						),
-					),
-					'propose' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/propose[/:id]',
-							'defaults' => array('action' => 'propose'),
-						),
-					),
-					'accept' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/accept[/:id]',
-							'defaults' => array('action' => 'accept'),
-						),
-					),
-					'decline' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/decline[/:id]',
-							'defaults' => array('action' => 'decline'),
-						),
-					),
-					'feedback' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/feedback[/:id]',
-							'defaults' => array('action' => 'feedback'),
-						),
-					),
-					'abandon' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/abandon[/:id]',
-							'defaults' => array('action' => 'abandon'),
-						),
-					),
-					'complete' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/complete[/:id]',
-							'defaults' => array('action' => 'complete'),
-						),
-					),
-					'consultFeedback' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/consult-feedback[/:id]',
-							'defaults' => array('action' => 'consultFeedback'),
-						),
-					),
-					'cancel' => array(
-						'type' => 'segment',
-						'options' => array(
-							'route' => '/cancel[/:id]',
-							'defaults' => array('action' => 'cancel'),
-						),
-					),
-				),
-			),*/
 			'survey' => array(
 				'type'    => 'literal',
 				'options' => array(
@@ -529,7 +377,6 @@ return array (
 				array('route' => 'flowEvent/list', 'roles' => array('user')),
 				array('route' => 'flowEvent/detail', 'roles' => array('user')),
 				array('route' => 'flowEvent/update', 'roles' => array('user')),
-//				array('route' => 'flowEvent/accountList', 'roles' => array('user')),
 				array('route' => 'flowEvent/fill', 'roles' => array('user')),
 				array('route' => 'flowEvent/contact', 'roles' => array('user')),
 				array('route' => 'flowEvent/abandon', 'roles' => array('user')),
@@ -556,26 +403,6 @@ return array (
 				array('route' => 'profile/removeContact', 'roles' => array('user')),
 				array('route' => 'profile/dashboard', 'roles' => array('user')),
 				array('route' => 'profile/photoUpload', 'roles' => array('user')),
-/*
-				array('route' => 'request', 'roles' => array('user')),
-				array('route' => 'request/index', 'roles' => array('user')),
-				array('route' => 'request/list', 'roles' => array('user')),
-				array('route' => 'request/home', 'roles' => array('user')),
-				array('route' => 'request/dashboard', 'roles' => array('user')),
-				array('route' => 'request/detail', 'roles' => array('user')),
-				array('route' => 'request/detailv2', 'roles' => array('user')),
-				array('route' => 'request/update', 'roles' => array('user')),
-				array('route' => 'request/accountList', 'roles' => array('user')),
-				array('route' => 'request/fill', 'roles' => array('user')),
-				array('route' => 'request/contact', 'roles' => array('user')),
-				array('route' => 'request/abandon', 'roles' => array('user')),
-				array('route' => 'request/complete', 'roles' => array('user')),
-				array('route' => 'request/propose', 'roles' => array('user')),
-				array('route' => 'request/accept', 'roles' => array('user')),
-				array('route' => 'request/decline', 'roles' => array('user')),
-				array('route' => 'request/feedback', 'roles' => array('user')),
-				array('route' => 'request/consultFeedback', 'roles' => array('user')),
-				array('route' => 'request/cancel', 'roles' => array('user')),*/
 				
 				array('route' => 'survey/fill', 'roles' => array('guest')),
 				array('route' => 'survey/template1', 'roles' => array('guest')),
@@ -672,7 +499,306 @@ return array (
 		'training_engineering' => ['labels' => ['default' => 'Training engineering', 'fr_FR' => 'Ingénierie de formation'], 'color' => 'blue-gradient'],
 	),
 
-	// Request
+	'ppit_roles' => array(
+		'ambassador' => array(
+			'route' => 'place',
+			'show' => true,
+			'labels' => array(
+				'en_US' => 'Ambassador',
+				'fr_FR' => 'Ambassadeur',
+			)
+		),
+		'contributor' => array(
+			'route' => 'place',
+			'show' => true,
+			'labels' => array(
+				'en_US' => 'Contributor',
+				'fr_FR' => 'Contributeur',
+			)
+		),
+	),
+	
+	// Account Pro bono corpo
+	
+	'core_account/pbc/property/status' => array(
+		'definition' => 'inline',
+		'type' => 'select',
+		'modalities' => array(
+			'suspect' => array('en_US' => 'Suspect (landing page)', 'fr_FR' => 'Suspect (landing page)'),
+			'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
+			'interested' => array('en_US' => 'Interested', 'fr_FR' => 'Intéressé'),
+			'registered' => array('en_US' => 'Registered', 'fr_FR' => 'Enregistré'),
+			'active' => array('en_US' => 'Active', 'fr_FR' => 'Actif'),
+			'gone' => array('en_US' => 'Gone', 'fr_FR' => 'Parti'),
+		),
+		'labels' => array(
+			'en_US' => 'Status',
+			'fr_FR' => 'Statut',
+		),
+		'perspectives' => array(
+			'contact' => array('suspect', 'new', 'registered', 'interested', 'active', 'gone'),
+			'account' => array('registered', 'active'),
+		),
+	),
+	
+	'core_account/pbc/property/origine' => array(
+		'definition' => 'inline',
+		'type' => 'select',
+		'modalities' => array(
+			'outcoming' => array('en_US' => 'Pro bono corpo call', 'fr_FR' => 'Appel Pro bono corpo'),
+			'e_mailing' => array('en_US' => 'Mailing Pro bono corpo', 'fr_FR' => 'Mailing Pro bono corpo'),
+			'cooptation' => array('en_US' => 'Referal', 'fr_FR' => 'Recommendation'),
+			'event' => array('en_US' => 'Event', 'fr_FR' => 'Événement'),
+			'social_network' => array('en_US' => 'Jive/SBC', 'fr_FR' => 'Jive/SBC'),
+			'subscription' => array('en_US' => 'Pro bono corpo site', 'fr_FR' => 'Site Pro bono corpo'),
+			'other' => array('en_US' => 'Other', 'fr_FR' => 'Autre'),
+		),
+		'labels' => array(
+			'en_US' => 'Origine',
+			'fr_FR' => 'Origine',
+		),
+	),
+	
+	'core_account/pbc/property/property_1' => array(
+		'definition' => 'inline',
+		'type' => 'multiselect',
+		'modalities' => array(
+			'contributor' => ['default' => 'Contributor', 'fr_FR' => 'Contributeur'],
+			'requestor' => ['default' => 'Requestor', 'fr_FR' => 'Demandeur'],
+		),
+		'labels' => ['default' => 'Role']
+	),
+	
+	'core_account/pbc/property/property_2' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Matched accounts',
+			'fr_FR' => 'Comptes connectés',
+		),
+	),
+	
+	'core_account/pbc/property/profile_tiny_1' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => ['default' => 'Service', 'fr_FR' => 'Service'],
+	),
+	
+	'core_account/pbc/property/profile_tiny_2' => array(
+		'definition' => 'inline',
+		'type' => 'multiselect',
+		'modalities' => ['definition' => 'matching/skills'],
+		'labels' => ['default' => 'Compétences par mots-clés'],
+	),
+	
+	'core_account/pbc/property/profile_tiny_3' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => ['default' => 'Skills in text', 'fr_FR' => 'Compétences texte libre'],
+	),
+	
+	'core_account/pbc/property/profile_tiny_4' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => ['default' => 'Location', 'fr_FR' => 'Localisation'],
+	),
+	
+	'core_account/pbc/property/profile_tiny_5' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => ['default' => 'Personal catcher', 'fr_FR' => 'Accroche personnelle'],
+	),
+	
+	'core_account/pbc/property/completeness' => array(
+		'definition' => 'inline',
+		'type' => 'computed',
+		'modalities' => array(
+			'0_not_completed' => ['default' => 'Not completed', 'fr_FR' => 'Non renseigné'],
+			'1_minimum' => ['default' => 'Minimum', 'fr_FR' => 'Minimal'],
+			'2_intermediary' => ['default' => 'Intermediary', 'fr_FR' => 'Intermédiaire'],
+			'3_completed' => ['default' => 'Completed', 'fr_FR' => 'Complété'],
+		),
+		'function' => '\PpitFlow\Model\AccountPbc::computeCompleteness',
+		'labels' => array(
+			'en_US' => 'Profile completeness',
+			'fr_FR' => 'Complétude du profil',
+		),
+	),
+	
+	'core_account/pbc' => array(
+		'properties' => array(
+			'status', 'place_id', 'contact_1_id', 'n_first', 'n_last', 'n_fn', 'email', 'tel_work', 'next_meeting_date', 'origine', 'contact_history', 'locale',
+			'property_1', 'property_2',
+			'profile_tiny_1', 'profile_tiny_2', 'profile_tiny_3', 'profile_tiny_4', 'profile_tiny_5',
+			'json_property_1', 'json_property_2', 'json_property_3', 'json_property_4', 'json_property_5',
+			'comment_1', 'comment_2', 'comment_3', 'comment_4', 'update_time',
+			'completeness',
+		),
+		'acl' => array(
+			'place_id' => array('application' => 'p-pit-admin', 'category' => 'place_id'),
+		),
+		'order' => 'n_fn',
+	),
+	
+	'core_account/search/pbc' => array(
+		'properties' => array(
+			'place_id' => [],
+			'status' => ['multiple' => true],
+			'property_1' => [],
+			'profile_tiny_1' => [],
+			'profile_tiny_2' => [],
+			'profile_tiny_3' => [],
+			'profile_tiny_4' => [],
+			'n_fn' => [],
+			'email' => [],
+			'next_meeting_date' => [],
+			'origine' => [],
+			'locale' => [],
+		),
+	),
+	
+	'core_account/list/pbc' => array(
+		'properties' => array(
+			'status' => array(
+				'background-color' => array(
+					'LightGreen' => ['status' => 'new'],
+					'LightSalmon' => ['status' => 'interested'],
+					'LightBlue' => ['status' => 'candidate'],
+					'LightGrey' => ['status' => 'gone'],
+				)
+			),
+			'completeness' => [],
+			'n_fn' => [],
+			'email' => [],
+			'property_1' => [],
+			'profile_tiny_1' => [],
+			'profile_tiny_2' => [],
+			'profile_tiny_3' => [],
+			'profile_tiny_4' => [],
+			'origine' => [],
+			'next_meeting_date' => [],
+		),
+	),
+	
+	'core_account/detail/pbc' => array(
+		'title' => array('en_US' => 'Contributor detail', 'fr_FR' => 'Détail du contributeur'),
+		'displayAudit' => true,
+		'tabs' => array(
+		),
+	),
+	
+	'core_account/update/pbc' => array(
+		'place_id' => ['mandatory' => false],
+		'status' => ['mandatory' => true],
+		'n_first' => ['mandatory' => true],
+		'n_last' => ['mandatory' => true],
+		'email' => ['mandatory' => false],
+		'tel_work' => ['mandatory' => false],
+		'property_1' => ['mandatory' => false],
+		'profile_tiny_1' => ['mandatory' => false],
+		'profile_tiny_2' => ['mandatory' => false],
+		'profile_tiny_3' => ['mandatory' => false],
+		'profile_tiny_4' => ['mandatory' => false],
+		'profile_tiny_5' => ['mandatory' => false],
+		'property_2' => ['readonly' => true],
+		'origine' => ['mandatory' => false],
+		'next_meeting_date' => ['mandatory' => false],
+		'contact_history' => ['mandatory' => false],
+		'locale' => ['mandatory' => false],
+	),
+	
+	'core_account/updateContact/pbc' => array(
+	),
+	
+	'core_account/groupUpdate/pbc' => array(
+		'status' => [],
+		'next_meeting_date' => [],
+	),
+	
+	'core_account/export/pbc' => array(
+		'place_id' => [],
+		'status' => [],
+		'completeness' => [],
+		'n_first' => [],
+		'n_last' => [],
+		'email' => [],
+		'property_1' => [],
+		'profile_tiny_2' => [],
+		//		'json_property_1' => [],
+		'profile_tiny_3' => [],
+		'profile_tiny_4' => [],
+		'profile_tiny_5' => [],
+		'origine' => [],
+		'next_meeting_date' => [],
+		'contact_history' => [],
+		'locale' => [],
+	),
+	
+	'core_account/pbc/property/json_property_2' => array(
+		'definition' => 'inline',
+		'type' => 'multiselect',
+		'modalities' => array(
+			'en' => ['default' => 'English', 'fr_FR' => 'Anglais'],
+			'fr' => ['default' => 'French', 'fr_FR' => 'Français'],
+			'ro' => ['default' => 'Romanian', 'fr_FR' => 'Roumain'],
+		),
+		'labels' => ['default' => 'Langues']
+	),
+	
+	'core_account/indexCard/pbc' => array(
+		'title' => array('en_US' => 'Client index card', 'fr_FR' => 'Fiche client'),
+		'header' => array(
+			'place_id' => null,
+			'status' => null,
+			'origine' => null,
+		),
+		'1st-column' => array(
+			'title' => 'title_1',
+			'rows' => array(
+				'n_title' => [],
+				'n_first' => [],
+				'n_last' => [],
+				'email' => [],
+				'tel_work' => [],
+				'tel_cell' => [],
+				'adr_street' => [],
+				'adr_extended' => [],
+				'adr_post_office_box' => [],
+				'adr_zip' => [],
+				'adr_city' => [],
+				'adr_state' => [],
+				'adr_country' => [],
+			),
+		),
+		'2nd-column' => array(
+			'title' => 'title_2',
+			'rows' => array(
+			),
+		),
+		'pdfDetailStyle' => '
+<style>
+table.note-report {
+	font-size: 1em;
+	border: 1px solid gray;
+}
+table.note-report th {
+	color: #FFF;
+	font-weight: bold;
+	text-align: center;
+	vertical-align: center;
+	border: 1px solid gray;
+	background-color: #006169;
+}
+	
+table.note-report td {
+	color: #666;
+	border: 1px solid gray;
+}
+</style>
+',
+	),
+	
+	// Event
 
 	'event/event/property/status' => array(
 		'definition' => 'inline',
@@ -879,6 +1005,250 @@ return array (
 		'feedbacks' => 'R',
 	),
 
+	// Request
+	
+	'event/request/property/status' => array(
+		'definition' => 'inline',
+		'type' => 'select',
+		'modalities' => array(
+			'new' => array('en_US' => 'New', 'fr_FR' => 'Nouveau'),
+			'connected' => array('en_US' => 'Matching initiated', 'fr_FR' => 'Contact amorcé'),
+			'realized' => array('en_US' => 'Realized', 'fr_FR' => 'Réalisé'),
+			'completed' => array('en_US' => 'Completed', 'fr_FR' => 'Finalisé'),
+			'canceled' => array('en_US' => 'Canceled', 'fr_FR' => 'Annulé'),
+		),
+		'labels' => array(
+			'en_US' => 'Status',
+			'fr_FR' => 'Statut',
+		),
+		'perspectives' => array(
+			'generic' => array('new', 'connected', 'realized', 'completed', 'canceled'),
+		),
+	),
+	
+	'event/request/property/account_id' => array(
+		'definition' => 'inline',
+		'type' => 'select',
+		'account_type' => 'pbc',
+		'labels' => array(
+			'en_US' => 'Owner account',
+			'fr_FR' => 'Compte propriétaire',
+		),
+	),
+	
+	'event/request/property/account_status' => array(
+		'definition' => 'core_account/pbc/property/status',
+		'labels' => array(
+			'en_US' => 'Account status',
+			'fr_FR' => 'Statut du compte',
+		),
+	),
+	
+	'event/request/property/caption' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Request title',
+			'fr_FR' => 'Titre de la demande',
+		),
+	),
+	
+	'event/request/property/matched_accounts' => array(
+		'definition' => 'inline',
+		'type' => 'multiselect',
+		'account_type' => 'pbc',
+		'labels' => array(
+			'en_US' => 'Matched accounts',
+			'fr_FR' => 'Comptes connectés',
+		),
+	),
+	
+	'event/request/property/property_1' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'en_US' => 'Skills',
+			'fr_FR' => 'Compétences',
+		),
+	),
+	
+	'event/request/property/property_2' => array(
+		'definition' => 'inline',
+		'type' => 'multiselect',
+		'modalities' => ['definition' => 'matching/skills'],
+		'labels' => array(
+			'en_US' => 'Keyword skills',
+			'fr_FR' => 'Compétences mot-clés',
+		),
+	),
+	
+	'event/request/property/property_3' => array(
+		'definition' => 'inline',
+		'type' => 'select',
+		'modalities' => array(
+			'information' => ['default' => 'Informations', 'fr_FR' => 'Informations'],
+			'connecting' => ['default' => 'Connecting', 'fr_FR' => 'Mise en relation'],
+			'expert_opinion' => ['default' => 'Expert d\'opinion', 'fr_FR' => 'Avis d’Expert'],
+			'solution_building' => ['default' => 'Solution building', 'fr_FR' => 'Construction de solution'],
+			'troubleshooting' => ['default' => 'Troubleshooting', 'fr_FR' => 'Dépannage'],
+			'do_not_know' => ['default' => 'I don\'t know', 'fr_FR' => 'Je ne sais pas'],
+		),
+		'labels' => array(
+			'en_US' => 'Request type',
+			'fr_FR' => 'Type de demande',
+		),
+	),
+	
+	'event/request/property/property_4' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'default' => 'Targeted contributors',
+			'fr_FR' => 'Contributeurs ciblés',
+		),
+	),
+	
+	'event/request/property/property_5' => array(
+		'definition' => 'inline',
+		'type' => 'date',
+		'labels' => array(
+			'default' => 'Execution begin',
+			'fr_FR' => 'Début d\'intervention',
+		),
+	),
+	
+	'event/request/property/property_6' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'default' => 'Estimated contribution duration',
+			'fr_FR' => 'Durée estimée de contribution',
+		),
+	),
+	
+	'event/request/property/property_7' => array(
+		'definition' => 'inline',
+		'type' => 'input',
+		'labels' => array(
+			'default' => 'Contribution location',
+			'fr_FR' => 'Localisation de la contribution',
+		),
+	),
+	
+	'event/request/property/property_24' => array(
+		'definition' => 'inline',
+		'type' => 'textarea',
+		'labels' => array(
+			'default' => 'Context and objectives',
+			'fr_FR' => 'Contexte et objectifs',
+		),
+	),
+	
+	'event/request/property/property_25' => array(
+		'definition' => 'inline',
+		'type' => 'textarea',
+		'labels' => array(
+			'default' => 'Description of the need',
+			'fr_FR' => 'Détail du besoin',
+		),
+	),
+	
+	'event/request/property/property_26' => array(
+		'definition' => 'inline',
+		'type' => 'textarea',
+		'labels' => array(
+			'default' => 'Other logistic constraints',
+			'fr_FR' => 'Autres contraintes logistiques',
+		),
+	),
+	
+	'event/request/property/update_time' => array(
+		'definition' => 'inline',
+		'type' => 'datetime',
+		'labels' => array(
+			'en_US' => 'Update time',
+			'fr_FR' => 'Heure de mise à jour',
+		),
+	),
+	
+	'event/request' => array(
+		'statuses' => array(),
+		'dimensions' => array(),
+		'indicators' => array(),
+		'properties' => array(
+			'status', 'type', 'place_id', 'place_caption', 'account_id', 'n_fn', 'n_first', 'n_last', 'email', 'locale', 'category', 'subcategory', 'identifier', 'caption', 'description',
+			'begin_date', 'end_date', 'day_of_week', 'day_of_month', 'exception_1', 'exception_2', 'exception_3', 'exception_4', 'begin_time', 'end_time', 'time_zone', 'location', 'latitude', 'longitude',
+			'matched_accounts', 'matching_log', 'feedbacks', 'value', 'comments',
+			'property_1', 'property_2', 'property_3', 'property_4', 'property_5', 'property_6', 'property_7',
+			'property_24', 'property_25', 'property_26',
+			'account_status', 'account_property_1', 'account_property_2', 'account_property_3', 'account_property_4', 'account_property_5', 'account_property_6', 'account_property_7', 'account_property_8', 'account_property_9', 'account_property_10', 'account_property_11', 'account_property_12', 'account_property_13', 'account_property_14', 'account_property_15', 'account_property_16',
+			'update_time'
+		),
+		'options' => [],
+	),
+	
+	'event/search/request' => array(
+		'title' => array('default' => 'Requests', 'fr_FR' => 'Demandes'),
+		'todoTitle' => array('default' => 'current', 'fr_FR' => 'en cours'),
+		'searchTitle' => array('default' => 'search', 'fr_FR' => 'recherche'),
+		'properties' => array(
+			'status' => ['multiple' => true],
+			'account_id' => [],
+			'caption' => [],
+			'property_2' => [],
+			'property_5' => [],
+			'matched_accounts' => [],
+		),
+	),
+	
+	'event/list/request' => array(
+		'status' => [],
+		'account_id' => [],
+		'matched_accounts' => [],
+		'update_time' => [],
+		'caption' => [],
+		'property_2' => [],
+		'property_3' => [],
+		'property_4' => [],
+		'property_5' => [],
+		'property_6' => [],
+		'property_7' => [],
+	),
+	
+	'event/update/request' => array(
+		'status' => ['mandatory' => true],
+		'account_id' => ['mandatory' => true],
+		'caption' => [],
+		'property_24' => [],
+		'property_25' => [],
+		'property_2' => [],
+		'property_3' => [],
+		'property_4' => [],
+		'property_5' => [],
+		'property_6' => [],
+		'property_7' => [],
+		'property_26' => [],
+		'matched_accounts' => [],
+	),
+	
+	'event/export/request' => array(
+		'status' => 'A',
+		'account_id' => 'B',
+		'matched_accounts' => 'C',
+		'caption' => 'D',
+		'property_24' => 'E',
+		'property_25' => 'F',
+		'property_2' => 'G',
+		'property_3' => 'H',
+		'property_4' => 'I',
+		'property_5' => 'J',
+		'property_6' => 'K',
+		'property_7' => 'L',
+		'property_26' => 'M',
+		'matching_log' => 'N',
+		'feedbacks' => 'O',
+	),
+	
 	// Landing page
 	
 	'landing/generic' => array(
@@ -890,6 +1260,15 @@ return array (
 			),
 			'analytics-id' => 'UA-82264844-4',
 			'campaign' => '1er sondage',
+			'style' => array(
+				'navbar' => 'background-color: transparent;',
+				'topNavCollapse' => 'background-color: #ffffff;',
+			),
+			'navbar' => array(
+				'class' => 'navbar navbar-expand-lg fixed-top scrolling-navbar navbar-black',
+				'account' => true,
+				'collapse' => false,
+			),
 			'logo' => array(
 				'href' => 'landing/template2',
 				'params' => ['place_identifier' => 'probonocorpo'],
@@ -909,37 +1288,20 @@ return array (
 		'intro' => array(
 			array(
 				'type' => 'h4',
+				'class' => 'd-flex justify-content-center text-responsive',
 				'text' => array(
-					'default' => '<span class="h3-responsive font-bold mb-2">LET\'S SHARE OUR SKILLS!</span>',
-					'fr_FR' => '<span class="h3-responsive font-bold mb-2">PARTAGEONS NOS COMPÉTENCES !</span>',
+					'default' => '<span class="h4-responsive font-bold mb-2">LET\'S SHARE OUR SKILLS!</span>', 
+					'fr_FR' => '<span class="h4-responsive font-bold mb-2">PARTAGEZ VOS TALENTS !</span>',
 				),
 			),
 			array(
 				'type' => 'div',
-				'button' => ['data-toggle' => 'modal', 'data-target' => '#modalLoginForm', 'class' => 'btn btn-secondary'],
+				'button' => ['id' => 'a_survey', 'href' => '#descr', 'class' => 'btn btn-outline-secondary'], 
 				'text' => array(
-					'default' => 'Sign in <i class="fa fa-sign-in-alt ml-2"></i>',
-					'fr_FR' => 'Me connecter <i class="fa fa-sign-in-alt ml-2"></i>',
+					'default' => 'Discover',
+					'fr_FR' => 'Découvrir',
 				),
 			),
-			array(
-				'type' => 'div',
-				'button' => ['data-toggle' => 'modal', 'data-target' => '#modalRegisterForm', 'class' => 'btn btn-primary'],
-				'text' => array(
-					'default' => 'Register <i class="fa fa-sign-in-alt ml-2"></i>',
-					'fr_FR' => 'M’enregistrer <i class="fa fa-user-circle ml-2"></i>',
-				),
-			),
-			array(
-				'type' => 'div',
-				'button' => ['id' => 'a_survey', 'href' => '#descr', 'class' => 'btn btn-default'],
-				'text' => array(
-					'default' => 'I am interested <i class="fa fa-hand-point-up ml-2"></i>',
-					'fr_FR' => 'Ça m\'intéresse <i class="fa fa-hand-point-up ml-2"></i>',
-				),
-			),
-			array('type' => 'br', 'class' => 'hr-light'),
-			array('type' => 'br', 'class' => 'hr-light'),
 			array('type' => 'br', 'class' => 'hr-light'),
 			array('type' => 'br', 'class' => 'hr-light'),
 			array('type' => 'br', 'class' => 'hr-light'),
@@ -950,33 +1312,50 @@ return array (
 		'presentation' => array(
 			array(
 				'type' => 'feature-box',
+				'margin' => false,
 				'rows' => array(
 					'columns' => array(
 						array(
 							'column-class' => 'col-md-12',
-							'type' => 'h1',
-							'class' => 'font-weight-bold text-center h1 my-5',
-							'text' => array(
-								'default' => 'ProBonoCorpo : Let\'s share our skills',
-								'fr_FR' => 'ProBonoCorpo : Partageons nos compétences',
+							'paragraphs' => array(
+								array(
+									'type' => 'h2',
+									'class' => 'section-heading h2-responsive text-center text-uppercase grey-text',
+									'text' => array(
+										'default' => 'Probono corpo makes collaboration and mutual aid easier',
+										'fr_FR' => 'Probono corpo facilite la collaboration et l’entraide',
+									),
+								),
 							),
 						),
 						array(
-							'column-class' => 'col-md-12',
-							'type' => 'p',
-							'class' => 'text-center grey-text mb-5 mx-auto w-responsive lead',
-							'text' => array(
-								'default' => 'Thank you for submitting your contribution',
-								'fr_FR' => 'Merci de soumettre votre contribution',
-							),
-						),
-						array(
-							'column-class' => 'col-md-12',
-							'type' => 'p',
-							'class' => 'text-center grey-text mb-5 mx-auto w-responsive lead',
-							'text' => array(
-								'default' => 'It will help us to start and develop ProBonoCorpo, SG internal startup',
-								'fr_FR' => 'Elle va nous aider à lancer et développer ProBonoCorpo, startup interne SG',
+							'column-class' => 'col-lg-12',
+							'paragraphs' => array(
+								array(
+									'class' => 'px-3 py-3',
+									'style' => 'background-color: #98BD29',
+									'type' => 'div',
+									'text' => array(
+										'default' => '
+<!-- Category -->
+<!-- Post title -->
+<h2 class="section-heading h2-responsive my-4 text-center text-uppercase font-weight-bold" style="color: #FFF;">The challenges for the business</h2>
+<!-- Excerpt -->
+<h5 class="h5-responsive my-3"><span style="color: #007837;"><i class="fa fa-check pr-2"></i></span>Share and pass on the skills</h5>
+<h5 class="h5-responsive my-3"><span style="color: #007837;"><i class="fa fa-check pr-2"></i></span>Quickly mobilize resources that fit the need</h5>
+<h5 class="h5-responsive my-3"><span style="color: #007837;"><i class="fa fa-check pr-2"></i></span>Help engagement with an agile and innovative organization</h5>
+', 
+										'fr_FR' => '
+<!-- Category -->
+<!-- Post title -->
+<h2 class="section-heading h2-responsive my-4 text-center text-uppercase font-weight-bold" style="color: #FFF;">Les challenges pour l’entreprise</h2>
+<!-- Excerpt -->
+<h5 class="h5-responsive my-3"><span style="color: #007837;"><i class="fa fa-check pr-2"></i></span>Partager et transmettre les compétences</h5>
+<h5 class="h5-responsive my-3"><span style="color: #007837;"><i class="fa fa-check pr-2"></i></span>Mobiliser rapidement des ressources au plus près des besoins</h5>
+<h5 class="h5-responsive my-3"><span style="color: #007837;"><i class="fa fa-check pr-2"></i></span>Favoriser l’engagement par une organisation agile et innovante</h5>
+',
+									),
+								),
 							),
 						),
 					),
@@ -989,9 +1368,6 @@ return array (
 				'property_1_contributor' => ['definition' => 'inline', 'type' => 'checkbox', 'class' => 'col-md-3', 'property_id' => 'property_1', 'value' => 'contributor', 'labels' => ['default' => 'Contributor', 'fr_FR' => 'Contributeur']],
 				'property_1_requestor' => ['definition' => 'inline', 'type' => 'checkbox', 'class' => 'col-md-3', 'property_id' => 'property_1', 'value' => 'requestor', 'labels' => ['default' => 'Requestor', 'fr_FR' => 'Demandeur']],
 				'email' => ['mandatory' => true, 'updatable' => false],
-				/*				'comment_1' => ['definition' => 'inline', 'type' => 'textarea', 'rows' => 1, 'class' => 'col-md-12', 'labels' => ['default' => 'Offered skills', 'fr_FR' => 'Compétences offertes']],
-					'comment_2' => ['definition' => 'inline', 'type' => 'textarea', 'rows' => 1, 'class' => 'col-md-12', 'labels' => ['default' => 'Requested skills', 'fr_FR' => 'Compétences demandées']],
-	'property_2_available' => ['definition' => 'inline', 'type' => 'checkbox', 'class' => 'col-md-4', 'property_id' => 'property_2', 'value' => 'available', 'default' => 'available', 'labels' => ['default' => 'Available for a phone call', 'fr_FR' => 'Disponible pour un point téléphonique']],*/
 			),
 			'submit' => array(
 				'class' => 'btn btn-light-blue btn-rounded',
@@ -1000,7 +1376,7 @@ return array (
 		),
 		'contact_section' => array(
 			'location' => ['label' => ['default' => 'Paris, France']],
-			'email' => ['label' => ['default' => 'probonocorpo.par@socgen.com']],
+			'email' => ['label' => ['default' => 'contact@2pit.io']],
 		),
 		'footer' => array(
 			'links' => array(
@@ -1020,94 +1396,16 @@ return array (
 	// Profile
 	
 	'profile/generic' => array(
-		'header' => array(
-			'title' => ['default' => 'PRO BONO corpo - My profile', 'fr_FR' => 'PRO BONO corpo - Mon profil'],
-			'description' => ['default' => 'Show yourself as you would like to be seen with Your CTO', 'fr_FR' => 'Montre-toi comme tu aimerais être vu avec My CTO'],
-			'logo' => array(
-				'href' => 'home',
-				'params' => [],
-				'src' => '/logos/probonocorpo/PBC-logo-web-fleur.png',
-				'height' => 40,
-				'alt' => 'Pro bono corpo logo',
-			),
-			'intro_height' => '65%',
-			'background_image' => array(
-				'mask' => 'rgba-stylish-light',
-				'src' => ['default' => '/img/probonocorpo/bulles.jpg'],
-				'class' => 'img-fluid',
-				'alt' => 'Mountains',
-			),
-		),
 		'intro' => array(
 		),
-		'card' => array(
-			'last_name' => ['property' => 'last_name', 'value' => ['default' => 'LAST NAME', 'fr_FR' => 'NOM']],
-			'first_name' => ['property' => 'first_name', 'value' => ['default' => 'First name', 'fr_FR' => 'Prénom']],
-			'position' => ['property' => 'position', 'value' => ['default' => 'Your current position', 'fr_FR' => 'Votre poste actuel']],
-			'location' => ['property' => 'adr_city', 'value' => ['default' => 'Your location', 'fr_FR' => 'Votre localisation']],
-			'service' => ['property' => 'org', 'value' => ['default' => 'Votre service', 'fr_FR' => 'Votre service']],
-			['type' => 'p', 'class' => 'section-description', 'text' => ['default' => 'RESG/BSC/H2R']],
-		),
-		'features' => array(
-			'hard_skill' => [
-				'type' => 'profile',
-				'category' => 'hard_skill',
-				'property' => 'description',
-				'title' => ['default' => 'Hard skills', 'fr_FR' => 'Compétences hard'],
-				'class' => 'teal-text pb-1',
-				'i_class' => 'fa fa-wrench fa-lg blue-text',
-				'value' => [
-					['type' => 'h4', 'class' => 'mb-4', 'text' => ['default' => 'Type in a title for summarizing your skills', 'fr_FR' => 'Saisissez un titre résumant vos compétences']],
-					['type' => 'p', 'text' => ['default' => 'Lorem ipsum <strong>dolor</strong> sit amet, consectetur adipisicing elit. Cras gravida orci eu lacus feugiat, nec euismod ante posuere.']],
-				],
-			],
-			'soft_skill' => [
-				'type' => 'profile',
-				'category' => 'soft_skill',
-				'property' => 'description',
-				'title' => ['default' => 'Soft skills', 'fr_FR' => 'Compétences soft'],
-				'class' => 'teal-text pb-1',
-				'i_class' => 'fa fa-users fa-lg purple-text',
-				'value' => [
-					['type' => 'h4', 'class' => 'mb-4', 'text' => ['default' => 'Sed lacinia dictum posuere']],
-					['type' => 'p', 'text' => ['default' => 'Vestibulum vel consectetur velit. Nulla tincidunt dolor eget tortor pretium, sit amet porttitor ligula bibendum.']],
-				],
-			],
-			'inclination' => [
-				'type' => 'profile',
-				'category' => 'inclination',
-				'property' => 'description',
-				'title' => ['default' => 'Inclinations', 'fr_FR' => 'Appétences'],
-				'class' => 'teal-text pb-1',
-				'i_class' => 'fa fa-heart fa-lg red-text',
-				'value' => [
-					['type' => 'h4', 'class' => 'mb-4', 'text' => ['default' => 'Fusce facilisis arcu auctor, feugiat magna euismod, consequat quam.']],
-					['type' => 'p', 'text' => ['default' => 'Etiam quis justo tincidunt nunc molestie molestie. Suspendisse venenatis ipsum sagittis risus egestas aliquam.']],
-				],
-			],
-			'quality' => [
-				'type' => 'profile',
-				'category' => 'quality',
-				'property' => 'description',
-				'title' => ['default' => 'Qualities', 'fr_FR' => 'Qualités'],
-				'class' => 'teal-text pb-1',
-				'i_class' => 'fa fa-thumbs-up fa-lg green-text',
-				'value' => [
-					['type' => 'h4', 'class' => 'mb-4', 'text' => ['default' => 'Quisque venenatis, enim quis lacinia sollicitudin']],
-					['type' => 'p', 'text' => ['default' => 'Donec suscipit risus ac orci suscipit porttitor. Aliquam porta fringilla sem vehicula fermentum. In dui velit, pellentesque vel sem eu, placerat porta nibh.']],
-				],
-			],
-		),
-		'feature-box' => array(
-		),
 		'form' => array(
-			'introduction' => array(
+			'incentive' => array(
 				array(
 					'type' => 'p',
-					'class' => 'section-description',
+					'class' => 'section-description text-warning',
 					'text' => array(
-						'default' => 'We care about confidentiality. The informations provided here will not be communicated to anyone',
-						'fr_FR' => 'Nous sommes attachés à la confidentialité. Les informations saisies sont uniquement destinées à améliorer la mise en relation. Elles ne peuvent en aucun cas être communiquées à des tiers.',
+						'default' => 'We invite you to declare at least one skill or a short personal sentence for a start. You can come back on your profile and complete after.',
+						'fr_FR' => 'Nous t’invitons à saisir au moins une compétence ou une petite phrase pour commencer. Tu pourras revenir sur ton profil pour compléter ensuite.',
 					),
 				),
 			),
@@ -1116,6 +1414,7 @@ return array (
 				'n_last' => ['class' => 'col-md-6'],
 				'email' => ['class' => 'col-md-6', 'protected' => true],
 				'tel_work' => ['class' => 'col-md-6', 'protected' => true],
+				'locale' => ['class' => 'col-md-6'],
 				'tiny_1' => ['class' => 'col-md-6', 'definition' => 'inline', 'type' => 'input', 'labels' => ['default' => 'Service', 'fr_FR' => 'Service']],
 				'tiny_4' => ['class' => 'col-md-6', 'definition' => 'inline', 'type' => 'input', 'labels' => ['default' => 'Location', 'fr_FR' => 'Localisation']],
 				'tiny_3' => ['feature' => 'skill', 'class' => 'col-md-6', 'definition' => 'inline', 'type' => 'keywords', 'labels' => ['default' => 'My skills / wishes', 'fr_FR' => 'Que souhaitez-vous partager (compétences / appétences)'], 'placeholder' => ['default' => 'Ex. finance, design thinking, video editing...', 'fr_FR' => 'Ex. finance, design thinking, montage vidéo...']],
@@ -1135,8 +1434,8 @@ return array (
 					'type' => 'p',
 					'class' => 'section-description',
 					'text' => array(
-						'default' => 'The informations provided here will not be communicated to anyone. They will never been communicated to third-parts without your agreement. For more information, contact us on <a href="mailto:probonocorpo.par@socgen.com?subject=Request for informations about data privacy in Pro Bono Corpo">Par-ProBonoCorpo</a>.',
-						'fr_FR' => 'Les informations saisies sont uniquement destinées à améliorer la mise en relation. Elles ne peuvent en aucun cas être communiquées à des tiers sans votre consentement. Pour en savoir plus, consultez nous sur <a href="mailto:probonocorpo.par@socgen.com?subject=Demande d\'informations sur la protection des données dans Pro Bono Corpo">Par-ProBonoCorpo</a>.',
+						'default' => 'The informations provided here will not be communicated to anyone. They will never been communicated to third-parts without your agreement. For more information, contact us on <a href="mailto:contact@2pit.io?subject=Request for informations about data privacy in Pro Bono Corpo">contact@2pit.io</a>.',
+						'fr_FR' => 'Les informations saisies sont uniquement destinées à améliorer la mise en relation. Elles ne peuvent en aucun cas être communiquées à des tiers sans votre consentement. Pour en savoir plus, consultez nous sur <a href="mailto:contact@2pit.io?subject=Demande d\'informations sur la protection des données dans Pro Bono Corpo">contact@2pit.io</a>.',
 					),
 				),
 			),
@@ -1176,7 +1475,7 @@ return array (
 		),
 		'contact_section' => array(
 			'location' => ['label' => ['default' => 'Paris, France']],
-			'email' => ['label' => ['default' => 'probonocorpo.par@socgen.com']],
+			'email' => ['label' => ['default' => 'contact@2pit.io']],
 		),
 	
 		'tooltips' => array(
@@ -1218,6 +1517,15 @@ return array (
 		'header' => array(
 			'title' => ['default' => 'ProBonoCorpo - Events', 'fr_FR' => 'ProBonoCorpo - Evénements'],
 			'description' => ['default' => 'Subscribe to events and organize your own ones', 'fr_FR' => 'Inscrits-toi aux événements et organize les tiens'],
+			'style' => array(
+				'navbar' => 'background-color: transparent;',
+				'topNavCollapse' => 'background-color: #ffffff;',
+			),
+			'navbar' => array(
+				'class' => 'navbar navbar-expand-lg fixed-top scrolling-navbar navbar-black',
+				'account' => true,
+				'collapse' => false,
+			),
 			'logo' => array(
 				'href' => 'home',
 				'params' => [],
@@ -1236,10 +1544,10 @@ return array (
 	
 		'index' => array(
 			'navbar' => array(
-				'publicMode' => ['type' => 'mode', 'value' => 'Public', 'labels' => ['default' => 'Current', 'fr_FR' => 'En cours']],
-				'skills' => ['type' => 'search', 'property' => 'property_2', 'labels' => ['default' => 'Keywords', 'fr_FR' => 'Mots clés']],
+				'publicMode' => ['type' => 'mode', 'value' => 'Public', 'labels' => ['default' => 'All the events', 'fr_FR' => 'Tous les événements']],
 				'ownerMode' => ['type' => 'mode', 'value' => 'Owner', 'labels' => ['default' => 'My events', 'fr_FR' => 'Mes événements']],
 				'contributorMode' => ['type' => 'mode', 'value' => 'Contributor', 'labels' => ['default' => 'My participations', 'fr_FR' => 'Mes participations']],
+				'skills' => ['type' => 'search', 'property' => 'property_2', 'labels' => ['default' => 'Keywords', 'fr_FR' => 'Mots clés']],
 				'new' => ['type' => 'new', 'labels' => ['default' => 'New event', 'fr_FR' => 'Nouvel événement']],
 			)
 		),
@@ -1281,6 +1589,8 @@ return array (
 			'Owner' => array(
 				'update' => ['icon' => 'edit', 'labels' => ['default' => 'Update', 'fr_FR' => 'Modifier']],
 				'cancel' => ['icon' => 'trash-alt', 'labels' => ['default' => 'Cancel', 'fr_FR' => 'Annuler']],
+				'close' => ['icon' => 'eye-slash',  'labels' => ['default' => 'Close registration', 'fr_FR' => 'Fermer les inscriptions']],
+				'open' => ['icon' => 'eye',  'labels' => ['default' => 'Open registration', 'fr_FR' => 'Ouvrir les inscriptions']],
 				'complete' => ['icon' => 'check-square',  'labels' => ['default' => 'Complete', 'fr_FR' => 'Terminer']],
 				'consultFeedback' => ['labels' => ['default' => 'Consult the feedbacks', 'fr_FR' => 'Consulter les feedbacks']],
 			),
@@ -1338,8 +1648,8 @@ return array (
 					'type' => 'p',
 					'class' => 'section-description',
 					'text' => array(
-						'default' => 'The informations provided here serve only the event organization. They will never been communicated to third-parts without your agreement. For more information, contact us on <a href="mailto:probonocorpo.par@socgen.com?subject=Request for informations about data privacy in Pro Bono Corpo">Par-ProBonoCorpo</a>.',
-						'fr_FR' => 'Les informations saisies sont uniquement destinées à l’organisation de l’événement. Elles ne peuvent en aucun cas être communiquées à des tiers sans votre consentement. Pour en savoir plus, consultez nous sur <a href="mailto:probonocorpo.par@socgen.com?subject=Demande d’informations sur la protection des données dans Pro Bono Corpo">Par-ProBonoCorpo</a>.',
+						'default' => 'The informations provided here serve only the event organization. They will never been communicated to third-parts without your agreement. For more information, contact us on <a href="mailto:contact@2pit.io?subject=Request for informations about data privacy in Pro Bono Corpo">contact@2pit.io</a>.',
+						'fr_FR' => 'Les informations saisies sont uniquement destinées à l’organisation de l’événement. Elles ne peuvent en aucun cas être communiquées à des tiers sans votre consentement. Pour en savoir plus, consultez nous sur <a href="mailto:contact@2pit.io?subject=Demande d’informations sur la protection des données dans Pro Bono Corpo">contact@2pit.io</a>.',
 					),
 				),
 			),
@@ -1393,8 +1703,8 @@ return array (
 					'type' => 'p',
 					'class' => 'section-description',
 					'text' => array(
-						'default' => 'The informations provided here serve only the event organization. They will never been communicated to third-parts without your agreement. For more information, contact us on <a href="mailto:probonocorpo.par@socgen.com?subject=Request for informations about data privacy in Pro Bono Corpo">Par-ProBonoCorpo</a>.',
-						'fr_FR' => 'Les informations saisies sont uniquement destinées à l’organisation de l’événement. Elles ne peuvent en aucun cas être communiquées à des tiers sans votre consentement. Pour en savoir plus, consultez nous sur <a href="mailto:probonocorpo.par@socgen.com?subject=Demande d’informations sur la protection des données dans Pro Bono Corpo">Par-ProBonoCorpo</a>.',
+						'default' => 'The informations provided here serve only the event organization. They will never been communicated to third-parts without your agreement. For more information, contact us on <a href="mailto:contact@2pit.io?subject=Request for informations about data privacy in Pro Bono Corpo">contact@2pit.io</a>.',
+						'fr_FR' => 'Les informations saisies sont uniquement destinées à l’organisation de l’événement. Elles ne peuvent en aucun cas être communiquées à des tiers sans votre consentement. Pour en savoir plus, consultez nous sur <a href="mailto:contact@2pit.io?subject=Demande d’informations sur la protection des données dans Pro Bono Corpo">contact@2pit.io</a>.',
 					),
 				),
 			),
@@ -1416,6 +1726,15 @@ return array (
 			),
 		),
 	
+		'rewards' => array(
+			'brand' => 'Innocoin',
+			'balance' => array(
+				'goal' => ['labels' => ['default' => 'Goal', 'fr_FR' => 'Objectif']],
+				'earned' => ['labels' => ['default' => 'Earned', 'fr_FR' => 'Gagné']],
+				'spent' => ['labels' => ['default' => 'Spent', 'fr_FR' => 'Dépensé']],
+			),
+		),
+		
 		'feedback' => array(
 			'title' => array(
 				'requestor' => array(
@@ -1452,8 +1771,8 @@ return array (
 					'type' => 'p',
 					'class' => 'section-description',
 					'text' => array(
-						'default' => 'The informations provided here serve only the event organization. They will never been communicated to third-parts without your agreement. For more information, contact us on <a href="mailto:probonocorpo.par@socgen.com?subject=Request for informations about data privacy in Pro Bono Corpo">Par-ProBonoCorpo</a>.',
-						'fr_FR' => 'Les informations saisies sont uniquement destinées à l’organisation de l’événement. Elles ne peuvent en aucun cas être communiquées à des tiers sans votre consentement. Pour en savoir plus, consultez nous sur <a href="mailto:probonocorpo.par@socgen.com?subject=Demande d’informations sur la protection des données dans Pro Bono Corpo">Par-ProBonoCorpo</a>.',
+						'default' => 'The informations provided here serve only the event organization. They will never been communicated to third-parts without your agreement. For more information, contact us on <a href="mailto:contact@2pit.io?subject=Request for informations about data privacy in Pro Bono Corpo">contact@2pit.io</a>.',
+						'fr_FR' => 'Les informations saisies sont uniquement destinées à l’organisation de l’événement. Elles ne peuvent en aucun cas être communiquées à des tiers sans votre consentement. Pour en savoir plus, consultez nous sur <a href="mailto:contact@2pit.io?subject=Demande d’informations sur la protection des données dans Pro Bono Corpo">contact@2pit.io</a>.',
 					),
 				),
 			),
@@ -1535,6 +1854,15 @@ return array (
 		'header' => array(
 			'title' => ['default' => 'ProBonoCorpo - Requests', 'fr_FR' => 'ProBonoCorpo - Demandes'],
 			'description' => ['default' => 'Describe your request for a perfect matching with the skill offer', 'fr_FR' => 'Décris ta demande pour un matching parfait avec l’offre de compétences'],
+			'style' => array(
+				'navbar' => 'background-color: transparent;',
+				'topNavCollapse' => 'background-color: #ffffff;',
+			),
+			'navbar' => array(
+				'class' => 'navbar navbar-expand-lg fixed-top scrolling-navbar navbar-black',
+				'account' => true,
+				'collapse' => false,
+			),
 			'logo' => array(
 				'href' => 'home',
 				'params' => [],
@@ -1590,6 +1918,8 @@ return array (
 			'Owner' => array(
 				'update' => ['icon' => 'edit', 'labels' => ['default' => 'Update', 'fr_FR' => 'Modifier']],
 				'cancel' => ['icon' => 'trash-alt', 'labels' => ['default' => 'Cancel', 'fr_FR' => 'Annuler']],
+				'close' => ['icon' => 'eye-slash',  'labels' => ['default' => 'Mask', 'fr_FR' => 'Masquer']],
+				'open' => ['icon' => 'eye',  'labels' => ['default' => 'Unmask', 'fr_FR' => 'Rendre visible']],
 				'complete' => ['icon' => 'check-square',  'labels' => ['default' => 'Complete', 'fr_FR' => 'Terminer']],
 				'consultFeedback' => ['labels' => ['default' => 'Consult the feedbacks', 'fr_FR' => 'Consulter les feedbacks']],
 			),
@@ -1649,8 +1979,8 @@ return array (
 					'type' => 'p',
 					'class' => 'section-description',
 					'text' => array(
-						'default' => 'The informations provided here will not be communicated to anyone. They will never been communicated to third-parts without your agreement. For more information, contact us on <a href="mailto:probonocorpo.par@socgen.com?subject=Request for informations about data privacy in Pro Bono Corpo">Par-ProBonoCorpo</a>.',
-						'fr_FR' => 'Les informations saisies sont uniquement destinées à améliorer la mise en relation. Elles ne peuvent en aucun cas être communiquées à des tiers sans votre consentement. Pour en savoir plus, consultez nous sur <a href="mailto:probonocorpo.par@socgen.com?subject=Demande d’informations sur la protection des données dans Pro Bono Corpo">Par-ProBonoCorpo</a>.',
+						'default' => 'The informations provided here will not be communicated to anyone. They will never been communicated to third-parts without your agreement. For more information, contact us on <a href="mailto:contact@2pit.io?subject=Request for informations about data privacy in Pro Bono Corpo">contact@2pit.io</a>.',
+						'fr_FR' => 'Les informations saisies sont uniquement destinées à améliorer la mise en relation. Elles ne peuvent en aucun cas être communiquées à des tiers sans votre consentement. Pour en savoir plus, consultez nous sur <a href="mailto:contact@2pit.io?subject=Demande d’informations sur la protection des données dans Pro Bono Corpo">contact@2pit.io</a>.',
 					),
 				),
 			),
@@ -1704,8 +2034,8 @@ return array (
 					'type' => 'p',
 					'class' => 'section-description',
 					'text' => array(
-						'default' => 'For more information, contact us on <a href="mailto:probonocorpo.par@socgen.com">Par-ProBonoCorpo</a>.',
-						'fr_FR' => 'Proposer sa contribution constitue un engagement moral de votre part vis-à-vis du demandeur qui s’engage de son côté à vous donner rapidement une réponse, positive ou non. Pour en savoir plus, consultez nous sur <a href="mailto:probonocorpo.par@socgen.com">Par-ProBonoCorpo</a>.',
+						'default' => 'For more information, contact us on <a href="mailto:contact@2pit.io">contact@2pit.io</a>.',
+						'fr_FR' => 'Proposer sa contribution constitue un engagement moral de votre part vis-à-vis du demandeur qui s’engage de son côté à vous donner rapidement une réponse, positive ou non. Pour en savoir plus, consultez nous sur <a href="mailto:contact@2pit.io">contact@2pit.io</a>.',
 					),
 				),
 			),
@@ -1763,8 +2093,8 @@ return array (
 					'type' => 'p',
 					'class' => 'section-description',
 					'text' => array(
-						'default' => 'For more information, contact us on <a href="mailto:probonocorpo.par@socgen.com?subject=Request for informations about data privacy in Pro Bono Corpo">Par-ProBonoCorpo</a>.',
-						'fr_FR' => 'Donner un feedback constitue un engagement moral de votre part vis-à-vis de votre interlocuteur qui s’engage de son côté à vous en donner rapidement un également. Pour en savoir plus, consultez nous sur <a href="mailto:probonocorpo.par@socgen.com?subject=Demande d’informations sur la protection des données dans Pro Bono Corpo">Par-ProBonoCorpo</a>.',
+						'default' => 'For more information, contact us on <a href="mailto:contact@2pit.io?subject=Request for informations about data privacy in Pro Bono Corpo">contact@2pit.io</a>.',
+						'fr_FR' => 'Donner un feedback constitue un engagement moral de votre part vis-à-vis de votre interlocuteur qui s’engage de son côté à vous en donner rapidement un également. Pour en savoir plus, consultez nous sur <a href="mailto:contact@2pit.io?subject=Demande d’informations sur la protection des données dans Pro Bono Corpo">contact@2pit.io</a>.',
 					),
 				),
 			),
